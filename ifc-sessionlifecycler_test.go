@@ -2,7 +2,7 @@ package datarepo_test
 
 import (
 	"fmt"
-	RS "github.com/fbaube/reposqlite"
+	DRS "github.com/fbaube/datarepo/sqlite"
 	"io/ioutil"
 	"os"
 )
@@ -18,7 +18,7 @@ import (
 func ExampleSessionLifecycle() {
 	var F *os.File
 	// S implements repo.SessionLifecycle
-	var S *RS.SqliteRepo
+	var S *DRS.SqliteRepo
 	var e error
 	// func TempFile(dir, pattern string) (f *os.File, err error)
 	F, e = ioutil.TempFile("", "*.db")
@@ -32,7 +32,7 @@ func ExampleSessionLifecycle() {
 	F.Close()
 
 	// Now the test begins.
-	S, e = RS.OpenRepoAtPath(F.Name())
+	S, e = DRS.OpenRepoAtPath(F.Name())
 	if e != nil {
 		panic(e)
 	}

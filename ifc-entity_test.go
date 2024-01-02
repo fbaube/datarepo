@@ -3,7 +3,7 @@ package datarepo_test
 import (
 	"database/sql"
 	"fmt"
-	RS "github.com/fbaube/reposqlite"
+	DRS "github.com/fbaube/datarepo/sqlite"
 	"io/ioutil"
 	"os"
 )
@@ -19,7 +19,7 @@ import (
 func ExampleRepoEntity() {
 	var F *os.File
 	// S implements repo.RepoLifecycle
-	var S *RS.SqliteRepo
+	var S *DRS.SqliteRepo
 	var e error
 	// func TempFile(dir, pattern string) (f *os.File, err error)
 	F, e = ioutil.TempFile("", "*.db")
@@ -32,7 +32,7 @@ func ExampleRepoEntity() {
 	F.Close()
 
 	// Now the test begins
-	S, e = RS.OpenRepoAtPath(F.Name())
+	S, e = DRS.OpenRepoAtPath(F.Name())
 	if e != nil {
 		panic(e)
 	}
