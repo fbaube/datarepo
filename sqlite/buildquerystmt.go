@@ -1,10 +1,10 @@
 package sqlite
 
-import RU "github.com/fbaube/repoutils"
+import DRU "github.com/fbaube/datarepo/utils"
 
-func (p *SqliteRepo) BuildQueryStmt(qs *RU.QuerySpec) (string, error) {
+func (p *SqliteRepo) BuildQueryStmt(qs *DRU.QuerySpec) (string, error) {
 	switch qs.DbOp {
-	case RU.OpCreateTable:
+	case DRU.OpCreateTable:
 
 	}
 	return "", nil

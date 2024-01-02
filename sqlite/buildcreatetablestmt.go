@@ -3,7 +3,7 @@ package sqlite
 import (
 	"fmt"
 	D "github.com/fbaube/dsmnd"
-	RU "github.com/fbaube/repoutils"
+	DRU "github.com/fbaube/datarepo/utils"
 	S "strings"
 	// "time"
 )
@@ -35,7 +35,7 @@ We can detect this situation, and correct for it,
 only by counting underscores in the StorName.
 */
 
-func (pSR *SqliteRepo) BuildCreateTableStmt(pTD *RU.TableDescriptor) (string, error) {
+func (pSR *SqliteRepo) BuildCreateTableStmt(pTD *DRU.TableDescriptor) (string, error) {
 	var sb, sb2 S.Builder
 	sb.WriteString(fmt.Sprintf("CREATE TABLE %s(\n", pTD.Name))
 	sb2.WriteString("reposqlite.GenCreTblStmt: ")

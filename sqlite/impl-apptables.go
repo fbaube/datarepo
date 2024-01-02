@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	L "github.com/fbaube/mlog"
-	RU "github.com/fbaube/repoutils"
+	DRU "github.com/fbaube/datarepo/utils"
 	"io/ioutil"
 	S "strings"
 )
@@ -17,10 +17,10 @@ import (
 //
 // Map value is the associated instance of TableDescriptor.
 // .
-var theMap map[string]RU.TableDescriptor
+var theMap map[string]DRU.TableDescriptor
 
 func init() {
-	theMap = make(map[string]RU.TableDescriptor)
+	theMap = make(map[string]DRU.TableDescriptor)
 }
 
 // RepoAppTables is table-related methods for a specified app's schema.
@@ -36,7 +36,7 @@ func init() {
 // seen do not conflict; if a table name is repeated but with a
 // different schema, the result is undefined.
 // .
-func (p *SqliteRepo) SetAppTables(appName string, cfg []RU.TableDescriptor) error {
+func (p *SqliteRepo) SetAppTables(appName string, cfg []DRU.TableDescriptor) error {
 	L.L.Info("SetAppTables: got %d table definitions", len(cfg))
 	for _, c := range cfg {
 		theMap[ /*pfx+*/ S.ToLower(c.Name)] = c
@@ -115,7 +115,7 @@ func (p *SqliteRepo) CreateAppTables() error {
 	return nil
 }
 
-func (p *SqliteRepo) createAppTable(td *RU.TableDescriptor) error {
+func (p *SqliteRepo) createAppTable(td *DRU.TableDescriptor) error {
 
 	var CTS string // the Create Table SQL string
 	var e error
