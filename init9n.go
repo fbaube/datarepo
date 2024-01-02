@@ -7,8 +7,8 @@ import (
 	FU "github.com/fbaube/fileutils"
 	L "github.com/fbaube/mlog"
 	DRS "github.com/fbaube/datarepo/sqlite"
-	RM "github.com/fbaube/rowmodels"
-	R "github.com/fbaube/repo"
+	DRM "github.com/fbaube/datarepo/rowmodels"
+	// // R "github.com/fbaube/datarepo/repo"
 	// _ "github.com/fbaube/sqlite3"
 	_ "github.com/mattn/go-sqlite3"
 	SU "github.com/fbaube/stringutils"
@@ -119,7 +119,7 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 		panic("L100")
 		return nil, errors.New("processDBargs: is not sqlite")
 	}
-	e = pSQR.SetAppTables("", RM.MmmcTableDescriptors)
+	e = pSQR.SetAppTables("", DRM.MmmcTableDescriptors)
 	/* type RepoAppTables interface {
 		// SetAppTables specifies schemata
 		SetAppTables(string, []U.TableConfig) error
