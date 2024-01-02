@@ -1,0 +1,8 @@
+github.com/fbaube/dsmnd v0.0.0-20231218095557-5b913bb5905b h1:1P2RY99TYtHUkHehvcUK8EIJHwmOe/z61heGgkVFPiU=
+github.com/fbaube/dsmnd v0.0.0-20231218095557-5b913bb5905b/go.mod h1:7FFQTZsr7f2vA243fKLohCwszP3Xrzi/xbFkOyPF+YQ=
+github.com/fbaube/dsmnd v0.0.0-20231220155054-af865d10e7cb h1:41SkRmLEWA7cINx2pCH9o+tyfZ2F4HlO76xJGkWH8bI=
+github.com/fbaube/dsmnd v0.0.0-20231220155054-af865d10e7cb/go.mod h1:7FFQTZsr7f2vA243fKLohCwszP3Xrzi/xbFkOyPF+YQ=
+github.com/fbaube/dsmnd v0.0.0-20231221072152-35b95935ea5a h1:tdGYMkCwx/WOUgJc5XsKDie/7R7mdpgFKfOHSkM+m1M=
+github.com/fbaube/dsmnd v0.0.0-20231221072152-35b95935ea5a/go.mod h1:7FFQTZsr7f2vA243fKLohCwszP3Xrzi/xbFkOyPF+YQ=
+github.com/fbaube/sqlite3 v0.0.0-20230623201839-76cebbc048ba h1:XLhnds2/YrlOdNvXfjSH8yPCfUdNd49dIxMpINCPCPU=
+github.com/fbaube/sqlite3 v0.0.0-20230623201839-76cebbc048ba/go.mod h1:vYzBSGC+jBvm7d3fUpwElcXoGZ7/aUYpkQ/Taaa2yL0=
