@@ -20,9 +20,9 @@ func (p SqliteRepo) GetAll_Inbatch() (pp []*DRM.InbatchRow, err error) {
 		L.L.Error("DB.GetAll_Inbatch: %w", e)
 		return nil, fmt.Errorf("funcs_inbatch.L19")
 	}
-	pp = make([]*RM.InbatchRow, 0, 16)
+	pp = make([]*DRM.InbatchRow, 0, 16)
 	for rowsx.Next() {
-		p := new(RM.InbatchRow)
+		p := new(DRM.InbatchRow)
 		// ====================
 		// e = rowsx.StructScan(p)
 		panic("funcs_inbatch L27")
