@@ -6,11 +6,11 @@ import (
 	"time"
 
 	L "github.com/fbaube/mlog"
-	RM "github.com/fbaube/rowmodels"
+	DRM "github.com/fbaube/datarepo/rowmodels"
 )
 
 // GetAll_Inbatch gets all input batches in the system.
-func (p SqliteRepo) GetAll_Inbatch() (pp []*RM.InbatchRow, err error) {
+func (p SqliteRepo) GetAll_Inbatch() (pp []*DRM.InbatchRow, err error) {
 	var rowsx *sql.Rows
 	var e error
 	q := "SELECT * FROM INBATCH"
@@ -37,7 +37,7 @@ func (p SqliteRepo) GetAll_Inbatch() (pp []*RM.InbatchRow, err error) {
 }
 
 // Add_Inbatch adds an input batch to the DB and returns its primary index.
-func (p SqliteRepo) Add_Inbatch(pIB *RM.InbatchRow) (int, error) {
+func (p SqliteRepo) Add_Inbatch(pIB *DRM.InbatchRow) (int, error) {
 	var rslt sql.Result
 	var stmt string
 	var e error

@@ -10,7 +10,7 @@ import (
 	FU "github.com/fbaube/fileutils"
 	L "github.com/fbaube/mlog"
 	// DRU "github.com/fbaube/datarepo/utils"
-	RM "github.com/fbaube/rowmodels"
+	DRM "github.com/fbaube/datarepo/rowmodels"
 	SU "github.com/fbaube/stringutils"
 	CA "github.com/fbaube/contentanalysis"
 )
@@ -19,7 +19,7 @@ import (
 // analysis, while "promoting" a [PathProps];
 // it work for directories and symlinks too.
 // .
-func NewContentityRow(pPP *FU.PathProps, pPA *CA.PathAnalysis) (*RM.ContentityRow, error) {
+func NewContentityRow(pPP *FU.PathProps, pPA *CA.PathAnalysis) (*DRM.ContentityRow, error) {
 	if pPP == nil || pPA == nil {
 		panic("OOPS")
 	}
@@ -29,7 +29,7 @@ func NewContentityRow(pPP *FU.PathProps, pPA *CA.PathAnalysis) (*RM.ContentityRo
 			"reposqlite.fxCntyrow.NewCR: got MarkupType UNK")
 	}
 	// var e error
-	pNewCR := new(RM.ContentityRow)
+	pNewCR := new(DRM.ContentityRow)
 	pNewCR.PathProps = *pPP
 	pNewCR.PathAnalysis = pPA
 
@@ -79,9 +79,9 @@ func NewContentityRow(pPP *FU.PathProps, pPA *CA.PathAnalysis) (*RM.ContentityRo
 }
 
 // GetContentityAll gets all content in the DB.
-func (p SqliteRepo) GetContentityAll() (pp []*RM.ContentityRow, err error) {
+func (p SqliteRepo) GetContentityAll() (pp []*DRM.ContentityRow, err error) {
 	var rows *sql.Rows
-	pp = make([]*RM.ContentityRow, 0, 16)
+	pp = make([]*DRM.ContentityRow, 0, 16)
 	q := "SELECT * FROM CONTENT"
 	// rows, err := p.Handle().Queryx(q)
 	rows, err = p.Handle().Query(q)
@@ -92,7 +92,7 @@ func (p SqliteRepo) GetContentityAll() (pp []*RM.ContentityRow, err error) {
 		panic("GetContentityAll")
 	}
 	for rows.Next() {
-		p := new(RM.ContentityRow)
+		p := new(DRM.ContentityRow)
 		// err := rows.StructScan(p)
 		if err = rows.Scan(p.PtrFields()...); err != nil {
 			return nil, fmt.Errorf("GetContentityAll: "+
@@ -112,7 +112,7 @@ func (p SqliteRepo) GetContentityAll() (pp []*RM.ContentityRow, err error) {
 }
 
 // InsertContentityRow adds a content item (i.e. a file) to the DB.
-func (p SqliteRepo) InsertContentityRow(pC *RM.ContentityRow) (int, error) {
+func (p SqliteRepo) InsertContentityRow(pC *DRM.ContentityRow) (int, error) {
 	var rslt sql.Result
 	var stmt string
 	var e error
