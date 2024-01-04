@@ -3,8 +3,8 @@ package utils
 import (
 	"database/sql"
 	_ "embed"
-	// _ "github.com/mattn/go-sqlite3"
-	_ "github.com/fbaube/sqlite3"
+	_ "github.com/mattn/go-sqlite3"
+	// _ "github.com/fbaube/sqlite3"
 )
 
 type Repo struct {

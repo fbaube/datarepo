@@ -7,10 +7,6 @@ require (
 	github.com/fbaube/dsmnd v0.0.0-20231221072152-35b95935ea5a
 	github.com/fbaube/fileutils v0.0.0-20231218210156-f6a37eab1eae
 	github.com/fbaube/mlog v0.0.0-20230904080411-cfac35fed413
-	github.com/fbaube/repo v0.0.0-20230702193159-4a0df3ed961a
-	github.com/fbaube/repoutils v0.0.0-20230904080659-aafe24b842a6
-	github.com/fbaube/rowmodels v0.0.0-20231231103247-cb4c3f05ccac
-	github.com/fbaube/sqlite3 v0.0.0-20230623201839-76cebbc048ba
 	github.com/fbaube/stringutils v0.0.0-20231208083612-f585d951ce32
 	github.com/mattn/go-sqlite3 v1.14.19
 )

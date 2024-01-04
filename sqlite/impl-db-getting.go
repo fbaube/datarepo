@@ -8,9 +8,9 @@ import (
 	// D "github.com/fbaube/dsmnd"
 	FU "github.com/fbaube/fileutils"
 	SU "github.com/fbaube/stringutils"
-	// _ "github.com/mattn/go-sqlite3" // to get init()
+	_ "github.com/mattn/go-sqlite3" // to get init()
 	L "github.com/fbaube/mlog"
-	_ "github.com/fbaube/sqlite3" // to get init()
+	// _ "github.com/fbaube/sqlite3" // to get init()
 	"os"
 	FP "path/filepath"
 	S "strings"

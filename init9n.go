@@ -29,6 +29,10 @@ type Init9nArgs struct {
      // DoZeroOut says initialize the DB with the 
      // app's tables but with no data in them 
      DoZeroOut bool
+     // DoBackup says before DoingZeroOut on an
+     // existing DB, first copy it to a backup
+     // copy using a hard-coded naming scheme 
+     DoBackup bool
      // TableDetails are app table details 
      TableDetails []DRU.TableDescriptor
 }
@@ -50,16 +54,22 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 
 	var mustAccessTheDB bool
 	var e error
+	// This will always be true, until it is decided
+	// under what conditions p.Dir might be "". Code
+	// below presumes that "" means "." 
 	mustAccessTheDB = p.DoImport || p.DoZeroOut || p.Dir != ""
 	if !mustAccessTheDB {
 		return nil, nil 
 	}
-	if p.DB_type != D.DB_SQLite {
+	if p.DB_type != "" && p.DB_type != D.DB_SQLite {
 	   return nil, errors.New("bad DB type: " + string(p.DB_type))
 	}
-
+	if p.DB_type == "" {
+	   println("DB: Type is missing: using SQLite.")
+	}
+	
 	// Start by checking on the status of the filename.
-	// This all assumes that the DB is SQLite, a single file.
+	// This assumes that the DB is SQLite, a single file.
 	// Note that a path is used to derive a FILE path.
 	var dbFilepath string
 	// println("misc.go: BEFOR:", p.Dir)
@@ -70,14 +80,14 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 	// println("misc.go: BEFOR:", p.Dir)
 	dbFilepath = FU.ResolvePath(
 		p.Dir + FU.PathSep + DEFAULT_FILENAME)
-	L.L.Info("DB resolved path: " + dbFilepath)
+	println("DB: full path:", dbFilepath)
 	errPfx := fmt.Errorf("processDBargs(%s):", dbFilepath)
 	// func IsFileAtPath(aPath string) (bool, *os.FileInfo, error) {
 
 	var fileinfo os.FileInfo
 	filexist, fileinfo, filerror := FU.IsFileAtPath(dbFilepath)
 	if filerror != nil {
-		panic("L71")
+		// panic("init9n.L87")
 		return nil, fmt.Errorf("%s file error: %w", errPfx, filerror)
 	}
 	s := SU.ElideHomeDir(dbFilepath)
@@ -102,6 +112,7 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 		}
 	}
 	if !filexist {
+	   	println("DB: Creating anew.")
 		L.L.Info("Creating DB: " + s)
 		if p.DoZeroOut {
 			L.L.Info("Zeroing out the DB is redundant")
@@ -112,12 +123,20 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 		return nil, fmt.Errorf("%s DB failure: %w", errPfx, e)
 	}
 	repoAbsPath := repo.Path()
+	println("DB: status OK.")
 	L.L.Info("DB OK: " + SU.ElideHomeDir(repoAbsPath))
 
 	pSQR, ok := repo.(*DRS.SqliteRepo)
 	if !ok {
-		panic("L100")
+		panic("init9n.L131")
 		return nil, errors.New("processDBargs: is not sqlite")
+	}
+	// At this point we have finished all execution paths
+	// that do NOT require the app table details, and so
+	// now we do have to have apptable details.
+	if p.TableDetails == nil || len(p.TableDetails) == 0 {
+	   println("DB: missing app table details. Aborting.")
+	   return nil, errors.New("Missing app DB table details")
 	}
 	e = pSQR.SetAppTables("", DRM.MmmcTableDescriptors)
 	/* type RepoAppTables interface {

@@ -14,16 +14,6 @@ github.com/fbaube/miscutils v0.0.0-20231117113020-2270027d01bd h1:Emb4XK5G8w7VzR
 github.com/fbaube/miscutils v0.0.0-20231117113020-2270027d01bd/go.mod h1:6oJ7XkjRcYbH/le2m11Sci3tXMspXhyRHd5RTX0Bz3M=
 github.com/fbaube/mlog v0.0.0-20230904080411-cfac35fed413 h1:hXpL/x5iYx38UGHzGU6V9ONPYeeLxzfniZDbAblkplw=
 github.com/fbaube/mlog v0.0.0-20230904080411-cfac35fed413/go.mod h1:gdqN52o2Q28x8fcloz1M7KyknKnK6VPxPkAOc3+HxmQ=
-github.com/fbaube/repo v0.0.0-20230702193159-4a0df3ed961a h1:m6NL6Y7Y1FkgxMyqN09j06JoRY4UQG6vxoJyu1OgXfs=
-github.com/fbaube/repo v0.0.0-20230702193159-4a0df3ed961a/go.mod h1:ypBjRS7l4lXxDEmxwP2Rnbbz2RkaCIwnl2Hcu5hDleg=
-github.com/fbaube/reposqlite v0.0.0-20230623075132-458db4b7dae3 h1:Js9qPx2/sZzaOnqUbJEgbJeEvksLRv+vzKU0QJQgv1A=
-github.com/fbaube/reposqlite v0.0.0-20230623075132-458db4b7dae3/go.mod h1:emMqc8U+FPVj52n46R4V+PUDHi7yA07sNuqknYLLh9o=
-github.com/fbaube/repoutils v0.0.0-20230904080659-aafe24b842a6 h1:QPMP4AX7Z3YvYlQSPvq0lbMKBK0KByvjpZSDYqxc6V8=
-github.com/fbaube/repoutils v0.0.0-20230904080659-aafe24b842a6/go.mod h1:6dj++mukLwRVVsvA8tHISnHoeria2FzcQC3iBt5ElxM=
-github.com/fbaube/rowmodels v0.0.0-20231231103247-cb4c3f05ccac h1:eU5dDcNbWhBYHpN4/8aH51abuRzEb3TmbY6zyiOKDFU=
-github.com/fbaube/rowmodels v0.0.0-20231231103247-cb4c3f05ccac/go.mod h1:d3jBR8tULtJgRM8tWmMMiGWoccm0iCzCm4+2O0tOGs4=
-github.com/fbaube/sqlite3 v0.0.0-20230623201839-76cebbc048ba h1:XLhnds2/YrlOdNvXfjSH8yPCfUdNd49dIxMpINCPCPU=
-github.com/fbaube/sqlite3 v0.0.0-20230623201839-76cebbc048ba/go.mod h1:vYzBSGC+jBvm7d3fUpwElcXoGZ7/aUYpkQ/Taaa2yL0=
 github.com/fbaube/stringutils v0.0.0-20231208083612-f585d951ce32 h1:Wvc82FRVfsYAUabqvrH7kNCivlPQjonRcC8MJnTYBiA=
 github.com/fbaube/stringutils v0.0.0-20231208083612-f585d951ce32/go.mod h1:87tQsliFKHC7Pi37dVN29FSD+xFnQLYbZ2VDB1Ydn+U=
 github.com/fbaube/wasmutils v0.0.0-20231209183154-e25018375bc2 h1:c2o0/6fIdaGD9G84GUFg41qHYPWqfKO0HD8G9KLJQH4=
