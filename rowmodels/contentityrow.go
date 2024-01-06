@@ -14,12 +14,10 @@ import (
 var TableSummary_ContentityRow = D.TableSummary{
     D.SCT_TABLE.DT(), "contentity", "cnt", "Content entity"}
 
-// TableDescriptor_ContentityRow specifies 11 DB columns,
-
+// TableDetails_ContentityRow specifies 11 DB columns,
 // incl primary key (assumed) and one foreign key, "inbatch".
-var TableDescriptor_ContentityRow = DRU.TableDescriptor{
-	"contentity",     // Name
-	"cnt",            // ShortName
+var TableDetails_ContentityRow = DRU.TableDetails{
+        TableSummary_ContentityRow, 
 	"idx_contentity", // IDName
 	"RelFP, AbsFP, Descr, T_Cre, T_Imp, T_Edt, " +
 		"RawMT, Mimtp, MType, Contt", // ColumnNames

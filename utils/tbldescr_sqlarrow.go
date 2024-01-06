@@ -46,10 +46,9 @@ var ColumnSpecs_SqlarRow = []D.ColumnSpec{
 	*/
 }
 
-// TableDescriptor_SqlarRow specifies TBS.
-var TableDescriptor_SqlarRow = TableDescriptor{
-	"sqlar",     // Name
-	"sqlar",     // ShortName
+// TableDetails_SqlarRow specifies TBS.
+var TableDetails_SqlarRow = TableDetails{
+    	D.TableSummary{}, // FIXME
 	"idx_sqlar", // IDName
 	"FIXME",     // ColumnNames
 	//

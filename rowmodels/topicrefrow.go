@@ -17,12 +17,11 @@ func (p *ContentityRow) String() string {
 
 // TableSummary_TopicrefRow describes the table.
 var TableSummary_TopicrefRow = D.TableSummary{D.SCT_TABLE.DT(),
-	"trf", "topicref", "Reference from map to topic"}
+	"topicref", "trf", "Reference from map to topic"}
 
-// TableDescriptor_TopicrefRow specifies only two foreign keys.
-var TableDescriptor_TopicrefRow = DRU.TableDescriptor{
-	"topicref",     // Name
-	"trf",          // ShortName
+// TableDetails_TopicrefRow specifies only two foreign keys.
+var TableDetails_TopicrefRow = DRU.TableDetails{
+        TableSummary_TopicrefRow, 
 	"idx_topicref", // IDName
 	//
 	"idx_map_contentity, idx_tpc_contentity", // ColumnNames

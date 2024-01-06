@@ -35,9 +35,9 @@ We can detect this situation, and correct for it,
 only by counting underscores in the StorName.
 */
 
-func (pSR *SqliteRepo) BuildCreateTableStmt(pTD *DRU.TableDescriptor) (string, error) {
+func (pSR *SqliteRepo) BuildCreateTableStmt(pTD *DRU.TableDetails) (string, error) {
 	var sb, sb2 S.Builder
-	sb.WriteString(fmt.Sprintf("CREATE TABLE %s(\n", pTD.Name))
+	sb.WriteString(fmt.Sprintf("CREATE TABLE %s(\n", pTD.StorName))
 	sb2.WriteString("reposqlite.GenCreTblStmt: ")
 	for _, pCS := range pTD.ColumnSpecs {
 		cnm := pCS.StorName // column name

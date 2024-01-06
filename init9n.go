@@ -33,8 +33,8 @@ type Init9nArgs struct {
      // existing DB, first copy it to a backup
      // copy using a hard-coded naming scheme 
      DoBackup bool
-     // TableDetails are app table details 
-     TableDetails []DRU.TableDescriptor
+     // TableDetailz are app tables' details 
+     TableDetailz []DRU.TableDetails
 }
 
 var DEFAULT_FILENAME = "mmmc.db"
@@ -134,11 +134,11 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 	// At this point we have finished all execution paths
 	// that do NOT require the app table details, and so
 	// now we do have to have apptable details.
-	if p.TableDetails == nil || len(p.TableDetails) == 0 {
+	if p.TableDetailz == nil || len(p.TableDetailz) == 0 {
 	   println("DB: missing app table details. Aborting.")
 	   return nil, errors.New("Missing app DB table details")
 	}
-	e = pSQR.SetAppTables("", DRM.MmmcTableDescriptors)
+	e = pSQR.SetAppTables("", DRM.MmmcTableDetails)
 	/* type RepoAppTables interface {
 		// SetAppTables specifies schemata
 		SetAppTables(string, []U.TableConfig) error

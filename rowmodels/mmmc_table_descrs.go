@@ -2,9 +2,9 @@ package rowmodels
 
 import DRU "github.com/fbaube/datarepo/utils"
 
-// MmmcTableDescriptors configures the three key tables.
-var MmmcTableDescriptors = []DRU.TableDescriptor{
-	TableDescriptor_InbatchRow,
-	TableDescriptor_ContentityRow,
-	TableDescriptor_TopicrefRow,
+// MmmcTableDetails configures the three key tables.
+var MmmcTableDetails = []DRU.TableDetails{
+	TableDetails_InbatchRow,
+	TableDetails_ContentityRow,
+	TableDetails_TopicrefRow,
 }

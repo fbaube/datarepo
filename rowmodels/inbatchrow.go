@@ -20,14 +20,11 @@ func (p *ContentityRow) String() string {
 // RENAME THIS TO TableDescriptor_*
 // TableSummary_InbatchRow describes the table.
 var TableSummary_InbatchRow = D.TableSummary{
-	D.SCT_TABLE.DT(), "INB", "inbatch", "Input batch of imported files"}
+	D.SCT_TABLE.DT(), "inbatch", "inb", "Input batch of imported files"}
 
-// RENAME THIS TO TableDetails_* and
-// USE THE TABLE SUMMARY/DESCRIPTOR JUST ABOVE 
-// TableDescriptor_InbatchRow TBS and no foreign keys.
-var TableDescriptor_InbatchRow = DRU.TableDescriptor{
-	"inbatch",     // Name
-	"inb",         // ShortName
+// TableDetails_InbatchRow TBS and no foreign keys.
+var TableDetails_InbatchRow = DRU.TableDetails{
+        TableSummary_InbatchRow,
 	"idx_inbatch", // IDName
 	// THIS CAN BE AUTO-GENERATED 
 	"FilCt, RelFP, AbsFP, T_Cre, Descr", // ColumnNames
