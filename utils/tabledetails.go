@@ -52,11 +52,11 @@ type TableDetails struct {
 	// field, which (for now) we use in the same format 
 	// BOTH for a primary key AND as a foreign key.
 	IDName string
-	// ColumnNameCSVs is all column names (except primary key), 
+	// ColumnNamesCSV is all column names (except primary key), 
 	// in a specific order, comma-separated, for use in SQL 
 	// statements. We omit the primary key so that we can 
 	// use this for SQL INSERT staements too.
-	ColumnNameCSVs string
+	ColumnNamesCSV string
 	// We used to have ForenKeys defined by name only, but this is
 	// insufficient information, because we need the field name AND
 	// the table name. In principle we could derive one from the
@@ -64,6 +64,9 @@ type TableDetails struct {
 	// we used to, but it adds significant complexity.
 	// ForenKeys   []string
 	ColumnSpecs []D.ColumnSpec
+	// PtrFields(*RowType) returns slice of ptrs to 
+	// every fields in rowmodel struct, used for Scan(..)
+	// // ColumnPtrsFunc func (any) []any
 }
 
 /*

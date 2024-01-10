@@ -30,11 +30,6 @@ var TableDetails_TopicrefRow = DRU.TableDetails{
 	ColumnSpecs_TopicrefRow, // []D.ColumnSpec
 }
 
-// TODO: Still can't sort out the notation for ptr constraints ?!
-func (tro *TopicrefRow) PtrFields() []any { // barfs on []db.PtrFields
-	return []any{&tro.Idx_Map_Contentity, &tro.Idx_Tpc_Contentity}
-}
-
 // ColumnSpecs_TopicrefRow is empty, cos
 // the table contains only foreign keys.
 var ColumnSpecs_TopicrefRow = []D.ColumnSpec{

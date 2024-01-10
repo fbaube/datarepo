@@ -4,7 +4,7 @@ import (
 	"fmt"
 	D "github.com/fbaube/dsmnd"
 	// FU "github.com/fbaube/fileutils"
-	DRU "github.com/fbaube/datarepo/utils"
+	// DR "github.com/fbaube/datarepo"
 	S "strings"
 	// "time"
 )
@@ -47,11 +47,12 @@ OTHR = "othr"
 // with the default column value (specified as part of the CREATE 
 // TABLE statement), or with NULL if no default value is specified.
 // .
-func (pSR *SqliteRepo) BuildInsertStmt(pTD *DRU.TableDetails) (string, error) {
+func (pSR *SqliteRepo) BuildInsertStmt(RM RowModeler) (string, error) {
 	var sb, sb2 S.Builder
 	panic("FIXME")
+	var pTD = RM.TableDetails()
 	sb.WriteString(fmt.Sprintf("CREATE TABLE %s(\n", pTD.StorName))
-	sb2.WriteString("reposqlite.GenCreTblStmt: ")
+	sb2.WriteString("reposqlite.GenInsertStmt: ")
 	for _, pCS := range pTD.ColumnSpecs {
 		cnm := pCS.StorName // column name
 		bdt := pCS.Datatype

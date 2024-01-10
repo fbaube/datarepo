@@ -94,7 +94,7 @@ func (p SqliteRepo) GetContentityAll() (pp []*DRM.ContentityRow, err error) {
 	for rows.Next() {
 		p := new(DRM.ContentityRow)
 		// err := rows.StructScan(p)
-		if err = rows.Scan(p.PtrFields()...); err != nil {
+		if err = rows.Scan(p.ColumnPtrs()...); err != nil {
 			return nil, fmt.Errorf("GetContentityAll: "+
 				"row.Scan error: %w \n\t (%s)", err, q)
 		}

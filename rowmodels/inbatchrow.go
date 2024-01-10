@@ -30,12 +30,7 @@ var TableDetails_InbatchRow = DRU.TableDetails{
 	"FilCt, RelFP, AbsFP, T_Cre, Descr", // ColumnNames
 	// No foreign keys
 	ColumnSpecs_InbatchRow, // []D.ColumnSpec
-}
-
-// TODO: Still can't sort out the notation for ptr constraints ?!
-func (inbro *InbatchRow) PtrFields() []any { // barfs on []db.PtrFields
-	return []any{&inbro.Idx_Inbatch, &inbro.FilCt, &inbro.RelFP,
-		&inbro.AbsFP, &inbro.T_Cre, &inbro.Descr}
+	// /* ColumnPtrsFunc */ ColumnPtrsINB,
 }
 
 // ColumnSpecs_InbatchRow specifies:
