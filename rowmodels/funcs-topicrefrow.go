@@ -20,7 +20,7 @@ func (tro *TopicrefRow) ColumnPtrs() []any { // barfs on []db.PtrFields
 }
 
 // TODO: Still can't sort out the notation for ptr constraints ?!
-func ColumnPtrs(tro *TopicrefRow) []any { // barfs on []db.PtrFields
+func ColumnPtrsTRF(tro *TopicrefRow) []any { // barfs on []db.PtrFields
 	return []any{&tro.Idx_Map_Contentity, &tro.Idx_Tpc_Contentity}
 }
 

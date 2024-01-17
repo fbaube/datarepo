@@ -52,6 +52,8 @@ func (p *SqliteRepo) SetAppTables(appName string, cfg []DRU.TableDetails) error 
 // The DB should be open when it is called (so that the connection
 // object exists). The DB should have a path, but mainly just for
 // error messages; the requirement could be removed.
+//
+// NOTE: If a table does not exist, it has to be created.
 // .
 func (p *SqliteRepo) EmptyAppTables() error {
 	if p.Path() == "" {
@@ -70,6 +72,11 @@ func (p *SqliteRepo) EmptyAppTables() error {
 			strerr := err.Error()
 			if S.HasPrefix(strerr, "no such table:") {
 				L.L.Info("No such table: " + c.StorName)
+			// OOPS! Create it!
+			e2 := p.createAppTable(&c)
+			if e2 != nil {
+			   panic(e2.Error())
+			   }
 			} else {
 				L.L.Error("reposqlite.emptyAllTbls: " + strerr)
 				return fmt.Errorf(
@@ -80,7 +87,7 @@ func (p *SqliteRepo) EmptyAppTables() error {
 			L.L.Info("Deleted all from table: " + S.ToLower(c.StorName))
 		}
 	}
-	L.L.Warning("SQLAR not emptied, utils/repo/sqlite/impl_apptables.go L83")
+	L.L.Info("SQLAR not emptied, utils/repo/sqlite/impl_apptables.go L83")
 	if e != nil {
 		return fmt.Errorf(
 			"sqliterepo.emptyapptables(%s) failed: %w", p.Path(), e)
@@ -120,9 +127,10 @@ func (p *SqliteRepo) createAppTable(td *DRU.TableDetails) error {
 	var CTS string // the Create Table SQL string
 	var e error
 
-	CTS, e = p.BuildCreateTableStmt(td)
+	CTS, e = p.NewCreateTableStmt(td)
 	if e != nil {
-		return fmt.Errorf("Cannot crate app table: %s: %w", td.StorName, e)
+		return fmt.Errorf(
+		     "Cannot create app table: %s: %w", td.StorName, e)
 	}
 	fnam := "./create-table-" + td.StorName + ".sql"
 	e = ioutil.WriteFile(fnam, []byte(CTS), 0644)

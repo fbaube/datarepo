@@ -2,35 +2,17 @@ package sqlite
 
 import (
 	"fmt"
-	D "github.com/fbaube/dsmnd"
+	// // "github.com/fbaube/dsmnd"
 	// FU "github.com/fbaube/fileutils"
 	// DR "github.com/fbaube/datarepo"
+	DRU "github.com/fbaube/datarepo/utils"
 	S "strings"
+	SU "github.com/fbaube/stringutils"
 	// "time"
+	RM "github.com/fbaube/datarepo/rowmodels"
 )
 
-/* REF
-https://www.sqlite.org/lang_createtable.html
-Create Table [ If Not Exists ] [schemaname.]tablename
-1) as select-statement
-2) ( columndef,+ tableconstraint,* )
-[ table-options ] ;
-*/
-
-/* REF
-TABL Fundatype = "tabl" // This datum describes a table !
-INTG = "1234" // SQLITE_INTEGER 1
-FLOT = "1.0f" // SQLITE_FLOAT   2
-TEXT = "AaZz" // SQLITE_TEXT    3
-BLOB = "blob" // SQLITE_BLOB    4
-NULL = "null" // SQLITE_NULL    5
-PKEY = "pkey" // PRIMARY KEY (SQLite "INTEGER")
-FKEY = "fkey" // FOREIGN KEY (SQLite "INTEGER")
-LIST = "list" // table type, one per enumeration ??
-OTHR = "othr"
-*/
-
-// BuildInsertStmt implements
+// NewInsertStmt implements
 // https://www.sqlite.org/lang_insert.html
 // 
 // INSERT INTO table [ ( column-name,+ ) ] VALUES(...);
@@ -47,19 +29,88 @@ OTHR = "othr"
 // with the default column value (specified as part of the CREATE 
 // TABLE statement), or with NULL if no default value is specified.
 // .
-func (pSR *SqliteRepo) BuildInsertStmt(RM RowModeler) (string, error) {
-	var sb, sb2 S.Builder
-	panic("FIXME")
-	var pTD = RM.TableDetails()
+func (pSR *SqliteRepo) NewInsertStmt(pRM interface{} /*RowModeler*/) (string, error) {
+	/*
+	var pTD = pRM.TableDetails()
 	sb.WriteString(fmt.Sprintf("CREATE TABLE %s(\n", pTD.StorName))
-	sb2.WriteString("reposqlite.GenInsertStmt: ")
-	for _, pCS := range pTD.ColumnSpecs {
-		cnm := pCS.StorName // column name
-		bdt := pCS.Datatype
-		sb2.WriteString(fmt.Sprintf("%s:%s, ", cnm, bdt))
+	{
+		var sbDbg S.Builder
+		sbDbg.WriteString("reposqlite.NewInsertStmt: ")
+		for _, pCS := range pTD.ColumnSpecs {
+		    cnm := pCS.StorName // column name
+		    bdt := pCS.Datatype
+		    sbDbg.WriteString(fmt.Sprintf("%s:%s, ", cnm, bdt))
+		}
+		fmt.Printf(sbDbg.String() + "\n")
 	}
-	fmt.Printf(sb2.String() + "\n")
+	*/
+	// panic("FIXME")
+	// So, we have to
+	//  1) Check the struct-type of the RowModeler-instance
+	//  2) Fetch the FieldPtrs
+	//  3) Write out the fields to the stmt
+	//  4) Write out the values to the stmt
+	//  5) Add RETURNING
+	//  6) (the stmt's user) Use that returned that ID
 
+	var colPtrs []any
+	var pTD DRU.TableDetails
+	var now = SU.Now() // time.Now().UTC().Format(time.RFC3339)
+	switch pRM.(type) {
+	case *RM.ContentityRow:
+	     var pCR *RM.ContentityRow 
+	     pCR = pRM.(*RM.ContentityRow)
+	     pTD = pCR.TableDetails()
+	     colPtrs = RM.ColumnPtrsCTY(pCR)
+	     pCR.T_Cre = now
+	     pCR.T_Imp = now
+	     pCR.T_Edt = now
+	case *RM.InbatchRow:
+	     var pIR *RM.InbatchRow
+	     pIR = pRM.(*RM.InbatchRow)
+	     pTD = pIR.TableDetails()
+	     colPtrs = RM.ColumnPtrsINB(pIR)
+	     pIR.T_Cre = now
+	case *RM.TopicrefRow:
+	     var pTR *RM.TopicrefRow
+	     pTR = pRM.(*RM.TopicrefRow)
+	     pTD = pTR.TableDetails()
+	     colPtrs = RM.ColumnPtrsTRF(pTR)
+	}
+	// colPtrs = pTD.ColumnPtrsFunc() // should be a no-arg func 
+	/*
+        tx, err := pSR.Handle().Begin()
+        if err != nil {
+                panic(err)
+        }
+        stmt = "INSERT INTO CONTENTITY(" +
+                "idx_inbatch, descr, relfp, absfp, " +
+                "t_cre, t_imp, t_edt, " +
+                "mimetype, mtype, " +
+                "xmlcontype, ditaflavor, ditacontype" +
+                ") VALUES(" +
+
+                ":idx_inbatch, :descr, :relfp, :absfp, " +
+                ":t_cre, :t_imp, :t_edt, " +
+                ":mimetype, :mtype, " +
+                ":xmlcontype, :ditaflavor, :ditacontype);"
+	*/
+	var sb S.Builder
+	sb.WriteString("INSERT INTO CONTENTITY(")
+	sb.WriteString(pTD.ColumnNamesCSV)
+	sb.WriteString(") VALUES(")
+	for iii, ppp := range pTD.ColumnSpecs {
+	    fmt.Printf("field[%d] colPtr<%T> ColumnSpec.Datatype<%s> \n",
+	    		iii, colPtrs[iii], ppp.Datatype)
+	    switch ppp.Datatype {
+	    }
+	}
+	sb.WriteString(") RETURNING IDX_" + pTD.StorName + ";")
+
+	return "BARF", nil
+}
+
+/*
 	// PRIMARY KEY IS ASSUMED - DO IT FIRST
 	// idx_mytable integer not null primary key autoincrement,
 	sb.WriteString(pTD.IDName +
@@ -136,7 +187,7 @@ func (pSR *SqliteRepo) BuildInsertStmt(RM RowModeler) (string, error) {
 		case D.NULL:
 		case D.LIST:
 		case D.OTHR:
-		*/
+		* /
 		default:
 			panic(pCS.Datatype)
 		}
