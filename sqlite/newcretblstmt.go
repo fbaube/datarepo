@@ -1,6 +1,7 @@
 package sqlite
 
 import (
+       "os"
 	"fmt"
 	D "github.com/fbaube/dsmnd"
 	DRU "github.com/fbaube/datarepo/utils"
@@ -129,11 +130,14 @@ func (pSR *SqliteRepo) NewCreateTableStmt(pTD *DRU.TableDetails) (string, error)
 				//> idx_inbatch integer not null ref's inbatch,
 				//> foreign key(idx_inbatch) references
 				//>     inbatch(idx_inbatch)
+				// BETTER:
+				// in table "contentity":
+				// idx_contentity integer not null
+				//     primary key autoincrement,
+				// idx_inbatch integer not null
+				//     references inbatch(idx_inbatch),
 				stmt.WriteString(fmt.Sprintf(
-					"%s integer not null references %s,\n",
-					refgField, refdTable))
-				stmt.WriteString(fmt.Sprintf(
-					"foreign key(%s) references %s(%s),\n",
+					"%s integer not null references %s(%s),\n",
 					refgField, refdTable, refgField))
 			case 3: // multiple indices into same table, e.g.
 				//> idx_cnt_map integer not null ref's cont'y,
@@ -146,12 +150,9 @@ func (pSR *SqliteRepo) NewCreateTableStmt(pTD *DRU.TableDetails) (string, error)
 				if S.EqualFold(ss[0], "idx") &&
 					S.EqualFold(ss[1][0:1], refdTable[0:1]) {
 					refdField = "idx_" + refdTable
-					stmt.WriteString(fmt.Sprintf(refgField+
-						" integer not null "+
-						"references %s,\n", refdTable))
-					stmt.WriteString(fmt.Sprintf("foreign "+
-						"key(%s) references %s(%s),\n",
-						refgField, refdTable, refdField))
+					stmt.WriteString(fmt.Sprintf(
+					  "%s integer not null references %s(%s),\n",
+					   refgField, refdTable, refdField))
 				} else {
 					return "", fmt.Errorf(
 						"Malformed a_b_c FKEY: %s,%s,%s",
@@ -163,13 +164,16 @@ func (pSR *SqliteRepo) NewCreateTableStmt(pTD *DRU.TableDetails) (string, error)
 			}
 		  }
 		default:
+			fmt.Fprintf(os.Stderr, "OOPS: col<%s> bdt<%s> sft<%s> \n",
+				colName, BDT, SFT) 
 			panic(pCS.Datatype)
 		}
 	}
 	// trim off final ",\n"
 	ss := stmt.String()
 	// and add STRICT 
-	stmt3 := ss[0:len(ss)-2] + "\n) STRICT;\n"
+	stmt3 := ss[0:len(ss)-2] + "\n) STRICT;"
+	fmt.Fprintf(os.Stderr, "SQL for CRE TBL: %s \n", stmt3) 
 	return stmt3, nil
 }
 

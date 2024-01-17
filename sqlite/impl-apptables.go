@@ -1,6 +1,7 @@
 package sqlite
 
 import (
+       "os"
 	_ "database/sql" // to get init()
 	"errors"
 	"fmt"
@@ -75,7 +76,8 @@ func (p *SqliteRepo) EmptyAppTables() error {
 			// OOPS! Create it!
 			e2 := p.createAppTable(&c)
 			if e2 != nil {
-			   panic(e2.Error())
+			   fmt.Fprintf(os.Stderr, "CRE TBL BARFED: %s \n", e2.Error())
+			// panic(e2.Error())
 			   }
 			} else {
 				L.L.Error("reposqlite.emptyAllTbls: " + strerr)

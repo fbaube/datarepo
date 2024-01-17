@@ -100,7 +100,7 @@ func (pSR *SqliteRepo) NewInsertStmt(pRM interface{} /*RowModeler*/) (string, er
 	sb.WriteString(pTD.ColumnNamesCSV)
 	sb.WriteString(") VALUES(")
 	for iii, ppp := range pTD.ColumnSpecs {
-	    fmt.Printf("field[%d] colPtr<%T> ColumnSpec.Datatype<%s> \n",
+	    fmt.Printf("field[%d] colPtr<%T> semFldTyp<%s> \n",
 	    		iii, colPtrs[iii], ppp.Datatype)
 	    switch ppp.Datatype {
 	    }

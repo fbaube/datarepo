@@ -22,7 +22,7 @@ func (p *ContentityRow) String() string {
 var TableSummary_InbatchRow = D.TableSummary{
 	D.SCT_TABLE.DT(), "inbatch", "inb", "Input batch of imported files"}
 
-// TableDetails_InbatchRow TBS and no foreign keys.
+// TableDetails_InbatchRow TBS has no foreign keys.
 var TableDetails_InbatchRow = DRU.TableDetails{
         TableSummary_InbatchRow,
 	"idx_inbatch", // IDName
@@ -38,17 +38,16 @@ var TableDetails_InbatchRow = DRU.TableDetails{
 //   - two path fields (rel & abs)
 //   - creation time
 //   - description
-//
 // .
 var ColumnSpecs_InbatchRow = []D.ColumnSpec{
-	D.ColumnSpec{D.BDT_INTG.DT(), "filct",
-		"Nr. of files", "Number of files"}, // D.INTEG
+	D.ColumnSpec{D.SFT_COUNT.DT(), "filct",
+		"Nr. of files", "Number of files"}, 
 	D.DD_RelFP,
 	D.DD_AbsFP,
 	D.DD_T_Cre, // D.DATIM // THIS AND T_Edt SHOULD USE
 	// DEFAULT https://www.sqlite.org/lang_createtable.html#dfltval
 	// CURRENT_TIMESTAMP "YYYY-MM-DD HH:MM:SS"
-	D.ColumnSpec{D.BDT_TEXT.DT(), "descr",
+	D.ColumnSpec{D.SFT_FTEXT.DT(), "descr",
 		"Batch descr.", "Inbatch description"}, // D.STRNG
 }
 
