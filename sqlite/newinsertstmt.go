@@ -2,7 +2,8 @@ package sqlite
 
 import (
 	"fmt"
-	// // "github.com/fbaube/dsmnd"
+	"os"
+	D "github.com/fbaube/dsmnd"
 	// FU "github.com/fbaube/fileutils"
 	// DR "github.com/fbaube/datarepo"
 	DRU "github.com/fbaube/datarepo/utils"
@@ -95,17 +96,31 @@ func (pSR *SqliteRepo) NewInsertStmt(pRM interface{} /*RowModeler*/) (string, er
                 ":mimetype, :mtype, " +
                 ":xmlcontype, :ditaflavor, :ditacontype);"
 	*/
+	fmt.Fprintf(os.Stderr, "LENS: ColSpex<%d> ColPtrs<%d> \n",
+		len(pTD.ColumnSpecs), len(colPtrs))
 	var sb S.Builder
 	sb.WriteString("INSERT INTO CONTENTITY(")
 	sb.WriteString(pTD.ColumnNamesCSV)
 	sb.WriteString(") VALUES(")
-	for iii, ppp := range pTD.ColumnSpecs {
-	    fmt.Printf("field[%d] colPtr<%T> semFldTyp<%s> \n",
-	    		iii, colPtrs[iii], ppp.Datatype)
-	    switch ppp.Datatype {
+	// var sft D.SemanticFieldType
+	var sn string
+	var dt D.SemanticFieldType 
+	for iii, cp := range colPtrs {
+	    if iii == 0 {
+	       sn = "priKey"
+	       dt = D.SFT_PRKEY
+	    } else {
+	       sn = pTD.ColumnSpecs[iii-1].StorName
+	       dt = D.SemanticFieldType(pTD.ColumnSpecs[iii-1].Datatype)
+	    }
+	    fmt.Printf("[%d] %s / %s / %T \n", iii, sn, dt, cp)
+	    // sft = D.SemanticFieldType(ppp.Datatype)
+	    switch cp {
+
 	    }
 	}
 	sb.WriteString(") RETURNING IDX_" + pTD.StorName + ";")
+	println("INSERT STMT:", sb.String())
 
 	return "BARF", nil
 }
