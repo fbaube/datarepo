@@ -19,7 +19,7 @@ var TableSummary_ContentityRow = D.TableSummary{
 var TableDetails_ContentityRow = DRU.TableDetails{
         TableSummary_ContentityRow, 
 	"idx_contentity", // IDName
-	"RelFP, AbsFP, Descr, T_Cre, T_Imp, T_Edt, " +
+	"IDX_inbatch, RelFP, AbsFP, Descr, T_Cre, T_Imp, T_Edt, " +
 		"RawMT, Mimtp, MType, Contt", // ColumnNames
 	// One foreign key: "inbatch"
 	ColumnSpecs_ContentityRow, // []D.ColumnSpecs

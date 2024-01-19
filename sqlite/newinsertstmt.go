@@ -4,14 +4,42 @@ import (
 	"fmt"
 	"os"
 	D "github.com/fbaube/dsmnd"
-	// FU "github.com/fbaube/fileutils"
+	FU "github.com/fbaube/fileutils"
+	SU "github.com/fbaube/stringutils"
 	// DR "github.com/fbaube/datarepo"
 	DRU "github.com/fbaube/datarepo/utils"
 	S "strings"
-	SU "github.com/fbaube/stringutils"
+	CT "github.com/fbaube/ctoken"
 	// "time"
 	RM "github.com/fbaube/datarepo/rowmodels"
 )
+
+// case *FU.AbsFilePath, *SU.MarkupType, *CT.Raw:
+
+// func AFPval(p *FU.AbsFilePath) string {
+func AFPval(p any) string {
+     var pAFP *FU.AbsFilePath
+     pAFP = p.(*FU.AbsFilePath)
+     var AFP FU.AbsFilePath
+     AFP = *pAFP
+     return string(AFP) 
+}
+// func MTval(p *SU.MarkupType) string {
+func MTval(p any) string {
+     var pAFP *SU.MarkupType
+     pAFP = p.(*SU.MarkupType)
+     var AFP SU.MarkupType
+     AFP = *pAFP
+     return string(AFP) 
+}
+// func CTRval(p *CT.Raw) string {
+func CTRval(p any) string {
+     var pAFP *CT.Raw
+     pAFP = p.(*CT.Raw)
+     var AFP CT.Raw
+     AFP = *pAFP
+     return string(AFP) 
+}
 
 // NewInsertStmt implements
 // https://www.sqlite.org/lang_insert.html
@@ -91,7 +119,7 @@ func (pSR *SqliteRepo) NewInsertStmt(pRM interface{} /*RowModeler*/) (string, er
                 "xmlcontype, ditaflavor, ditacontype" +
                 ") VALUES(" +
 
-                ":idx_inbatch, :descr, :relfp, :absfp, " +
+               ":idx_inbatch, :descr, :relfp, :absfp, " +
                 ":t_cre, :t_imp, :t_edt, " +
                 ":mimetype, :mtype, " +
                 ":xmlcontype, :ditaflavor, :ditacontype);"
@@ -106,24 +134,66 @@ func (pSR *SqliteRepo) NewInsertStmt(pRM interface{} /*RowModeler*/) (string, er
 	var sn string
 	var dt D.SemanticFieldType 
 	for iii, cp := range colPtrs {
+	    /*
 	    if iii == 0 {
 	       sn = "priKey"
 	       dt = D.SFT_PRKEY
-	    } else {
-	       sn = pTD.ColumnSpecs[iii-1].StorName
-	       dt = D.SemanticFieldType(pTD.ColumnSpecs[iii-1].Datatype)
+	       // This is an INSERT, so we do
+	       // not write out the primary key!
+	       continue
 	    }
+	    */
+	    sn = pTD.ColumnSpecs[iii].StorName
+	    dt = D.SemanticFieldType(pTD.ColumnSpecs[iii].Datatype)
 	    fmt.Printf("[%d] %s / %s / %T \n", iii, sn, dt, cp)
 	    // sft = D.SemanticFieldType(ppp.Datatype)
-	    switch cp {
-
+	    switch cp.(type) {
+	    	   case *string:
+		   	var pS *string
+			var sS string
+			pS = cp.(*string)
+			sS = *pS
+		   	sb.WriteString(fmt.Sprintf("'%s', ", sS))
+	    	   case *FU.AbsFilePath:
+		   	sb.WriteString(fmt.Sprintf("'%s', ", AFPval(cp)))
+	    	   case *SU.MarkupType:
+		   	sb.WriteString(fmt.Sprintf("'%s', ", MTval(cp)))
+	    	   case *CT.Raw:
+		   	sb.WriteString(fmt.Sprintf("'%s', ", CTRval(cp)))
+		   case *int:
+		   	var pI *int
+			pI = cp.(*int)
+		   	sb.WriteString(fmt.Sprintf("%d, ", *pI))
 	    }
 	}
-	sb.WriteString(") RETURNING IDX_" + pTD.StorName + ";")
-	println("INSERT STMT:", sb.String())
-
-	return "BARF", nil
+	var stmt string 
+	stmt = sb.String()
+	stmt2 := stmt[:len(stmt)-2] + ") RETURNING IDX_" + pTD.StorName + ";"
+	// sb.WriteString(") RETURNING IDX_" + pTD.StorName + ";")
+	println("INSERT STMT:", stmt2) // sb.String())
+	return stmt2, nil
 }
+
+/*
+// func Deref[T any](ptr *T) T { 
+func StringFromPtr[SS ~string](ss *SS) string {
+
+     // cannot use *ss (variable of type SS constrained
+     // by ~string) as string value in return statement
+     return *ss
+
+     var pS *string
+     // cannot convert ss (variable of type *SS) to type *string 
+     pS = (*string)(ss)
+     return *pS
+
+     var SSS string
+     // cannot use *ss (variable of type SS constrained
+     // by ~string) as string value in assignment
+     SSS = *ss
+     return SSS
+}
+*/
 
 /*
 	// PRIMARY KEY IS ASSUMED - DO IT FIRST

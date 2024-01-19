@@ -19,7 +19,8 @@ func (cro *ContentityRow) ColumnNamesCSV() string {
 // TODO: Still can't sort out the notation for ptr constraints ?!
 func ColumnPtrsCTY(cro *ContentityRow) []any { // barfs on []db.PtrFields
 	return []any{
-		&cro.Idx_Contentity, &cro.Idx_Inbatch,
+		// &cro.Idx_Contentity,
+		&cro.Idx_Inbatch,
 		&cro.PathProps.RelFP, &cro.PathProps.AbsFP,
 		// &cro.RelFP, &cro.AbsFP,
 		// &cro.FUPP.RelFP, &cro.FUPP.AbsFP,
@@ -34,7 +35,8 @@ func ColumnPtrsCTY(cro *ContentityRow) []any { // barfs on []db.PtrFields
 // TODO: Still can't sort out the notation for ptr constraints ?!
 func (cro *ContentityRow) ColumnPtrs() []any { // barfs on []db.PtrFields
 	return []any{
-		&cro.Idx_Contentity, &cro.Idx_Inbatch,
+		// &cro.Idx_Contentity,
+		&cro.Idx_Inbatch,
 		&cro.PathProps.RelFP, &cro.PathProps.AbsFP,
 		// &cro.RelFP, &cro.AbsFP,
 		// &cro.FUPP.RelFP, &cro.FUPP.AbsFP,
