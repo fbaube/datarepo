@@ -7,7 +7,7 @@ import (
 	FU "github.com/fbaube/fileutils"
 	L "github.com/fbaube/mlog"
 	DRS "github.com/fbaube/datarepo/sqlite"
-	DRM "github.com/fbaube/datarepo/rowmodels"
+	// DRM "github.com/fbaube/datarepo/rowmodels"
 	// // R "github.com/fbaube/datarepo/repo"
 	// _ "github.com/fbaube/sqlite3"
 	_ "github.com/mattn/go-sqlite3"
@@ -20,7 +20,7 @@ import (
 type Init9nArgs struct {
      // D.DB_type is so far only D.DB_SQLite = "sqlite"
      D.DB_type
-     // BaseFilename defaults to "mmmc.db"
+     // BaseFilename defaults to "m5.db"
      BaseFilename string 
      Dir string
      // DoImport is a flag that access to a DB is required,
@@ -37,7 +37,7 @@ type Init9nArgs struct {
      TableDetailz []DRU.TableDetails
 }
 
-var DEFAULT_FILENAME = "mmmc.db"
+var DEFAULT_FILENAME = "m5.db"
 
 // ProcessInit9nArgs processes DN initialization arguments. 
 // It can process either a new DB OR an existing DB.
@@ -138,7 +138,7 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 	   println("DB: missing app table details. Aborting.")
 	   return nil, errors.New("Missing app DB table details")
 	}
-	e = pSQR.SetAppTables("", DRM.MmmcTableDetails)
+	e = pSQR.SetAppTables("", p.TableDetailz) // DRM.MmmcTableDetails)
 	/* type RepoAppTables interface {
 		// SetAppTables specifies schemata
 		SetAppTables(string, []U.TableConfig) error
