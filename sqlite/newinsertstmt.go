@@ -98,7 +98,7 @@ func (pSR *SqliteRepo) NewInsertStmt(pRM interface{} /*RowModeler*/) (string, er
 	     var pIR *RM.InbatchRow
 	     pIR = pRM.(*RM.InbatchRow)
 	     pTD = pIR.TableDetails()
-	     colPtrs = RM.ColumnPtrsINB(pIR)
+	     colPtrs = RM.ColumnPtrsINB(pIR, false) // not PK
 	     pIR.T_Cre = now
 	case *RM.TopicrefRow:
 	     var pTR *RM.TopicrefRow

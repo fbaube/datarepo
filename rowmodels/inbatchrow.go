@@ -2,68 +2,8 @@ package rowmodels
 
 import (
 	"fmt"
-	D "github.com/fbaube/dsmnd"
-	FU "github.com/fbaube/fileutils"
 	DRU "github.com/fbaube/datarepo/utils"
-	// "github.com/fbaube/nurepo/db"
 )
-
-/*
-var TableSummary_ContentityRow = D.TableSummary{
-var TableDescriptor_ContentityRow = TableDescriptor{
-func (cro *ContentityRow) PtrFields() []any { // barfs on []db.PtrFields
-var ColumnSpecs_ContentityRow = []D.ColumnSpec{
-type ContentityRow struct {
-func (p *ContentityRow) String() string {
-*/
-
-// RENAME THIS TO TableDescriptor_*
-// TableSummary_InbatchRow describes the table.
-var TableSummary_InbatchRow = D.TableSummary{
-	D.SCT_TABLE.DT(), "inbatch", "inb", "Input batch of imported files"}
-
-// TableDetails_InbatchRow TBS has no foreign keys.
-var TableDetails_InbatchRow = DRU.TableDetails{
-        TableSummary_InbatchRow,
-	"idx_inbatch", // IDName
-	// THIS CAN BE AUTO-GENERATED 
-	"FilCt, RelFP, AbsFP, T_Cre, Descr", // ColumnNames
-	// No foreign keys
-	ColumnSpecs_InbatchRow, // []D.ColumnSpec
-	// /* ColumnPtrsFunc */ ColumnPtrsINB,
-}
-
-// ColumnSpecs_InbatchRow specifies:
-//   - file count
-//   - two path fields (rel & abs)
-//   - creation time
-//   - description
-// .
-var ColumnSpecs_InbatchRow = []D.ColumnSpec{
-	D.ColumnSpec{D.SFT_COUNT.DT(), "filct",
-		"Nr. of files", "Number of files"}, 
-	D.DD_RelFP,
-	D.DD_AbsFP,
-	D.DD_T_Cre, // D.DATIM // THIS AND T_Edt SHOULD USE
-	// DEFAULT https://www.sqlite.org/lang_createtable.html#dfltval
-	// CURRENT_TIMESTAMP "YYYY-MM-DD HH:MM:SS"
-	D.ColumnSpec{D.SFT_FTEXT.DT(), "descr",
-		"Batch descr.", "Inbatch description"}, // D.STRNG
-}
-
-// InbatchRow describes (in the DB)
-// a single import batch at the CLI.
-//   - NOTE: Maybe rename this to FileSet ?
-//   - TODO: Maybe represent this with a dsmnd.NSPath: Batch.nr+Path
-type InbatchRow struct {
-	Idx_Inbatch int
-	FilCt       int
-	RelFP       string
-	AbsFP       FU.AbsFilePath
-	T_Cre       string
-	// Batch "name" ? Or add a separate Name field ?
-	Descr string
-}
 
 // TODO Write col desc's using Desmond !
 // TODO Generate ColNames from ColumnSpecs_InbatchRow
@@ -73,3 +13,13 @@ func (p *InbatchRow) String() string {
 	return fmt.Sprintf("inbatchrow FIXME")
 	// p.PathProps.String(), p.PathAnalysis.String())
 }
+
+// TableDetailsINB TBS has no foreign keys.
+var TableDetailsINB = DRU.TableDetails{
+        TableSummaryINB,
+	"idx_inbatch", // IDName
+	ColumnNamesCsvINB, 
+	ColumnSpecsINB, // []D.ColumnSpec
+	// /* ColumnPtrsFunc */ ColumnPtrsINB,
+}
+

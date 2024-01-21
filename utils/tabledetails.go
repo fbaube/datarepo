@@ -42,34 +42,37 @@ import D "github.com/fbaube/dsmnd"
 //
 // .
 type TableDetails struct {
-        // TableSummary is a [Datum] and
-	// has four fields, used thusly:
+        // [dsmnd.TableSummary] is a [dsmnd.Datum] 
+	// and has four fields, used thusly:
 	//  - BasicDatatype: [D.SCT_TABLE] 
-	//  - StorName: the name of the table in the DB, 
-	//    e.g. inbatch, contentity, topicref (was: Name) 
-	//  - DispName: a short version for use in the names of
-	//    other variables, e.g. inb, cnt, trf (was: ShortName) 
+	//  - StorName: the name of the table in the 
+	//    DB, e.g. inbatch, contentity, topicref 
+	//  - DispName: a short (three-letter) version 
+	//    of the name for use in the names of other
+	//    variables, e.g. inb, cnt, trf 
 	//  - Description: TBS
      	D.TableSummary 
 	// IDName is the (auto-generatable!) name of the index 
 	// field, which (for now) we use in the same format 
-	// BOTH for a primary key AND as a foreign key.
+	// BOTH for a primary key AND as a foreign key. 
 	IDName string
 	// ColumnNamesCSV is all column names (except primary key), 
-	// in a specific order, comma-separated, for use in SQL 
-	// statements. We omit the primary key so that we can 
-	// use this for SQL INSERT staements too.
+	// in a specific (auto-generatable!) order, comma-separated, 
+	// for use in SQL statements. We omit the primary key so 
+	// that we can use this for SQL INSERT statements too.
 	ColumnNamesCSV string
+	// ColumnSpecs is a list of [dsmnd.D.ColumnSpec] that 
+	// omits the primary key that we automatically include.
+	ColumnSpecs []D.ColumnSpec
+	// PtrFields(*RowType) returns slice of ptrs to 
+	// every fields in rowmodel struct, used for Scan(..)
+	// // ColumnPtrsFunc func (any) []any
 	// We used to have ForenKeys defined by name only, but this is
 	// insufficient information, because we need the field name AND
 	// the table name. In principle we could derive one from the
 	// other using our other DB-related data structures, and maybe
 	// we used to, but it adds significant complexity.
 	// ForenKeys   []string
-	ColumnSpecs []D.ColumnSpec
-	// PtrFields(*RowType) returns slice of ptrs to 
-	// every fields in rowmodel struct, used for Scan(..)
-	// // ColumnPtrsFunc func (any) []any
 }
 
 /*

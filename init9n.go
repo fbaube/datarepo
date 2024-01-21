@@ -138,15 +138,7 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 	   println("DB: missing app table details. Aborting.")
 	   return nil, errors.New("Missing app DB table details")
 	}
-	e = pSQR.SetAppTables("", p.TableDetailz) // DRM.MmmcTableDetails)
-	/* type RepoAppTables interface {
-		// SetAppTables specifies schemata
-		SetAppTables(string, []U.TableConfig) error
-		// EmptyAllTables deletes (app-level) data
-		EmptyAppTables() error
-		// CreateTables creates/empties the app's tables
-		CreateAppTables() error
-	} */
+	e = pSQR.SetAppTables("", p.TableDetailz) // DRM.M5_TableDetails)
 	if !filexist {
 		// env.SimpleRepo.ForceExistDBandTables()
 		e = pSQR.CreateAppTables()
@@ -165,9 +157,10 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 /*
 // inputExts more than covers the file types associated with the LwDITA spec.
 // Of course, when we check for them we do so case-insensitively.
+// Ones we don't handle don't go here, e.g. ".adoc" Asciidoc.
 var inputExts = []string{
 	".dita", ".map", ".ditamap", ".xml",
-	".md", ".markdown", ".mdown", ".mkdn",
+	".md", ".markdown", ".mdown", ".mkdn", 
 	".html", ".htm", ".xhtml", ".png", ".gif", ".jpg"}
 
 // AllGLinks gathers all GLinks in the current run's input set.
