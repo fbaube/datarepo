@@ -59,21 +59,6 @@ func CTRval(p any) string {
 // TABLE statement), or with NULL if no default value is specified.
 // .
 func (pSR *SqliteRepo) NewInsertStmt(pRM interface{} /*RowModeler*/) (string, error) {
-	/*
-	var pTD = pRM.TableDetails()
-	sb.WriteString(fmt.Sprintf("CREATE TABLE %s(\n", pTD.StorName))
-	{
-		var sbDbg S.Builder
-		sbDbg.WriteString("reposqlite.NewInsertStmt: ")
-		for _, pCS := range pTD.ColumnSpecs {
-		    cnm := pCS.StorName // column name
-		    bdt := pCS.Datatype
-		    sbDbg.WriteString(fmt.Sprintf("%s:%s, ", cnm, bdt))
-		}
-		fmt.Printf(sbDbg.String() + "\n")
-	}
-	*/
-	// panic("FIXME")
 	// So, we have to
 	//  1) Check the struct-type of the RowModeler-instance
 	//  2) Fetch the FieldPtrs
@@ -107,23 +92,6 @@ func (pSR *SqliteRepo) NewInsertStmt(pRM interface{} /*RowModeler*/) (string, er
 	     colPtrs = RM.ColumnPtrsTRF(pTR)
 	}
 	// colPtrs = pTD.ColumnPtrsFunc() // should be a no-arg func 
-	/*
-        tx, err := pSR.Handle().Begin()
-        if err != nil {
-                panic(err)
-        }
-        stmt = "INSERT INTO CONTENTITY(" +
-                "idx_inbatch, descr, relfp, absfp, " +
-                "t_cre, t_imp, t_edt, " +
-                "mimetype, mtype, " +
-                "xmlcontype, ditaflavor, ditacontype" +
-                ") VALUES(" +
-
-               ":idx_inbatch, :descr, :relfp, :absfp, " +
-                ":t_cre, :t_imp, :t_edt, " +
-                ":mimetype, :mtype, " +
-                ":xmlcontype, :ditaflavor, :ditacontype);"
-	*/
 	fmt.Fprintf(os.Stderr, "LENS: ColSpex<%d> ColPtrs<%d> \n",
 		len(pTD.ColumnSpecs), len(colPtrs))
 	var sb S.Builder
