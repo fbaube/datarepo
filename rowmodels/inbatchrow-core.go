@@ -38,8 +38,8 @@ func (inbro *InbatchRow) ColumnPtrs(inclPK bool) []any {
      return ColumnPtrsINB(inbro, inclPK) 
 }
 
-// ColumnSpecsINB field order MUST be kept in 
-// sync with [ColumnNamesCsvINB] and [ColumnPtrsINB] and it specifies:
+// ColumnSpecsINB field order MUST be kept in sync with
+// [ColumnNamesCsvINB] and [ColumnPtrsINB] and it specifies:
 //   - file count
 //   - two path fields (rel & abs) (placed at the end
 //     because they tend to be looong)

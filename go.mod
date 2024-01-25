@@ -1,6 +1,6 @@
 module github.com/fbaube/datarepo
 
-go 1.21.5
+go 1.21.6
 
 require (
 	github.com/fbaube/contentanalysis v0.0.0-20240117104147-e12c9546e1cc

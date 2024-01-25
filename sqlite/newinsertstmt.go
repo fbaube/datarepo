@@ -89,7 +89,7 @@ func (pSR *SqliteRepo) NewInsertStmt(pRM interface{} /*RowModeler*/) (string, er
 	     var pTR *RM.TopicrefRow
 	     pTR = pRM.(*RM.TopicrefRow)
 	     pTD = pTR.TableDetails()
-	     colPtrs = RM.ColumnPtrsTRF(pTR)
+	     colPtrs = RM.ColumnPtrsTRF(pTR, false)
 	}
 	// colPtrs = pTD.ColumnPtrsFunc() // should be a no-arg func 
 	fmt.Fprintf(os.Stderr, "LENS: ColSpex<%d> ColPtrs<%d> \n",
