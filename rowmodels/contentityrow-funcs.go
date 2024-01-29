@@ -1,23 +1,14 @@
 package rowmodels
 
-import (
-	DRU "github.com/fbaube/datarepo/utils"
-	// "github.com/fbaube/nurepo/db"
-)
-
 // Implement interface RowModeler
 
-func (cro *ContentityRow) TableDetails() DRU.TableDetails {
-     return TableDetails_ContentityRow
-}
-
-func (cro *ContentityRow) ColumnNamesCSV() string {
-     return cro.TableDetails().ColumnNamesCSV
+func (cro *ContentityRow) TableDetails() TableDetails {
+     return TableDetailsCNT
 }
 
 // ColumnPtrs implements interface [Row].
 // TODO: Still can't sort out the notation for ptr constraints ?!
-func ColumnPtrsCTY(cro *ContentityRow) []any { // barfs on []db.PtrFields
+func ColumnPtrsCNT(cro *ContentityRow) []any { // barfs on []db.PtrFields
 	return []any{
 		// &cro.Idx_Contentity,
 		&cro.Idx_Inbatch,

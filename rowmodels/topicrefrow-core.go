@@ -8,6 +8,16 @@ var TableSummaryTRF = D.TableSummary{
 	D.SCT_TABLE.DT(), "topicref", "trf",
 	"Reference from map to topic"}
 
+// TableDetails_TopicrefRow specifies only two foreign keys.
+var TableDetails_TopicrefRow = TableDetails{
+        TableSummaryTRF, 
+        "idx_topicref", // IDName
+        "idx_cnt_map, idx_cnt_tpc", // ColumnNames
+        ColumnSpecsTRF, 
+}
+
+// ====================
+
 // For implementing interface RowModeler: This file
 // contains four key items that MUST be kept in sync:
 //  - ColumnSpecsTRF

@@ -1,12 +1,8 @@
 package rowmodels
 
-import (
-	DRU "github.com/fbaube/datarepo/utils"
-)
-
 // Implement interface RowModeler
 
-func (tro *TopicrefRow) TableDetails() DRU.TableDetails {
+func (tro *TopicrefRow) TableDetails() TableDetails {
      return TableDetails_TopicrefRow
 }
 

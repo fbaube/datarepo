@@ -9,34 +9,17 @@ var TableSummaryINB = D.TableSummary{
 	D.SCT_TABLE.DT(), "inbatch", "inb",
 	"Input batch of imported files"}
 
-// For implementing interface RowModeler: This file
-// contains four key items that MUST be kept in sync:
+// This file contains four key items that MUST be kept in sync:
 //  - ColumnSpecsINB
-//  - ColumnPtrsINB
-//  - InbatchRow
 //  - ColumnNamesCsvINB
+//  - ColumnPtrsINB
+//  - struct InbatchRow
 //
-// The order of fields is quite flexible, and so because 
-// of how fields are displayed in DB tools, shorter and 
-// more-important fields should appear first.
-//
-// NOTE that:
-//  - in principle, both variables and code can 
-//    be auto-generated based on [ColumnSpecsINB],
-//  - BUT it would be a serious task to do so,
-//  - AND might be useless and/or impossible when
-//    using generics. 
+// SEE FILE ./tabledetails.go for more information.
 
-// ColumnNamesCsvINB can be left unset and then 
-// easily auto-generated from [ColumnSpecsINB].
-var ColumnNamesCsvINB = "FilCt, Descr, T_Cre, T_Imp, T_Edt, RelFP, AbsFP" 
-
+// PKSpecINB should be auto.generated! 
 var PKSpecINB = D.ColumnSpec{D.SFT_PRKEY.DT(),
     "idx_inbatch", "Pri.key", "Primary key"} 
-
-func (inbro *InbatchRow) ColumnPtrs(inclPK bool) []any {
-     return ColumnPtrsINB(inbro, inclPK) 
-}
 
 // ColumnSpecsINB field order MUST be kept in sync with
 // [ColumnNamesCsvINB] and [ColumnPtrsINB] and it specifies:
@@ -60,8 +43,12 @@ var ColumnSpecsINB = []D.ColumnSpec{
 	D.DD_AbsFP,
 }
 
-// ColumnPtrsINB MUST be kept in sync:
-//  - field order with [ColumnNamesCsvINB] and [ColumnSpecsINB]
+// ColumnNamesCsvINB TODO: this can be left unset and 
+// then (easily!) auto-generated from [ColumnSpecsINB].
+var ColumnNamesCsvINB = "FilCt, Descr, T_Cre, T_Imp, T_Edt, RelFP, AbsFP" 
+
+// ColumnPtrsINB goes into TableDetails and MUST be kept in sync:
+//  - field order with [ColumnSpecsINB] and [ColumnNamesCsvINB] 
 //  - field names with [InbatchRow]
 func ColumnPtrsINB(inbro *InbatchRow, inclPK bool) []any { 
      var list []any
@@ -74,9 +61,13 @@ func ColumnPtrsINB(inbro *InbatchRow, inclPK bool) []any {
      return append(pk, list...)
 }
 
-// InbatchRow field names MUST be kept in sync 
-// with [ColumnPtrsINB] and a record describes 
-// (in the DB) a single import batch at the CLI.
+func (inbro *InbatchRow) ColumnPtrs(inclPK bool) []any {
+     return ColumnPtrsINB(inbro, inclPK) 
+}
+
+// InbatchRow describes (in the DB) a single import batch
+// (probably at the CLI field names); field names MUST be 
+// kept in sync with [ColumnPtrsINB].
 //  - NOTE: Maybe rename Inbatch* to FileSet*
 //    (and INB to FLS) ?
 //  - TODO: Maybe represent this (or, each file)

@@ -1,10 +1,10 @@
 package rowmodels
 
-import DRU "github.com/fbaube/datarepo/utils"
+// import DRU "github.com/fbaube/datarepo/utils"
 
 // M5_TableDetails configures the three key tables.
-var M5_TableDetails = []DRU.TableDetails{
-	TableDetails_ContentityRow,
+var M5_TableDetails = []TableDetails{
+	TableDetailsCNT,
 	TableDetailsINB,
-	TableDetails_TopicrefRow,
+	TableDetailsTRF,
 }

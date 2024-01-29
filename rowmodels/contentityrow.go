@@ -10,22 +10,22 @@ import (
 	// "github.com/fbaube/nurepo/db"
 )
 
-// TableSummary_ContentityRow summarizes the table.
-var TableSummary_ContentityRow = D.TableSummary{
+// TableSummaryCNT summarizes the table.
+var TableSummaryCNT = D.TableSummary{
     D.SCT_TABLE.DT(), "contentity", "cnt", "Content entity"}
 
-// TableDetails_ContentityRow specifies 11 DB columns,
+// TableDetailsCNT specifies 11 DB columns,
 // incl primary key (assumed) and one foreign key, "inbatch".
-var TableDetails_ContentityRow = DRU.TableDetails{
-        TableSummary_ContentityRow, 
+var TableDetailsCNT = TableDetails{
+        TableSummaryCNT, 
 	"idx_contentity", // IDName
 	"IDX_inbatch, RelFP, AbsFP, Descr, T_Cre, T_Imp, T_Edt, " +
 		"RawMT, Mimtp, MType, Contt", // ColumnNames
 	// One foreign key: "inbatch"
-	ColumnSpecs_ContentityRow, // []D.ColumnSpecs
+	ColumnSpecsCNT, // []D.ColumnSpecs
 }
 
-// ColumnSpecs_ContentityRow specifies
+// ColumnSpecsCNT specifies
 //   - a primary key (actually, it doescNOT - a primary
 //     key is assumed, and handled elsewhere)
 //   - a foreign key "inbatch"
@@ -43,7 +43,7 @@ var TableDetails_ContentityRow = DRU.TableDetails{
 //     [xdita,hdita!,mdita]), LwDITA content type)
 //
 // .
-var ColumnSpecs_ContentityRow = []D.ColumnSpec{
+var ColumnSpecsCNT = []D.ColumnSpec{
 	D.ColumnSpec{D.SFT_FRKEY.DT(), "idx_inbatch", "inbatch",
 		"Input batch of imported content"},
 	D.DD_RelFP,
@@ -105,7 +105,7 @@ type ContentityRow struct {
 }
 
 // TODO Write col desc's using Desmond !
-// TODO Generate ColNames from ColumnSpecs_ContentityRow
+// TODO Generate ColNames from ColumnSpecsCNT
 
 // FIXME: String implements Stringer.
 func (p *ContentityRow) String() string {
