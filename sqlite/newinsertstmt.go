@@ -6,8 +6,6 @@ import (
 	D "github.com/fbaube/dsmnd"
 	FU "github.com/fbaube/fileutils"
 	SU "github.com/fbaube/stringutils"
-	// DR "github.com/fbaube/datarepo"
-	DRU "github.com/fbaube/datarepo/utils"
 	S "strings"
 	CT "github.com/fbaube/ctoken"
 	// "time"
@@ -68,14 +66,14 @@ func (pSR *SqliteRepo) NewInsertStmt(pRM interface{} /*RowModeler*/) (string, er
 	//  6) (the stmt's user) Use that returned that ID
 
 	var colPtrs []any
-	var pTD DRU.TableDetails
+	var pTD RM.TableDetails
 	var now = SU.Now() // time.Now().UTC().Format(time.RFC3339)
 	switch pRM.(type) {
 	case *RM.ContentityRow:
 	     var pCR *RM.ContentityRow 
 	     pCR = pRM.(*RM.ContentityRow)
 	     pTD = pCR.TableDetails()
-	     colPtrs = RM.ColumnPtrsCTY(pCR)
+	     colPtrs = RM.ColumnPtrsCNT(pCR)
 	     pCR.T_Cre = now
 	     pCR.T_Imp = now
 	     pCR.T_Edt = now
