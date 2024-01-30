@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	L "github.com/fbaube/mlog"
-	DRU "github.com/fbaube/datarepo/utils"
+	DRM "github.com/fbaube/datarepo/rowmodels"
 	"io/ioutil"
 	S "strings"
 )
@@ -18,10 +18,10 @@ import (
 //
 // Map value is the associated instance of TableDetails.
 // .
-var theMap map[string]DRU.TableDetails
+var theMap map[string]DRM.TableDetails
 
 func init() {
-	theMap = make(map[string]DRU.TableDetails)
+	theMap = make(map[string]DRM.TableDetails)
 }
 
 // RepoAppTables is table-related methods for a specified app's schema.
@@ -37,7 +37,7 @@ func init() {
 // seen do not conflict; if a table name is repeated but with a
 // different schema, the result is undefined.
 // .
-func (p *SqliteRepo) SetAppTables(appName string, cfg []DRU.TableDetails) error {
+func (p *SqliteRepo) SetAppTables(appName string, cfg []DRM.TableDetails) error {
 	L.L.Info("SetAppTables: got %d table definitions", len(cfg))
 	for _, c := range cfg {
 		theMap[ /*pfx+*/ S.ToLower(c.StorName)] = c
@@ -124,7 +124,7 @@ func (p *SqliteRepo) CreateAppTables() error {
 	return nil
 }
 
-func (p *SqliteRepo) createAppTable(td *DRU.TableDetails) error {
+func (p *SqliteRepo) createAppTable(td *DRM.TableDetails) error {
 
 	var CTS string // the Create Table SQL string
 	var e error

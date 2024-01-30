@@ -7,14 +7,11 @@ import (
 	FU "github.com/fbaube/fileutils"
 	L "github.com/fbaube/mlog"
 	DRS "github.com/fbaube/datarepo/sqlite"
-	// DRM "github.com/fbaube/datarepo/rowmodels"
-	// // R "github.com/fbaube/datarepo/repo"
-	// _ "github.com/fbaube/sqlite3"
+	DRM "github.com/fbaube/datarepo/rowmodels"
 	_ "github.com/mattn/go-sqlite3"
 	SU "github.com/fbaube/stringutils"
 	"os"
 	_ "database/sql"
-	DRU "github.com/fbaube/datarepo/utils"
 )
 
 type Init9nArgs struct {
@@ -34,7 +31,7 @@ type Init9nArgs struct {
      // copy using a hard-coded naming scheme 
      DoBackup bool
      // TableDetailz are app tables' details 
-     TableDetailz []DRU.TableDetails
+     TableDetailz []DRM.TableDetails
 }
 
 var DEFAULT_FILENAME = "m5.db"

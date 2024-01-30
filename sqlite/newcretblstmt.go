@@ -4,7 +4,7 @@ import (
        "os"
 	"fmt"
 	D "github.com/fbaube/dsmnd"
-	DRU "github.com/fbaube/datarepo/utils"
+	DRM "github.com/fbaube/datarepo/rowmodels"
 	S "strings"
 	// "time"
 )
@@ -40,7 +40,7 @@ only by counting underscores in the StorName.
 
 // NewCreateTableStmt expects [TableDetails.IDName] to be set. 
 // . 
-func (pSR *SqliteRepo) NewCreateTableStmt(pTD *DRU.TableDetails) (string, error) {
+func (pSR *SqliteRepo) NewCreateTableStmt(pTD *DRM.TableDetails) (string, error) {
 	{
 		var sbDbg S.Builder
 		sbDbg.WriteString("reposqlite.GenCreTblStmt: ")
@@ -59,10 +59,10 @@ func (pSR *SqliteRepo) NewCreateTableStmt(pTD *DRU.TableDetails) (string, error)
 	// PRIMARY KEY IS ASSUMED - DO IT FIRST
 	// idx_mytable integer not null primary key autoincrement,
 	// ====================================
-	if pTD.IDName == "" {
-	   panic("pTD.IDName is not set")
+	if pTD.PKname == "" {
+	   panic("pTD.PKname is not set")
 	}
-	stmt.WriteString(pTD.IDName +
+	stmt.WriteString(pTD.PKname +
 		" integer not null primary key autoincrement, " +
 		"-- NOTE: integer, not int. \n")
 	// =====================================
