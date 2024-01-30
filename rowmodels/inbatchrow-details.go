@@ -5,7 +5,7 @@ package rowmodels
 // TableDetailsINB TBS has no foreign keys.
 var TableDetailsINB = TableDetails{
         TableSummaryINB,
-        "idx_inbatch", // IDName
+        "idx_inbatch", // PKname
         ColumnNamesCsvINB,
         ColumnSpecsINB, // []D.ColumnSpec
 	// ColumnPtrsINB, 

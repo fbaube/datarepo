@@ -8,54 +8,29 @@ var TableSummaryTRF = D.TableSummary{
 	D.SCT_TABLE.DT(), "topicref", "trf",
 	"Reference from map to topic"}
 
-// TableDetails_TopicrefRow specifies only two foreign keys.
-var TableDetails_TopicrefRow = TableDetails{
-        TableSummaryTRF, 
-        "idx_topicref", // IDName
-        "idx_cnt_map, idx_cnt_tpc", // ColumnNames
-        ColumnSpecsTRF, 
-}
-
-// ====================
-
-// For implementing interface RowModeler: This file
-// contains four key items that MUST be kept in sync:
+// This file contains four key items that MUST be kept in sync:
 //  - ColumnSpecsTRF
-//  - ColumnPtrsTRF
-//  - TopicrefRow
 //  - ColumnNamesCsvTRF
+//  - ColumnPtrsTRF
+//  - struct TopicrefRow
 //
-// The order of fields is quite flexible, and so because 
-// of how fields are displayed in DB tools, shorter and 
-// more-important fields should appear first.
-//
-// NOTE that:
-//  - in principle, both variables and code can 
-//    be auto-generated based on [ColumnSpecsTRF],
-//  - BUT it would be a serious task to do so,
-//  - AND might be useless and/or impossible when
-//    using generics. 
+// SEE FILE ./tabledetails.go for more information.
 
-// ColumnNamesCsvTRF can be left unset and then 
-// easily auto-generated from [ColumnSpecsTRF].
-var ColumnNamesCsvTRF = "idx_cnt_map, idx_cnt_tpc" // ColumnNames
-
+// PKSpecTRF should be auto.generated!
 var PKSpecTRF = D.ColumnSpec{D.SFT_PRKEY.DT(),
     "idx_topicref", "Pri.key", "Primary key"} 
 
-func (tro *TopicrefRow) ColumnPtrs(inclPK bool) []any {
-     return ColumnPtrsTRF(tro, inclPK) 
-}
-
-// ColumnSpecsTRF field order MUST be kept in 
-// sync with [ColumnNamesCsvTRF] and [ColumnPtrsTRF] and it specifies:
-//   - file count
-//   - two path fields (rel & abs) (placed at the end
-//     because they tend to be looong)
-//   - three time fields (creation, import, last-edit)
-//     (the meaning of creation is TBD) 
-//   - description
+// ColumnSpecsTRF field order MUST be kept in sync with
+// [ColumnNamesCsvTRF] and [ColumnPtrsTRF] and it specifies:
+//   - the primary index into table "contentity"
+//     of the map that makes the reference
+//   - the primary index into table "contentity"
+//     of the topic that is referred to
 //   - NOT the primary key, which is handled automatically 
+//
+// Note that it is unclear ATM so far whether this 
+// table also includes maps referring to submaps,
+// or topics referring to other topics.
 // .
 var ColumnSpecsTRF = []D.ColumnSpec{
 	D.ColumnSpec{D.SFT_FRKEY.DT(), "idx_cnt_map", "contentity",
@@ -63,6 +38,10 @@ var ColumnSpecsTRF = []D.ColumnSpec{
 	D.ColumnSpec{D.SFT_FRKEY.DT(), "idx_cnt_tpc", "contentity",
 		"Referenced topic"},
 }
+
+// ColumnNamesCsvTRF TODO: this can be left unset and 
+// then (easily!) auto-generated from [ColumnSpecsTRF].
+var ColumnNamesCsvTRF = "idx_cnt_map, idx_cnt_tpc" 
 
 // ColumnPtrsTRF MUST be kept in sync:
 //  - field order with [ColumnNamesCsvTRF] and [ColumnSpecsTRF]
@@ -76,19 +55,22 @@ func ColumnPtrsTRF(tro *TopicrefRow, inclPK bool) []any {
      return append(pk, list...)
 }
 
-// TopicrefRow describes a reference from a Map (i.e. TOC) to a Topic.
-// Note that "Topic" does NOT necessarily refer to a DITA `topictref`
-// element!
+func (tro *TopicrefRow) ColumnPtrs(inclPK bool) []any {
+     return ColumnPtrsTRF(tro, inclPK) 
+}
+
+// TopicrefRow describes (in the DB) a reference 
+// from a Map (i.e. TOC) to a Topic; field names 
+// MUST be kept in sync with [ColumnPtrsTRF]. 
 //
-// TopicrefRow field names MUST be kept in sync 
-// with [ColumnPtrsTRF] and a record describes 
-// (in the DB) a single import batch at the CLI.
+// Note that "Topic" does NOT necessarily refer 
+// to a DITA `topictref`element!
 //
 // The relationship is N-to-N btwn Maps and Topics, so a TopicrefRow
 // might not be unique because a map might explicitly reference a 
 // particular topic more than once. So for simplicity, let's create 
 // only one TopicrefRow per map/topic pair, and see if it creates 
-// problems elsewhere later on. Maybe a record needs a "count" field. 
+// problems elsewhere later on. Maybe a record also needs a "count" field. 
 //
 // Note also that if we decide to use multi-trees, then perhaps these links
 // can count not just as kids for maps, but also as parents for topics.

@@ -42,7 +42,7 @@ func (pSR *SqliteRepo) ExecInsertStmt(stmt string) (int, error) {
 	     	println("EXEC:LastInsertId failed:", e.Error())
 		return -1, e
 		} 
-	fmt.Println("Exec Insert: id<%d> \n", id)
+	fmt.Printf("Exec Insert: id<%d> \n", id)
 	/*
 	// or try QUERY + Scan
 	// ==========
