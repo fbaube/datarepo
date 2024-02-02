@@ -42,7 +42,11 @@ type columnPtrsFunc func(any, bool) []any
 //
 // If they are not kept in sync as required, there may be compile
 // time errors, but more likely there will be nasty runtime errors,
-// and in particular, obscure impenetrable DB errors. 
+// and in particular, obscure impenetrable DB errors.
+//
+// (In principle this can all be done with reflection and code
+// generation, starting from the column specs, but it would be
+// a big implementation effort.) 
 //
 // For typical DB operations like INSERT and UPDATE (altho not DELETE),
 // the funcs and vars in this file always explicitly pass the names of
@@ -54,14 +58,14 @@ type columnPtrsFunc func(any, bool) []any
 // Note tho that DB tools will have trouble displaying (on screens)
 // the values of ALL fields, and for this reason, fields whose values
 // are shorter and more important should appear (i.e. be defined) first,
-// so that CREATE TABLE lists them first, ahead of longer and/or 
+// so that CREATE TABLE lists them first, ahead of much-longer and/or 
 // less-important fields.
 // 
 // Notes on date-time fields:
 //   - SQLite can use string, int, or real. But, date-time fields
 //     based on TableDetails and [dsmnd.DbColumnSpec]) use strings
-//     (SQLite DDL "TEXT"), which are expected to be ISO-8601 or 
-//     RFC 3339 (and probably UTC). It is the first option listed in
+//     (SQLite "TEXT"), which are expected to be ISO-8601 (or RFC
+//     3339) (and probably UTC). Text is the first option listed in
 //     https://www.sqlite.org/datatype3.html#date_and_time_datatype:
 //   - TEXT: "YYYY-MM-DD HH:MM:SS.SSS"
 //   - REAL as Julian day numbers: the day count since 24 Nov 4714 BC
@@ -107,13 +111,13 @@ type TableDetails struct {
 	ColumnSpecs []D.ColumnSpec
 	
 	// ColumnPtrsFunc returns a slice of ptrs to every field 
-	// in the passed-in *[Rowmodeler] struct (except the
-	// primary key). Used for DB Scan(..) funcs. 
+	// in the passed-in *[Rowmodeler] struct (except maybe 
+	// the primary key). Used for DB Scan(..) funcs. 
 	// Func signature must be: func (any) []any ; 
 	// Although it should be: func (*any) []*any
 	// ColumnPtrsFunc columnPtrsFunc
 
-	// Instance any // an empty instance 
+	// Instance RowModeller // an empty instance 
 	
 	// We used to have ForenKeys defined by name only, but
 	// this was insufficient information, because we need

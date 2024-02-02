@@ -1,8 +1,6 @@
 package rowmodels
 
 import (
-	"fmt"
-
 	D "github.com/fbaube/dsmnd"
 	FU "github.com/fbaube/fileutils"
 	DRU "github.com/fbaube/datarepo/utils"
@@ -14,25 +12,27 @@ import (
 var TableSummaryCNT = D.TableSummary{
     D.SCT_TABLE.DT(), "contentity", "cnt", "Content entity"}
 
-// TableDetailsCNT specifies 11 DB columns,
-// incl primary key (assumed) and one foreign key, "inbatch".
-var TableDetailsCNT = TableDetails{
-        TableSummaryCNT, 
-	"idx_contentity", // IDName
-	"IDX_inbatch, RelFP, AbsFP, Descr, T_Cre, T_Imp, T_Edt, " +
-		"RawMT, Mimtp, MType, Contt", // ColumnNames
-	// One foreign key: "inbatch"
-	ColumnSpecsCNT, // []D.ColumnSpecs
-}
+// This file contains four key items that MUST be kept in sync:
+//  - ColumnSpecsINB
+//  - ColumnNamesCsvINB
+//  - ColumnPtrsINB
+//  - struct InbatchRow
+//
+// SEE FILE ./tabledetails.go for more information.
 
-// ColumnSpecsCNT specifies
-//   - a primary key (actually, it doescNOT - a primary
+// PKSpecCNT should be auto.generated!
+var PKSpecCNT = D.ColumnSpec{D.SFT_PRKEY.DT(),
+    "idx_contentity", "Pri.key", "Primary key"}
+
+// ColumnSpecsCNT field order MUST be kept in sync with
+// [ColumnNamesCsvCNT] and [ColumnPtrsCNT] and it specifies:
+//   - a primary key (actually, it does NOT - a primary
 //     key is assumed, and handled elsewhere)
 //   - a foreign key "inbatch"
 //   - two path fields (rel & abs)
 //   - three time fields (creation, import, last-edit)
 //   - a description
-//   - three content-type fields (raw markup type, MIME-type, MType)
+//   - three content-type fields (raw markup type, MIME-type, MType); 
 //     NOTE: these are persisted in the DB because
 //   - - they are useful in searching thru content
 //   - - they can be expensive to calculate at import time
@@ -63,10 +63,60 @@ var ColumnSpecsCNT = []D.ColumnSpec{
 	// D.ColSpec{D.SFT_TOKEN.DT(), "ditacontype", "LwDITA contype", "LwDITA cnt type"},
 }
 
+// ColumnNamesCsvCNT TODO: this can be left unset and
+// then (easily!) auto-generated from [ColumnSpecsCNT].
+var ColumnNamesCsvCNT =
+    "IDX_inbatch, RelFP, AbsFP, Descr, T_Cre, T_Imp, T_Edt, " +
+    "RawMT, Mimtp, MType, Contt" // ColumnNames
+
+// ColumnPtrsCNT goes into TableDetails and MUST be kept in sync:
+//  - field order with [ColumnSpecsCNT] and [ColumnNamesCsvCNT]
+//  - field names with [ContentityRow]
+func ColumnPtrsCNT(cro *ContentityRow, inclPK bool) []any {
+     var list []any
+     list = []any {
+		// &cro.Idx_Contentity,
+		&cro.Idx_Inbatch,
+		&cro.PathProps.RelFP, &cro.PathProps.AbsFP,
+		&cro.Descr, &cro.T_Cre, &cro.T_Imp, &cro.T_Edt,
+		&cro.PathProps.TypedRaw.MarkupType,
+		&cro.PathAnalysis.ContypingInfo.MimeType,
+		&cro.PathAnalysis.ContypingInfo.MType,
+		&cro.PathProps.TypedRaw.Raw, 
+		}
+	if !inclPK { return list }
+	var pk []any
+	pk = []any { &cro.Idx_Contentity }
+	return append(pk, list...)
+}
+
+func (cro *ContentityRow) ColumnPtrs(inclPK bool) []any {
+     return ColumnPtrsCNT(cro, inclPK)
+}
+
+/*
+
+func (cro *ContentityRow) TableDetails() TableDetails {
+     return TableDetailsCNT
+}
+
+// TableDetailsCNT specifies 11 DB columns,
+// incl primary key (assumed) and one foreign key, "inbatch".
+var TableDetailsCNT = TableDetails{
+        TableSummaryCNT, 
+	"idx_contentity", // IDName
+	"IDX_inbatch, RelFP, AbsFP, Descr, T_Cre, T_Imp, T_Edt, " +
+		"RawMT, Mimtp, MType, Contt", // ColumnNames
+	// One foreign key: "inbatch"
+	ColumnSpecsCNT, // []D.ColumnSpecs
+}
+
+*/
+
 // ContentityRow describes (in the DB) the entity's content
 // plus its "dead properties" - basically, properties that
 // are set by the user, rather than calculated as needed.
-// Has the entity Raw content, in [PathProps.TypedRaw.Raw].
+// The Raw content is in [PathProps.TypedRaw.Raw].
 type ContentityRow struct {
 	Idx_Contentity int
 	Idx_Inbatch    int // NOTE: Rename to FILESET? Could be multiple?
@@ -104,10 +154,3 @@ type ContentityRow struct {
 	// Linkable = a symbol that CAN be a Linkee
 }
 
-// TODO Write col desc's using Desmond !
-// TODO Generate ColNames from ColumnSpecsCNT
-
-// FIXME: String implements Stringer.
-func (p *ContentityRow) String() string {
-	return fmt.Sprintf("PP<%s> AR <%s>", "", "")
-}
