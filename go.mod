@@ -5,11 +5,11 @@ go 1.21.6
 require (
 	github.com/fbaube/contentanalysis v0.0.0-20240117104147-e12c9546e1cc
 	github.com/fbaube/ctoken v0.0.0-20240117104044-e4c4f08f089a
-	github.com/fbaube/dsmnd v0.0.0-20240117202718-156e4507cef4
+	github.com/fbaube/dsmnd v0.0.0-20240130143636-adbc149a7741
 	github.com/fbaube/fileutils v0.0.0-20231218210156-f6a37eab1eae
 	github.com/fbaube/mlog v0.0.0-20230904080411-cfac35fed413
 	github.com/fbaube/stringutils v0.0.0-20240110181932-8dd4155bdb7f
-	github.com/mattn/go-sqlite3 v1.14.20
+	github.com/mattn/go-sqlite3 v1.14.22
 )
 
 require (

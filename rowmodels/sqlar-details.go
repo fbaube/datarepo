@@ -1,19 +1,10 @@
-package utils
+package rowmodels
 
 import (
 	"fmt"
 	D "github.com/fbaube/dsmnd"
 	// FU "github.com/fbaube/fileutils"
 )
-
-/*
-var TableSummary_ContentityRow = D.TableSummary{
-var TableDescriptor_ContentityRow = TableDescriptor{
-func (cro *ContentityRow) PtrFields() []any { // barfs on []db.PtrFields
-var ColumnSpecs_ContentityRow = []D.ColumnSpec{
-type ContentityRow struct {
-func (p *ContentityRow) String() string {
-*/
 
 // SqlarRow gas structure defined by SQLite.
 type SqlarRow struct {

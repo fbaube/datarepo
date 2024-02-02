@@ -73,7 +73,7 @@ func (pSR *SqliteRepo) NewInsertStmt(pRM interface{} /*RowModeler*/) (string, er
 	     var pCR *RM.ContentityRow 
 	     pCR = pRM.(*RM.ContentityRow)
 	     pTD = pCR.TableDetails()
-	     colPtrs = RM.ColumnPtrsCNT(pCR)
+	     colPtrs = RM.ColumnPtrsCNT(pCR, false)
 	     pCR.T_Cre = now
 	     pCR.T_Imp = now
 	     pCR.T_Edt = now
