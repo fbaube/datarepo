@@ -50,14 +50,15 @@ func NewContentityRow(pPP *FU.PathProps, pPA *CA.PathAnalysis) (*DRM.ContentityR
 	//  More content analysis
 	// =======================
 	if pPA.MType == "" {
-		L.L.Warning("No MType, so trying snift-MIME-type: %s", pPA.MimeTypeAsSnift)
+		L.L.Warning("No MType, so trying snift-MIME-type: %s",
+			pPA.MimeTypeAsSnift)
 		switch pPA.MimeTypeAsSnift {
 		case "text/xml/image/svg+xml":
 			println("SVG!!")
 			pPA.MType = "xml/cnt/svg"
 		}
 	}
-	pNewCR.PathAnalysis = pPA
+	// pNewCR.PathAnalysis = pPA // repeats the above 
 	if pNewCR.MarkupType() == "UNK" {
 		panic("UNK MarkupType in NewContentityRow")
 	}

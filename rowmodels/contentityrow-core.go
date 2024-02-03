@@ -6,6 +6,7 @@ import (
 	DRU "github.com/fbaube/datarepo/utils"
 	CA "github.com/fbaube/contentanalysis"
 	// "github.com/fbaube/nurepo/db"
+	// "runtime/debug"
 )
 
 // TableSummaryCNT summarizes the table.
@@ -74,6 +75,12 @@ var ColumnNamesCsvCNT =
 //  - field names with [ContentityRow]
 func ColumnPtrsCNT(cro *ContentityRow, inclPK bool) []any {
      var list []any
+     if cro.PathAnalysis == nil {
+     	println("NIL cro.PathAnalysis !!")
+	// Dump stack (was trigrd accidentally by debugging stuff)
+	// debug.PrintStack()
+	cro.PathAnalysis = new(CA.PathAnalysis)
+	}
      list = []any {
 		// &cro.Idx_Contentity,
 		&cro.Idx_Inbatch,

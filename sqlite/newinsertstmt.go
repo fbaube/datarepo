@@ -93,7 +93,9 @@ func (pSR *SqliteRepo) NewInsertStmt(pRM interface{} /*RowModeler*/) (string, er
 	fmt.Fprintf(os.Stderr, "LENS: ColSpex<%d> ColPtrs<%d> \n",
 		len(pTD.ColumnSpecs), len(colPtrs))
 	var sb S.Builder
-	sb.WriteString("INSERT INTO CONTENTITY(")
+	sb.WriteString("INSERT INTO ")
+	sb.WriteString(pTD.TableSummary.StorName)
+	sb.WriteString("(")
 	sb.WriteString(pTD.ColumnNamesCSV)
 	sb.WriteString(") VALUES(")
 	// var sft D.SemanticFieldType
