@@ -11,5 +11,6 @@ type StatementBuilder interface {
 	BuildQueryStmt(*DRU.QuerySpec) (string, error)
 	NewCreateTableStmt(*DRM.TableDetails) (string, error)
 	NewInsertStmt(any /*sqlite.RowModeler*/) (string, error)
+	// NewInsertStmtGnrcMthd(DRM.RowModeler) (string, error)
 	ExecInsertStmt(string) (int, error)
 }
