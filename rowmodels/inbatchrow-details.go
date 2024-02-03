@@ -8,7 +8,7 @@ var TableDetailsINB = TableDetails{
         "idx_inbatch", // PKname
         ColumnNamesCsvINB,
         ColumnSpecsINB, // []D.ColumnSpec
-	// ColumnPtrsINB, 
+	ColumnPtrsINB, 
 }
 
 // TableDetails returns the table

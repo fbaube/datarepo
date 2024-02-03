@@ -73,7 +73,10 @@ var ColumnNamesCsvCNT =
 // ColumnPtrsCNT goes into TableDetails and MUST be kept in sync:
 //  - field order with [ColumnSpecsCNT] and [ColumnNamesCsvCNT]
 //  - field names with [ContentityRow]
-func ColumnPtrsCNT(cro *ContentityRow, inclPK bool) []any {
+// func ColumnPtrsCNT(cro *ContentityRow, inclPK bool) []any {
+func ColumnPtrsCNT(acro RowModeler, inclPK bool) []any {
+     var cro *ContentityRow
+     cro = acro.(*ContentityRow)
      var list []any
      if cro.PathAnalysis == nil {
      	println("NIL cro.PathAnalysis !!")

@@ -268,3 +268,78 @@ ditacontype text not null check (typeof(ditacontype) == 'text'),
 foreign key(idx_inbatch) references inbatch(idx_inbatch)
 );
 */
+
+// MAKE THIS GENERIC !!!
+func NewInsertStmtGeneric[T RM.RowModeler](pSR *SqliteRepo, pRM T) (string, error) {
+	// So, we have to
+	//  1) Check the struct-type of the RowModeler-instance
+	//  2) Fetch the FieldPtrs
+	//  3) Write out the fields to the stmt
+	//  4) Write out the values to the stmt
+	//  5) Add RETURNING
+	//  6) (the stmt's user) Use that returned that ID
+
+	var colPtrs []any
+	var pTD RM.TableDetails
+	// TMP var now = SU.Now() // time.Now().UTC().Format(time.RFC3339)
+
+	pTD = pRM.TableDetails()
+	colPtrs = pTD.ColumnPtrsFunc(pRM, false)
+	/* TMP
+	pRM.T_Cre = now
+	pRM.T_Imp = now
+	pRM.T_Edt = now
+	*/
+
+	fmt.Fprintf(os.Stderr, "LENS: ColSpex<%d> ColPtrs<%d> \n",
+		len(pTD.ColumnSpecs), len(colPtrs))
+	var sb S.Builder
+	sb.WriteString("INSERT INTO ")
+	sb.WriteString(pTD.TableSummary.StorName)
+	sb.WriteString("(")
+	sb.WriteString(pTD.ColumnNamesCSV)
+	sb.WriteString(") VALUES(")
+	// var sft D.SemanticFieldType
+	var sn string
+	var dt D.SemanticFieldType 
+	for iii, cp := range colPtrs {
+	    /*
+	    if iii == 0 {
+	       sn = "priKey"
+	       dt = D.SFT_PRKEY
+	       // This is an INSERT, so we do
+	       // not write out the primary key!
+	       continue
+	    }
+	    */
+	    sn = pTD.ColumnSpecs[iii].StorName
+	    dt = D.SemanticFieldType(pTD.ColumnSpecs[iii].Datatype)
+	    fmt.Printf("[%d] %s / %s / %T \n", iii, sn, dt, cp)
+	    // sft = D.SemanticFieldType(ppp.Datatype)
+	    switch cp.(type) {
+	    	   case *string:
+		   	var pS *string
+			var sS string
+			pS = cp.(*string)
+			sS = *pS
+		   	sb.WriteString(fmt.Sprintf("'%s', ", sS))
+	    	   case *FU.AbsFilePath:
+		   	sb.WriteString(fmt.Sprintf("'%s', ", AFPval(cp)))
+	    	   case *SU.MarkupType:
+		   	sb.WriteString(fmt.Sprintf("'%s', ", MTval(cp)))
+	    	   case *CT.Raw:
+		   	sb.WriteString(fmt.Sprintf("'%s', ", CTRval(cp)))
+		   case *int:
+		   	var pI *int
+			pI = cp.(*int)
+		   	sb.WriteString(fmt.Sprintf("%d, ", *pI))
+	    }
+	}
+	var stmt string 
+	stmt = sb.String()
+	stmt2 := stmt[:len(stmt)-2] + ") RETURNING IDX_" + pTD.StorName + ";"
+	// sb.WriteString(") RETURNING IDX_" + pTD.StorName + ";")
+	println("INSERT STMT:", stmt2) // sb.String())
+	return stmt2, nil
+}
+

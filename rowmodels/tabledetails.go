@@ -3,7 +3,7 @@ package rowmodels
 import D "github.com/fbaube/dsmnd"
 
 // columnPtrsFunc should be used below for [TableDetails.ColumnPtrsFunc]
-type columnPtrsFunc func(any, bool) []any 
+type columnPtrsFunc func(RowModeler, bool) []any 
 
 // TableDetails is key to the entire data repository scheme:
 // it contains metadata required to manage corresppondences
@@ -115,7 +115,7 @@ type TableDetails struct {
 	// the primary key). Used for DB Scan(..) funcs. 
 	// Func signature must be: func (any) []any ; 
 	// Although it should be: func (*any) []*any
-	// ColumnPtrsFunc columnPtrsFunc
+	ColumnPtrsFunc columnPtrsFunc
 
 	// Instance RowModeller // an empty instance 
 	

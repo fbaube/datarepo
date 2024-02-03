@@ -50,7 +50,10 @@ var ColumnNamesCsvINB = "FilCt, Descr, T_Cre, T_Imp, T_Edt, RelFP, AbsFP"
 // ColumnPtrsINB goes into TableDetails and MUST be kept in sync:
 //  - field order with [ColumnSpecsINB] and [ColumnNamesCsvINB] 
 //  - field names with [InbatchRow]
-func ColumnPtrsINB(inbro *InbatchRow, inclPK bool) []any { 
+// func ColumnPtrsINB(inbro *InbatchRow, inclPK bool) []any { 
+func ColumnPtrsINB(ainbro RowModeler, inclPK bool) []any {
+     var inbro *InbatchRow
+     inbro = ainbro.(*InbatchRow)
      var list []any
      list = []any { &inbro.FilCt, &inbro.Descr,
      	      &inbro.T_Cre, &inbro.T_Imp, &inbro.T_Edt,

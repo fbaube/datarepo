@@ -46,7 +46,10 @@ var ColumnNamesCsvTRF = "idx_cnt_map, idx_cnt_tpc"
 // ColumnPtrsTRF MUST be kept in sync:
 //  - field order with [ColumnNamesCsvTRF] and [ColumnSpecsTRF]
 //  - field names with [TopicrefRow]
-func ColumnPtrsTRF(tro *TopicrefRow, inclPK bool) []any { 
+// func ColumnPtrsTRF(tro *TopicrefRow, inclPK bool) []any { 
+func ColumnPtrsTRF(atro RowModeler, inclPK bool) []any {
+     var tro *TopicrefRow
+     tro = atro.(*TopicrefRow)
      var list []any 
      list = []any { &tro.Idx_Map_Contentity, &tro.Idx_Tpc_Contentity }
      if !inclPK { return list }
