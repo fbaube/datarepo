@@ -269,7 +269,7 @@ foreign key(idx_inbatch) references inbatch(idx_inbatch)
 );
 */
 
-func NewInsertStmtGenrcFunc[T RM.RowModeler](pSR *SqliteRepo, pRM T) (string, error) {
+func NewInsertStmtGnrcFunc[T RM.RowModeler](pSR *SqliteRepo, pRM T) (string, error) {
 	// So, we have to
 	//  1) Check the struct-type of the RowModeler-instance
 	//  2) Fetch the FieldPtrs
