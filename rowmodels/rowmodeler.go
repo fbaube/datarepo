@@ -11,8 +11,9 @@ import(
 type RowModeler interface {
      TableDetails() TableDetails 
      // ColumnNamesCSV() string 
-     // ColumnPtrs() []any
+     ColumnPtrs(bool) []any
      // When generic, include *T
+     // *T
 }
 
 /*

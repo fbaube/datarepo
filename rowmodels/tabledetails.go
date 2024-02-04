@@ -5,6 +5,8 @@ import D "github.com/fbaube/dsmnd"
 // columnPtrsFunc should be used below for [TableDetails.ColumnPtrsFunc]
 type columnPtrsFunc func(RowModeler, bool) []any 
 
+// type newInstance RowModeler
+
 // TableDetails is key to the entire data repository scheme:
 // it contains metadata required to manage corresppondences
 // between DB columns and struct fields. It specifies an 
@@ -116,6 +118,8 @@ type TableDetails struct {
 	// Func signature must be: func (any) []any ; 
 	// Although it should be: func (*any) []*any
 	ColumnPtrsFunc columnPtrsFunc
+
+	BlankInstance RowModeler
 
 	// Instance RowModeller // an empty instance 
 	

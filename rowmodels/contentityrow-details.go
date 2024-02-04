@@ -11,7 +11,8 @@ var TableDetailsCNT = TableDetails{
 		"RawMT, Mimtp, MType, Contt", // ColumnNames
 	// One foreign key: "inbatch"
 	ColumnSpecsCNT, // []D.ColumnSpecs
-	ColumnPtrsCNT, 
+	ColumnPtrsCNT,
+	&ContentityRow{}, // RowModeler(new(ContentityRow)),
 }
 
 // TableDetails returns the table

@@ -44,5 +44,6 @@ var TableDetails_SqlarRow = TableDetails{
 	"FIXME",     // ColumnNames
 	//
 	ColumnSpecs_SqlarRow, // []D.ColumnSpec
-	nil, 
+	nil,
+	nil,
 }
