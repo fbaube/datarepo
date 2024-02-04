@@ -58,8 +58,10 @@ func ExecSelectOneStmt[T RM.RowModeler](pSR *SqliteRepo, stmt string) (T, error)
 
 	// func (r *Row) Scan(dest ...any) error
 	var colPtrs []any
-	var anInstance T 
-	colPtrs = anInstance.ColumnPtrs(true)
+	var anInstance T
+	// var paI *T
+	// paI = &anInstance
+	colPtrs = /*paI*/anInstance.ColumnPtrs(true)
 	// scanErr := row.Scan(colPtrs)
 
 	// ===

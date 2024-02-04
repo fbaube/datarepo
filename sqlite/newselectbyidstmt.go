@@ -54,7 +54,7 @@ func (pSR *SqliteRepo) NewSelectByIdStmt(pRM interface{} /*RowModeler*/, anID in
 	sb.WriteString(pTD.ColumnNamesCSV)
 	sb.WriteString(" FROM ")
 	sb.WriteString(pTD.TableSummary.StorName)
-	sb.WriteString("WHERE ")
+	sb.WriteString(" WHERE ")
 	sb.WriteString(pTD.StorName)
 	sb.WriteString(" = ")
 	sb.WriteString(fmt.Sprintf("%d;", anID))
