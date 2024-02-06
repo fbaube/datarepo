@@ -18,7 +18,7 @@ type Zork struct {
 //   - Delete (del,Delete,remove)
 // . 
 type TypedRepoer[T any] interface {
-     	RM.RowModeler // Must satisfy this interface
+     	RM.RowModel // Must satisfy this interface
 	*T // Must be a pointer
 	
 	Insert(T)  (int, error)

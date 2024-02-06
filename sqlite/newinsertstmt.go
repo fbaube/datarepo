@@ -9,7 +9,7 @@ import (
 	S "strings"
 	CT "github.com/fbaube/ctoken"
 	// "time"
-	RM "github.com/fbaube/datarepo/rowmodels"
+	DRM "github.com/fbaube/datarepo/rowmodels"
 )
 
 // case *FU.AbsFilePath, *SU.MarkupType, *CT.Raw:
@@ -56,7 +56,7 @@ func CTRval(p any) string {
 // with the default column value (specified as part of the CREATE 
 // TABLE statement), or with NULL if no default value is specified.
 // .
-func (pSR *SqliteRepo) NewInsertStmt(pRM interface{} /*RowModeler*/) (string, error) {
+func (pSR *SqliteRepo) NewInsertStmt(pRM DRM.RowModel) (string, error) {
 	// So, we have to
 	//  1) Check the struct-type of the RowModeler-instance
 	//  2) Fetch the FieldPtrs
@@ -66,28 +66,28 @@ func (pSR *SqliteRepo) NewInsertStmt(pRM interface{} /*RowModeler*/) (string, er
 	//  6) (the stmt's user) Use that returned that ID
 
 	var colPtrs []any
-	var pTD RM.TableDetails
+	var pTD DRM.TableDetails
 	var now = SU.Now() // time.Now().UTC().Format(time.RFC3339)
 	switch pRM.(type) {
-	case *RM.ContentityRow:
-	     var pCR *RM.ContentityRow 
-	     pCR = pRM.(*RM.ContentityRow)
+	case *DRM.ContentityRow:
+	     var pCR *DRM.ContentityRow 
+	     pCR = pRM.(*DRM.ContentityRow)
 	     pTD = pCR.TableDetails()
-	     colPtrs = RM.ColumnPtrsCNT(pCR, false)
+	     colPtrs = DRM.ColumnPtrsFuncCNT(pCR, false)
 	     pCR.T_Cre = now
 	     pCR.T_Imp = now
 	     pCR.T_Edt = now
-	case *RM.InbatchRow:
-	     var pIR *RM.InbatchRow
-	     pIR = pRM.(*RM.InbatchRow)
+	case *DRM.InbatchRow:
+	     var pIR *DRM.InbatchRow
+	     pIR = pRM.(*DRM.InbatchRow)
 	     pTD = pIR.TableDetails()
-	     colPtrs = RM.ColumnPtrsINB(pIR, false) // not PK
+	     colPtrs = DRM.ColumnPtrsFuncINB(pIR, false) // not PK
 	     pIR.T_Cre = now
-	case *RM.TopicrefRow:
-	     var pTR *RM.TopicrefRow
-	     pTR = pRM.(*RM.TopicrefRow)
+	case *DRM.TopicrefRow:
+	     var pTR *DRM.TopicrefRow
+	     pTR = pRM.(*DRM.TopicrefRow)
 	     pTD = pTR.TableDetails()
-	     colPtrs = RM.ColumnPtrsTRF(pTR, false)
+	     colPtrs = DRM.ColumnPtrsFuncTRF(pTR, false)
 	}
 	// colPtrs = pTD.ColumnPtrsFunc() // should be a no-arg func 
 	fmt.Fprintf(os.Stderr, "LENS: ColSpex<%d> ColPtrs<%d> \n",
@@ -269,7 +269,7 @@ foreign key(idx_inbatch) references inbatch(idx_inbatch)
 );
 */
 
-func NewInsertStmtGnrcFunc[T RM.RowModeler](pSR *SqliteRepo, pRM T) (string, error) {
+func NewInsertStmtGnrcFunc[T DRM.RowModel](pSR *SqliteRepo, pRM T) (string, error) {
 	// So, we have to
 	//  1) Check the struct-type of the RowModeler-instance
 	//  2) Fetch the FieldPtrs
@@ -279,7 +279,7 @@ func NewInsertStmtGnrcFunc[T RM.RowModeler](pSR *SqliteRepo, pRM T) (string, err
 	//  6) (the stmt's user) Use that returned that ID
 
 	var colPtrs []any
-	var pTD RM.TableDetails
+	var pTD DRM.TableDetails
 	// TMP var now = SU.Now() // time.Now().UTC().Format(time.RFC3339)
 
 	pTD = pRM.TableDetails()

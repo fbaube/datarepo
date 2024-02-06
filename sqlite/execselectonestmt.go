@@ -26,14 +26,14 @@ import (
 //  - If not nil, the error is also returned from Scan(..)
 // .
 // func (pSR *SqliteRepo) ExecSelectOneStmt[T RowModeler](stmt string) (T, error) {
-func ExecSelectOneStmt[T RM.RowModeler](pSR *SqliteRepo, stmt string) (T, error) {
+func ExecSelectOneStmt[T RM.RowModel](pSR *SqliteRepo, stmt string) (T, error) {
 
 	var row *sql.Row
 	var e error 
 	// ==========
 	// QUERY (not EXEC)
 	// func (db *DB) QueryRow(query string, args ...any) *Row 
-	L.L.Info("Trying QUERY SELECT ONE: " + stmt)
+	L.L.Info("Trying QUERY SELECT ONE: \"" + stmt + "\"")
 	// res, e = pSR.Exec(stmt)
 	row = pSR.QueryRow(stmt)
 	// ==========
@@ -61,18 +61,16 @@ func ExecSelectOneStmt[T RM.RowModeler](pSR *SqliteRepo, stmt string) (T, error)
 	var anInstance T
 	// var paI *T
 	// paI = &anInstance
-	colPtrs = /*paI*/anInstance.ColumnPtrs(true)
-	// scanErr := row.Scan(colPtrs)
-
-	// ===
-
-        if e = row.Scan(colPtrs); e != nil {
-            return anInstance, fmt.Errorf("ExecSelectOneStmt(scan:%s): %w", stmt, e)
-        }
-	if e = row.Err(); e != nil { // rows
-           return anInstance, fmt.Errorf("ExecSelectOneStmt(%s):err:  %w", stmt, e)
+	colPtrs = /*paI*/anInstance.ColumnPtrsMethod(true)
+	e = row.Scan(colPtrs)
+	if ee := row.Err(); ee != nil { // rows
+           return anInstance, fmt.Errorf(
+	   	  "ExecSelectOneStmt(\"%s\"):err:  %w", stmt, ee)
 	   }
-
+	if e != nil {
+            return anInstance, fmt.Errorf(
+	    	   "ExecSelectOneStmt(scan:\"%s\"): %w", stmt, e)
+        }
 	return anInstance, nil
 }
 
