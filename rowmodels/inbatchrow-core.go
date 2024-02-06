@@ -47,11 +47,11 @@ var ColumnSpecsINB = []D.ColumnSpec{
 // then (easily!) auto-generated from [ColumnSpecsINB].
 var ColumnNamesCsvINB = "FilCt, Descr, T_Cre, T_Imp, T_Edt, RelFP, AbsFP" 
 
-// ColumnPtrsINB goes into TableDetails and MUST be kept in sync:
+// ColumnPtrsFuncINB goes into TableDetails and MUST be kept in sync:
 //  - field order with [ColumnSpecsINB] and [ColumnNamesCsvINB] 
 //  - field names with [InbatchRow]
-// func ColumnPtrsINB(inbro *InbatchRow, inclPK bool) []any { 
-func ColumnPtrsINB(ainbro RowModeler, inclPK bool) []any {
+// func ColumnPtrsFuncINB(inbro *InbatchRow, inclPK bool) []any { 
+func ColumnPtrsFuncINB(ainbro RowModel, inclPK bool) []any {
      var inbro *InbatchRow
      inbro = ainbro.(*InbatchRow)
      var list []any
@@ -64,8 +64,8 @@ func ColumnPtrsINB(ainbro RowModeler, inclPK bool) []any {
      return append(pk, list...)
 }
 
-func (inbro *InbatchRow) ColumnPtrs(inclPK bool) []any {
-     return ColumnPtrsINB(inbro, inclPK) 
+func (inbro *InbatchRow) ColumnPtrsMethod(inclPK bool) []any {
+     return ColumnPtrsFuncINB(inbro, inclPK) 
 }
 
 // InbatchRow describes (in the DB) a single import batch

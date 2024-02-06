@@ -3,9 +3,9 @@ package sqlite
 import (
 	"fmt"
 	"os"
-	SU "github.com/fbaube/stringutils"
+	// SU "github.com/fbaube/stringutils"
 	S "strings"
-	RM "github.com/fbaube/datarepo/rowmodels"
+	DRM "github.com/fbaube/datarepo/rowmodels"
 )
 
 // case *FU.AbsFilePath, *SU.MarkupType, *CT.Raw:
@@ -13,7 +13,7 @@ import (
 // NewSelectByIdStmt implements some of 
 // https://www.sqlite.org/lang_select.html
 // .
-func (pSR *SqliteRepo) NewSelectByIdStmt(pRM interface{} /*RowModeler*/, anID int) (string, error) {
+func (pSR *SqliteRepo) NewSelectByIdStmt(pTD *DRM.TableDetails, anID int) (string, error) {
 	// So, we have to
 	//  1) Check the struct-type of the RowModeler-instance
 	//  2) Fetch the FieldPtrs
@@ -22,31 +22,17 @@ func (pSR *SqliteRepo) NewSelectByIdStmt(pRM interface{} /*RowModeler*/, anID in
 	//  5) Add RETURNING
 	//  6) (the stmt's user) Use that returned that ID
 
-	var colPtrs []any
-	var pTD RM.TableDetails
-	var now = SU.Now() // time.Now().UTC().Format(time.RFC3339)
-	switch pRM.(type) {
-	case *RM.ContentityRow:
-	     var pCR *RM.ContentityRow 
-	     pCR = pRM.(*RM.ContentityRow)
-	     pTD = pCR.TableDetails()
-	     colPtrs = RM.ColumnPtrsCNT(pCR, false)
-	     pCR.T_Cre = now
-	     pCR.T_Imp = now
-	     pCR.T_Edt = now
-	case *RM.InbatchRow:
-	     var pIR *RM.InbatchRow
-	     pIR = pRM.(*RM.InbatchRow)
-	     pTD = pIR.TableDetails()
-	     colPtrs = RM.ColumnPtrsINB(pIR, false) // not PK
-	     pIR.T_Cre = now
-	case *RM.TopicrefRow:
-	     var pTR *RM.TopicrefRow
-	     pTR = pRM.(*RM.TopicrefRow)
-	     pTD = pTR.TableDetails()
-	     colPtrs = RM.ColumnPtrsTRF(pTR, false)
+	var pRM DRM.RowModel
+	switch pTD.StorName { 
+	case "contentity":
+	     pRM = new(DRM.ContentityRow)
+	case "inbatch":
+	     pRM = new(DRM.InbatchRow)
+	case "topicref":
+	     pRM = new(DRM.TopicrefRow)
 	}
-	// colPtrs = pTD.ColumnPtrsFunc() // should be a no-arg func 
+	var colPtrs []any // []*any
+	colPtrs = pTD.ColumnPtrsFunc(pRM, false)
 	fmt.Fprintf(os.Stderr, "LENS: ColSpex<%d> ColPtrs<%d> \n",
 		len(pTD.ColumnSpecs), len(colPtrs))
 	var sb S.Builder
@@ -55,7 +41,7 @@ func (pSR *SqliteRepo) NewSelectByIdStmt(pRM interface{} /*RowModeler*/, anID in
 	sb.WriteString(" FROM ")
 	sb.WriteString(pTD.TableSummary.StorName)
 	sb.WriteString(" WHERE ")
-	sb.WriteString(pTD.StorName)
+	sb.WriteString(pTD.PKname)
 	sb.WriteString(" = ")
 	sb.WriteString(fmt.Sprintf("%d;", anID))
 	
@@ -193,7 +179,7 @@ foreign key(idx_inbatch) references inbatch(idx_inbatch)
 */
 
 /*
-func NewInsertStmtGenrcFunc[T RM.RowModeler](pSR *SqliteRepo, pRM T) (string, error) {
+func NewInsertStmtGenrcFunc[T DRM.RowModeler](pSR *SqliteRepo, pRM T) (string, error) {
 	// So, we have to
 	//  1) Check the struct-type of the RowModeler-instance
 	//  2) Fetch the FieldPtrs
@@ -203,7 +189,7 @@ func NewInsertStmtGenrcFunc[T RM.RowModeler](pSR *SqliteRepo, pRM T) (string, er
 	//  6) (the stmt's user) Use that returned that ID
 
 	var colPtrs []any
-	var pTD RM.TableDetails
+	var pTD *DRM.TableDetails
 	// TMP var now = SU.Now() // time.Now().UTC().Format(time.RFC3339)
 
 	pTD = pRM.TableDetails()

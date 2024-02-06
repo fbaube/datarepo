@@ -68,24 +68,38 @@ var ColumnSpecsCNT = []D.ColumnSpec{
 // then (easily!) auto-generated from [ColumnSpecsCNT].
 var ColumnNamesCsvCNT =
     "IDX_inbatch, RelFP, AbsFP, Descr, T_Cre, T_Imp, T_Edt, " +
-    "RawMT, Mimtp, MType, Contt" // ColumnNames
+    "RawMT, Mimtp, MType, Contt" 
 
-// ColumnPtrsCNT goes into TableDetails and MUST be kept in sync:
+/*
+func (RM RowModel) ColumnPtrsMthdCNT(inclPK bool) []any {
+     return ColumnPtrsFuncCNT(RM, inclPK)
+     }
+*/
+
+// ColumnPtrsFuncCNT goes into a field in struct TableDetails
+// and MUST be kept in sync:
 //  - field order with [ColumnSpecsCNT] and [ColumnNamesCsvCNT]
 //  - field names with [ContentityRow]
-// func ColumnPtrsCNT(cro *ContentityRow, inclPK bool) []any {
-func ColumnPtrsCNT(acro RowModeler, inclPK bool) []any {
+// func ColumnPtrsFuncCNT(cro *ContentityRow, inclPK bool) []any {
+func ColumnPtrsFuncCNT(acro RowModel, inclPK bool) []any {
+     if acro == nil {
+     	panic("ColumnPtrsFuncCNT nil RowModel")
+	}
      var cro *ContentityRow
      cro = acro.(*ContentityRow)
+     if cro == nil {
+     	println("ColumnPtrsFuncCNT nil *ContentityRow")
+	cro = new(ContentityRow)
+	}
      var list []any
      if cro.PathAnalysis == nil {
      	println("NIL cro.PathAnalysis !!")
-	// Dump stack (was trigrd accidentally by debugging stuff)
+	// Dump stack (but now comment out cos was
+	// trigrd accidentally by debugging stuff)
 	// debug.PrintStack()
 	cro.PathAnalysis = new(CA.PathAnalysis)
 	}
      list = []any {
-		// &cro.Idx_Contentity,
 		&cro.Idx_Inbatch,
 		&cro.PathProps.RelFP, &cro.PathProps.AbsFP,
 		&cro.Descr, &cro.T_Cre, &cro.T_Imp, &cro.T_Edt,
@@ -100,8 +114,8 @@ func ColumnPtrsCNT(acro RowModeler, inclPK bool) []any {
 	return append(pk, list...)
 }
 
-func (cro *ContentityRow) ColumnPtrs(inclPK bool) []any {
-     return ColumnPtrsCNT(cro, inclPK)
+func (cro *ContentityRow) ColumnPtrsMethod(inclPK bool) []any {
+     return ColumnPtrsFuncCNT(cro, inclPK)
 }
 
 /*

@@ -6,7 +6,7 @@ var TableDetailsTRF = TableDetails{
 	"idx_topicref", // PKname
 	ColumnNamesCsvTRF, // "idx_cnt_map, idx_cnt_tpc", // ColumnNames
 	ColumnSpecsTRF, // []D.ColumnSpec
-	ColumnPtrsTRF,
+	ColumnPtrsFuncTRF,
 	&TopicrefRow{},
 }
 

@@ -3,7 +3,8 @@ package rowmodels
 import D "github.com/fbaube/dsmnd"
 
 // columnPtrsFunc should be used below for [TableDetails.ColumnPtrsFunc]
-type columnPtrsFunc func(RowModeler, bool) []any 
+type columnPtrsFunc func(RowModel, bool) []any 
+// type columnPtrsMthd func(bool) []any 
 
 // type newInstance RowModeler
 
@@ -112,16 +113,17 @@ type TableDetails struct {
 	// omits the primary key that we automatically include.
 	ColumnSpecs []D.ColumnSpec
 	
-	// ColumnPtrsFunc returns a slice of ptrs to every field 
-	// in the passed-in *[Rowmodeler] struct (except maybe 
+	// ColumnPtrsFunc return a slice of ptrs to every field
+	// in the passed-by-ptr [Rowmodeler] struct (maybe incl.
 	// the primary key). Used for DB Scan(..) funcs. 
-	// Func signature must be: func (any) []any ; 
-	// Although it should be: func (*any) []*any
+	// Func signature must be like: func (any) []any ; 
+	// Although it should be like: func (*any) []*any
 	ColumnPtrsFunc columnPtrsFunc
+	// ColumnPtrsMthd columnPtrsMthd
 
-	BlankInstance RowModeler
-
-	// Instance RowModeller // an empty instance 
+	BlankInstance RowModel
+	
+	// Instance RowModel // an empty instance 
 	
 	// We used to have ForenKeys defined by name only, but
 	// this was insufficient information, because we need

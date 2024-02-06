@@ -43,11 +43,11 @@ var ColumnSpecsTRF = []D.ColumnSpec{
 // then (easily!) auto-generated from [ColumnSpecsTRF].
 var ColumnNamesCsvTRF = "idx_cnt_map, idx_cnt_tpc" 
 
-// ColumnPtrsTRF MUST be kept in sync:
+// ColumnPtrsFuncTRF MUST be kept in sync:
 //  - field order with [ColumnNamesCsvTRF] and [ColumnSpecsTRF]
 //  - field names with [TopicrefRow]
-// func ColumnPtrsTRF(tro *TopicrefRow, inclPK bool) []any { 
-func ColumnPtrsTRF(atro RowModeler, inclPK bool) []any {
+// func ColumnPtrsFuncTRF(tro *TopicrefRow, inclPK bool) []any { 
+func ColumnPtrsFuncTRF(atro RowModel, inclPK bool) []any {
      var tro *TopicrefRow
      tro = atro.(*TopicrefRow)
      var list []any 
@@ -58,8 +58,8 @@ func ColumnPtrsTRF(atro RowModeler, inclPK bool) []any {
      return append(pk, list...)
 }
 
-func (tro *TopicrefRow) ColumnPtrs(inclPK bool) []any {
-     return ColumnPtrsTRF(tro, inclPK) 
+func (tro *TopicrefRow) ColumnPtrsMethod(inclPK bool) []any {
+     return ColumnPtrsFuncTRF(tro, inclPK) 
 }
 
 // TopicrefRow describes (in the DB) a reference 
