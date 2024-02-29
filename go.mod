@@ -1,6 +1,8 @@
 module github.com/fbaube/datarepo
 
-go 1.21.6
+go 1.22
+
+toolchain go1.22.0
 
 require (
 	github.com/fbaube/contentanalysis v0.0.0-20240117104147-e12c9546e1cc
@@ -8,12 +10,13 @@ require (
 	github.com/fbaube/dsmnd v0.0.0-20240130143636-adbc149a7741
 	github.com/fbaube/fileutils v0.0.0-20231218210156-f6a37eab1eae
 	github.com/fbaube/mlog v0.0.0-20230904080411-cfac35fed413
-	github.com/fbaube/stringutils v0.0.0-20240110181932-8dd4155bdb7f
+	github.com/fbaube/stringutils v0.0.0-20240227182912-df670eade115
 	github.com/mattn/go-sqlite3 v1.14.22
 )
 
 require (
 	github.com/fatih/color v1.16.0 // indirect
+	github.com/fbaube/humanbytes v0.0.0-20240227103335-a0b11501ad0e // indirect
 	github.com/fbaube/logutils v0.0.0-20240118190821-fba0e702dd07 // indirect
 	github.com/fbaube/miscutils v0.0.0-20231117113020-2270027d01bd // indirect
 	github.com/fbaube/wasmutils v0.0.0-20231209183154-e25018375bc2 // indirect
@@ -22,9 +25,9 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mgutz/str v1.2.0 // indirect
-	golang.org/x/exp v0.0.0-20240205201215-2c58cdc269a3 // indirect
-	golang.org/x/net v0.20.0 // indirect
-	golang.org/x/sys v0.16.0 // indirect
-	golang.org/x/tools v0.17.0 // indirect
+	golang.org/x/exp v0.0.0-20240222234643-814bf88cf225 // indirect
+	golang.org/x/net v0.21.0 // indirect
+	golang.org/x/sys v0.17.0 // indirect
+	golang.org/x/tools v0.18.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
