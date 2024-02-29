@@ -98,7 +98,7 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 			}
 			filexist = false
 		} else {
-		        repo, e = DRS.OpenRepoAtPath(dbFilepath)
+		        repo, e = DB_Manager.OpenAtPath(dbFilepath)
 			// If the DB exists and we want to open
 			// it as-is, i.e. without zeroing it out,
 			// then this is where we return success:
@@ -114,7 +114,7 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 		if p.DoZeroOut {
 			L.L.Info("Zeroing out the DB is redundant")
 		}
-		repo, e = DRS.NewRepoAtPath(dbFilepath)
+		repo, e = DB_Manager.NewAtPath(dbFilepath)
 	}
 	if e != nil {
 		return nil, fmt.Errorf("%s DB failure: %w", errPfx, e)
@@ -125,7 +125,7 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 
 	pSQR, ok := repo.(*DRS.SqliteRepo)
 	if !ok {
-		panic("init9n.L131")
+		panic("init9n.L118")
 		return nil, errors.New("processDBargs: is not sqlite")
 	}
 	// At this point we have finished all execution paths

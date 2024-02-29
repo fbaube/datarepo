@@ -5,19 +5,17 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	// D "github.com/fbaube/dsmnd"
 	FU "github.com/fbaube/fileutils"
 	SU "github.com/fbaube/stringutils"
 	_ "github.com/mattn/go-sqlite3" // to get init()
 	L "github.com/fbaube/mlog"
-	// _ "github.com/fbaube/sqlite3" // to get init()
 	"os"
 	FP "path/filepath"
 	S "strings"
 )
 
 // Methods in this file implement
-// type DBGetting interface {
+// type DBManager interface {
 //	OpenAtPath(string) (string, error)
 //	NewAtPath(string) (string, error)
 //	OpenExistingAtPath(string) (string, error)
@@ -94,7 +92,7 @@ os.Chmod, os.Chown, os.Close, os.Read, os.ReadAt, os.ReadDir,
 os.Readdirnames, os.Seek, os.Truncate
 */
 
-func /*(p SqliteRepoImplem)*/ OpenAtPath(path string) (*SqliteRepo, error) {
+func (p *SqliteDBManager) OpenAtPath(path string) (*SqliteRepo, error) {
 	/* N'YET
 	if p.DBImplementationName != D.DB_SQLite { panic("not sqlite ?!") }
 	*/
@@ -110,22 +108,23 @@ func /*(p SqliteRepoImplem)*/ OpenAtPath(path string) (*SqliteRepo, error) {
 		}
 	}
 	if filexist && (filerror == nil) {
-		return OpenRepoAtPath(path)
+		return p.OpenExistingAtPath(path)
 	}
 	if (!filexist) && (filerror == nil) {
-		return NewRepoAtPath(path)
+		return p.NewAtPath(path)
 	}
 	return nil, fmt.Errorf("sqlite.OpenAtPath: unfathomable: %s", path)
 }
 
-// NewRepoAtPath creates a DB at the filepath, opens it, and runs
+// NewAtPath creates a DB at the filepath, opens it, and runs
 // standard initialization pragma(s). It does not create any tables
 // in it. If a file or dir already exists at the filepath, the func
 // returns an error. The filepath can be a relative path, but not "".
 //
 // The repo type will be "sqlite" (equivalent to "sqlite3").
 // .
-func /*(p SqliteRepoImplem)*/ NewRepoAtPath(aPath string) (pSR *SqliteRepo, e error) {
+func (p *SqliteDBManager) NewAtPath(aPath string) (*SqliteRepo, error) {
+// func (p *SqliteDBManager) NewAtPath(aPath string) (DR.SimpleRepo, error) {
 
 	if !S.HasSuffix(aPath, ".db") {
 		println("sqlite.repo.new: missing suffix \".db\": " + aPath)
@@ -145,7 +144,7 @@ func /*(p SqliteRepoImplem)*/ NewRepoAtPath(aPath string) (pSR *SqliteRepo, e er
 	}
 	if filexist || filerror != nil || fileinfo != nil {
 		return nil, fmt.Errorf(
-			"sqlite.repo: New(%s): %w", aPath, e)
+			"sqlite.repo: New(%s): problem(s)...", aPath)
 	}
 	// ALL CLEAR !
 	errPfx := fmt.Sprintf("sqlite.repo.new(%s): ", aPath)
@@ -189,20 +188,20 @@ func /*(p SqliteRepoImplem)*/ NewRepoAtPath(aPath string) (pSR *SqliteRepo, e er
 	L.L.Info("New DB created at: " + SU.Tildotted(aPath))
 	// drivers := sql.Drivers()
 	// println("DB driver(s):", fmt.Sprintf("%+v", drivers))
-	pSR = new(SqliteRepo)
+	pSR := new(SqliteRepo)
 	pSR.DB = pDB
 	pSR.filepath = aPath
 	return pSR, nil
 }
 
-// OpenRepoAtPath opens an existing DB at the filepath. It is
+// OpenExistingAtPath opens an existing DB at the filepath. It is
 // assumed to have any default initializations (i.e. pragmas etc.).
 // If no file already exists at the filepath, the func returns an
 // error. The filepath can be a relative path, but may not be "".
 //
 // The repo type will be "sqlite" (equivalent to "sqlite3").
 // .
-func /*(p SqliteRepoImplem)*/ OpenRepoAtPath(aPath string) (*SqliteRepo, error) {
+func (p *SqliteDBManager) OpenExistingAtPath(aPath string) (*SqliteRepo, error) {
 	if !S.HasSuffix(aPath, ".db") {
 		println("sqlite.repo.openAt: missing \".db\": " + aPath)
 	}

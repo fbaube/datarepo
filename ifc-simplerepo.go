@@ -33,6 +33,6 @@ type SimpleRepo interface {
 	QueryRunner
 
 	RepoAppTables
-	DBGetting
+	// DBManager
 }
 
