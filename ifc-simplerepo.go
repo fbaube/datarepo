@@ -30,5 +30,9 @@ type SimpleRepo interface {
      // StatementBuilder uses [TableDescriptor] and [QuerySpec] 
 	StatementBuilder
      // QueryRunner is for generics and has funcs that return 0,1,N rows
-	QueryRunner 
+	QueryRunner
+
+	RepoAppTables
+	DBGetting
 }
+
