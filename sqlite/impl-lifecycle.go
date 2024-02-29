@@ -51,16 +51,28 @@ func (p *SqliteRepo) DoPragma(s string) {
 	}
 }
 
-// Open also, if needed, does pragma-style initialization.
+// Open should not do pragma-style initialization.
 func (p *SqliteRepo) Open() error {
 	// println("Open")
 	return nil
 }
 
-// NewAtPath also, if needed, does pragma-style initialization.
-func (p *SqliteRepo) NewAtPath() error {
+// OpenAtPath also, if needed, does pragma-style initialization.
+func (p *SqliteRepo) OpenAtPath(s string) (string, error) {
 	// println("Open")
-	return nil
+	return "", nil
+}
+
+// NewAtPath also, if needed, does pragma-style initialization.
+func (p *SqliteRepo) NewAtPath(s string) (string, error) {
+	// println("Open")
+	return "", nil
+}
+
+// OpenExistingAtPath also, if needed, does pragma-style initialization.
+func (p *SqliteRepo) OpenExistingAtPath(s string) (string, error) {
+	// println("Open")
+	return "", nil
 }
 
 // IsOpen also, if possible, pings the DB as a health check.
