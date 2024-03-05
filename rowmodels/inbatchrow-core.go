@@ -1,6 +1,7 @@
 package rowmodels
 
 import (
+       "slices"
 	D "github.com/fbaube/dsmnd"
 	FU "github.com/fbaube/fileutils"
 )
@@ -9,7 +10,8 @@ var TableSummaryINB = D.TableSummary{
 	D.SCT_TABLE.DT(), "inbatch", "inb",
 	"Input batch of imported files"}
 
-// This file contains four key items that MUST be kept in sync:
+// This file contains four key items that
+// MUST be kept perfectly in sync:
 //  - ColumnSpecsINB
 //  - ColumnNamesCsvINB
 //  - ColumnPtrsINB
@@ -17,12 +19,13 @@ var TableSummaryINB = D.TableSummary{
 //
 // SEE FILE ./tabledetails.go for more information.
 
-// PKSpecINB should be auto.generated! 
+// PKSpecINB specifies the table's primary key.
+// TODO: It should be auto.generated! 
 var PKSpecINB = D.ColumnSpec{D.SFT_PRKEY.DT(),
     "idx_inbatch", "Pri.key", "Primary key"} 
 
 // ColumnSpecsINB field order MUST be kept in sync with
-// [ColumnNamesCsvINB] and [ColumnPtrsINB] and it specifies:
+// [ColumnNamesCsvINB] and [ColumnPtrsINB]. It specifies:
 //   - file count
 //   - two path fields (rel & abs) (placed at the end
 //     because they tend to be looong)
@@ -43,11 +46,18 @@ var ColumnSpecsINB = []D.ColumnSpec{
 	D.DD_AbsFP,
 }
 
-// ColumnNamesCsvINB TODO: this can be left unset and 
-// then (easily!) auto-generated from [ColumnSpecsINB].
-var ColumnNamesCsvINB = "FilCt, Descr, T_Cre, T_Imp, T_Edt, RelFP, AbsFP" 
+// ColumnNamesCsv_INB is TODO: It should be auto-generated!
+var ColumnNamesCsv_INB = "FilCt, Descr, T_Cre, T_Imp, T_Edt, RelFP, AbsFP" 
 
-// ColumnPtrsFuncINB goes into TableDetails and MUST be kept in sync:
+// ColumnNamesCsvINB is TODO: this can be left unset and 
+// then (easily!) auto-generated from [ColumnSpecsINB].
+func ColumnNamesCsvINB(inclPK bool) string {
+     if !inclPK { return ColumnNamesCsv_INB }
+     return "IDX_inbatch, " + ColumnNamesCsv_INB
+     }
+
+// ColumnPtrsFuncINB supplies a field in TableDetails.
+// NOTE: It MUST be kept in sync:
 //  - field order with [ColumnSpecsINB] and [ColumnNamesCsvINB] 
 //  - field names with [InbatchRow]
 // func ColumnPtrsFuncINB(inbro *InbatchRow, inclPK bool) []any { 
@@ -59,13 +69,19 @@ func ColumnPtrsFuncINB(ainbro RowModel, inclPK bool) []any {
      	      &inbro.T_Cre, &inbro.T_Imp, &inbro.T_Edt,
 	      &inbro.RelFP, &inbro.AbsFP } 
      if !inclPK { return list }
-     var pk []any
-     pk = []any { &inbro.Idx_Inbatch }
-     return append(pk, list...)
+     // names = slices.Insert(names, 1, "Bill", "Billie")
+     list = slices.Insert(list, 0, any(&inbro.Idx_Inbatch))
+     return list
 }
 
+// ColumnPtrsMethod is NOTE: Maybe do the
+// "switch (Rowmodeler).RowmodelImplName" trick here. 
 func (inbro *InbatchRow) ColumnPtrsMethod(inclPK bool) []any {
      return ColumnPtrsFuncINB(inbro, inclPK) 
+}
+
+func (cro *InbatchRow) ColumnNamesCsv(inclPK bool) string {
+     return ColumnNamesCsvINB(inclPK)
 }
 
 // InbatchRow describes (in the DB) a single import batch

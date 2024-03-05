@@ -4,7 +4,7 @@ package rowmodels
 var TableDetailsTRF = TableDetails{
         TableSummaryTRF, 
 	"idx_topicref", // PKname
-	ColumnNamesCsvTRF, // "idx_cnt_map, idx_cnt_tpc", // ColumnNames
+	ColumnNamesCsv_TRF, 
 	ColumnSpecsTRF, // []D.ColumnSpec
 	ColumnPtrsFuncTRF,
 	&TopicrefRow{},

@@ -7,8 +7,9 @@ import (
 	RM "github.com/fbaube/datarepo/rowmodels"
 )
 
-// ExecInsertStmt executes a simple (not prepared) SQL statement.
-// Conceptually, it should use Exec() and not Query().
+// ExecInsertStmt executes a simple (still-text,
+// not "prepared") SQL statement. Conceptually,
+// it should use Exec() and not Query().
 //
 // Notes on this:
 //  - [Exec](..) returns ([Result], error)
@@ -62,7 +63,12 @@ func ExecSelectOneStmt[T RM.RowModel](pSR *SqliteRepo, stmt string) (T, error) {
 	// var paI *T
 	// paI = &anInstance
 	colPtrs = /*paI*/anInstance.ColumnPtrsMethod(true)
-	e = row.Scan(colPtrs)
+	// fmt.Printf("ExecSelectOneStmt: colPtrs: %#v \n", colPtrs)
+
+	// OOPS: SELECT IDX_inbatch, RelFP, AbsFP, Descr, T_Cre, T_Imp, T_Edt, RawMT, Mimtp, MType, Contt 
+	// OOPS: colPtrs: []interface {}{(*int)(0x140000d00d0), (*int)(0x140000d00d8), (*string)(0x140000d0140), (*fileutils.AbsFilePath)(0x140000d0150), (*string)(0x140000d00e0), (*string)(0x140000d00f0), (*string)(0x140000d0100), (*string)(0x140000d0110), (*stringutils.MarkupType)(0x140000d0130), (*string)(0x140000d21b0), (*string)(0x140000d21d0), (*ctoken.Raw)(0x140000d0120)}
+
+	e = row.Scan(colPtrs...)
 	if ee := row.Err(); ee != nil { // rows
            return anInstance, fmt.Errorf(
 	   	  "ExecSelectOneStmt(\"%s\"):err:  %w", stmt, ee)

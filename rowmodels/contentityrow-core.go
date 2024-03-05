@@ -1,6 +1,7 @@
 package rowmodels
 
 import (
+       "slices"
 	D "github.com/fbaube/dsmnd"
 	FU "github.com/fbaube/fileutils"
 	DRU "github.com/fbaube/datarepo/utils"
@@ -64,11 +65,17 @@ var ColumnSpecsCNT = []D.ColumnSpec{
 	// D.ColSpec{D.SFT_TOKEN.DT(), "ditacontype", "LwDITA contype", "LwDITA cnt type"},
 }
 
-// ColumnNamesCsvCNT TODO: this can be left unset and
+// ColumnNamesCsv_CNT TODO: this can be left unset and
 // then (easily!) auto-generated from [ColumnSpecsCNT].
-var ColumnNamesCsvCNT =
+var ColumnNamesCsv_CNT =
     "IDX_inbatch, RelFP, AbsFP, Descr, T_Cre, T_Imp, T_Edt, " +
-    "RawMT, Mimtp, MType, Contt" 
+    "RawMT, Mimtp, MType, Contt"
+
+func ColumnNamesCsvCNT(inclPK bool) string {
+     if !inclPK { return ColumnNamesCsv_CNT }
+     return "IDX_contentity, " + ColumnNamesCsv_CNT
+     }
+
 
 /*
 func (RM RowModel) ColumnPtrsMthdCNT(inclPK bool) []any {
@@ -109,13 +116,17 @@ func ColumnPtrsFuncCNT(acro RowModel, inclPK bool) []any {
 		&cro.PathProps.TypedRaw.Raw, 
 		}
 	if !inclPK { return list }
-	var pk []any
-	pk = []any { &cro.Idx_Contentity }
-	return append(pk, list...)
+	// names = slices.Insert(names, 1, "Bill", "Billie")
+	list = slices.Insert(list, 0, any(&cro.Idx_Contentity))
+	return list
 }
 
 func (cro *ContentityRow) ColumnPtrsMethod(inclPK bool) []any {
      return ColumnPtrsFuncCNT(cro, inclPK)
+}
+
+func (cro *ContentityRow) ColumnNamesCsv(inclPK bool) string {
+     return ColumnNamesCsvCNT(inclPK)
 }
 
 /*

@@ -1,6 +1,7 @@
 package rowmodels
 
 import (
+       "slices"
 	D "github.com/fbaube/dsmnd"
 )
 
@@ -8,7 +9,8 @@ var TableSummaryTRF = D.TableSummary{
 	D.SCT_TABLE.DT(), "topicref", "trf",
 	"Reference from map to topic"}
 
-// This file contains four key items that MUST be kept in sync:
+// This file contains four key items that
+// MUST be kept perfectly in sync:
 //  - ColumnSpecsTRF
 //  - ColumnNamesCsvTRF
 //  - ColumnPtrsTRF
@@ -16,7 +18,8 @@ var TableSummaryTRF = D.TableSummary{
 //
 // SEE FILE ./tabledetails.go for more information.
 
-// PKSpecTRF should be auto.generated!
+// PKSpecTRF specifies the table's primary key.
+// TODO: It should be auto.generated!
 var PKSpecTRF = D.ColumnSpec{D.SFT_PRKEY.DT(),
     "idx_topicref", "Pri.key", "Primary key"} 
 
@@ -39,9 +42,15 @@ var ColumnSpecsTRF = []D.ColumnSpec{
 		"Referenced topic"},
 }
 
-// ColumnNamesCsvTRF TODO: this can be left unset and 
+// ColumnNamesCsv_TRF is TODO: It should be auto-generated!
+var ColumnNamesCsv_TRF = "idx_cnt_map, idx_cnt_tpc"
+
+// ColumnNamesCsvTRF is TODO: this can be left unset and
 // then (easily!) auto-generated from [ColumnSpecsTRF].
-var ColumnNamesCsvTRF = "idx_cnt_map, idx_cnt_tpc" 
+func ColumnNamesCsvTRF(inclPK bool) string {
+     if !inclPK { return ColumnNamesCsv_TRF }
+     return "IDX_topicref, " + ColumnNamesCsv_TRF
+     }
 
 // ColumnPtrsFuncTRF MUST be kept in sync:
 //  - field order with [ColumnNamesCsvTRF] and [ColumnSpecsTRF]
@@ -53,13 +62,18 @@ func ColumnPtrsFuncTRF(atro RowModel, inclPK bool) []any {
      var list []any 
      list = []any { &tro.Idx_Map_Contentity, &tro.Idx_Tpc_Contentity }
      if !inclPK { return list }
-     var pk []any
-     pk = []any { &tro.Idx_Topicref }
-     return append(pk, list...)
+     list = slices.Insert(list, 0, any(&tro.Idx_Topicref))
+     return list
 }
 
+// ColumnPtrsMethod is NOTE: Maybe do the
+// "switch (Rowmodeler).RowmodelImplName" trick here.
 func (tro *TopicrefRow) ColumnPtrsMethod(inclPK bool) []any {
      return ColumnPtrsFuncTRF(tro, inclPK) 
+}
+
+func (tro *TopicrefRow) ColumnNamesCsv(inclPK bool) string {
+     return ColumnNamesCsvTRF(inclPK)
 }
 
 // TopicrefRow describes (in the DB) a reference 

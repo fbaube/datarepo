@@ -6,7 +6,7 @@ package rowmodels
 var TableDetailsINB = TableDetails{
         TableSummaryINB,
         "idx_inbatch", // PKname
-        ColumnNamesCsvINB,
+        ColumnNamesCsv_INB,
         ColumnSpecsINB, // []D.ColumnSpec
 	ColumnPtrsFuncINB,
 	&InbatchRow{}, 

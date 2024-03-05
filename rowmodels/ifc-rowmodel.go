@@ -4,7 +4,7 @@ package rowmodels
 // package [github.com/fbaube/datarepo/rowmodels] 
 type RowModel interface {
      TableDetails() TableDetails 
-     // ColumnNamesCSV() string 
+     ColumnNamesCsv(bool) string 
      ColumnPtrsMethod(bool) []any
      // When generic, include *T
      // *T
