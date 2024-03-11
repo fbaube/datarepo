@@ -2,7 +2,7 @@ package sqlite
 
 import (
 	"fmt"
-	"os"
+	// "os"
 	// SU "github.com/fbaube/stringutils"
 	S "strings"
 	DRM "github.com/fbaube/datarepo/rowmodels"
@@ -22,6 +22,7 @@ func (pSR *SqliteRepo) NewSelectByIdStmt(pTD *DRM.TableDetails, anID int) (strin
 	//  5) Add RETURNING
 	//  6) (the stmt's user) Use that returned that ID
 
+	/*
 	var pRM DRM.RowModel
 	switch pTD.StorName { 
 	case "contentity":
@@ -35,8 +36,10 @@ func (pSR *SqliteRepo) NewSelectByIdStmt(pTD *DRM.TableDetails, anID int) (strin
 	colPtrs = pTD.ColumnPtrsFunc(pRM, false)
 	fmt.Fprintf(os.Stderr, "LENS: ColSpex<%d> ColPtrs<%d> \n",
 		len(pTD.ColumnSpecs), len(colPtrs))
+	*/
 	var sb S.Builder
-	sb.WriteString("SELECT ")
+	// FIX: We need the own-table ID here too 
+	sb.WriteString("SELECT " + pTD.PKname + ", ")
 	sb.WriteString(pTD.ColumnNamesCSV)
 	sb.WriteString(" FROM ")
 	sb.WriteString(pTD.TableSummary.StorName)
@@ -200,8 +203,8 @@ func NewInsertStmtGenrcFunc[T DRM.RowModeler](pSR *SqliteRepo, pRM T) (string, e
 	pRM.T_Edt = now
 	* /
 
-	fmt.Fprintf(os.Stderr, "LENS: ColSpex<%d> ColPtrs<%d> \n",
-		len(pTD.ColumnSpecs), len(colPtrs))
+	// fmt.Fprintf(os.Stderr, "LENS: ColSpex<%d> ColPtrs<%d> \n",
+	//	len(pTD.ColumnSpecs), len(colPtrs))
 	var sb S.Builder
 	sb.WriteString("INSERT INTO ")
 	sb.WriteString(pTD.TableSummary.StorName)

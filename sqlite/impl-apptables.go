@@ -149,13 +149,15 @@ func (p *SqliteRepo) createAppTable(td *DRM.TableDetails) error {
 		fmt.Println("p.Exec(CreTbl) barfed: %s", err.Error())
 		return err
 	}
+	/*
 	ss, e := p.DumpTableSchema_sqlite(td.StorName)
 	if e != nil {
 		return fmt.Errorf("simplerepo.createtable.sqlite: "+
 			"DumpTableSchema<%s> failed: %w", e)
 	}
 	L.L.Dbg(td.StorName + " SCHEMA: " + ss)
-	// println("TODO: Insert record with IDX 0 and string descr's")
-	//    and ("TODO: Dump all table records (i.e. just one)")
+	*/
+	// println("TODO: (maybe) Insert record with IDX 0 and string descr's")
+	//    and ("TODO: (then) Dump all table records (i.e. just one)")
 	return nil
 }

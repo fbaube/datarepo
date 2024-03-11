@@ -2,7 +2,7 @@ package sqlite
 
 import (
 	"fmt"
-	"os"
+	// "os"
 	D "github.com/fbaube/dsmnd"
 	FU "github.com/fbaube/fileutils"
 	SU "github.com/fbaube/stringutils"
@@ -89,9 +89,11 @@ func (pSR *SqliteRepo) NewInsertStmt(pRM DRM.RowModel) (string, error) {
 	     pTD = pTR.TableDetails()
 	     colPtrs = DRM.ColumnPtrsFuncTRF(pTR, false)
 	}
-	// colPtrs = pTD.ColumnPtrsFunc() // should be a no-arg func 
+	/*
+	colPtrs = pTD.ColumnPtrsFunc() // should be a no-arg func 
 	fmt.Fprintf(os.Stderr, "LENS: ColSpex<%d> ColPtrs<%d> \n",
 		len(pTD.ColumnSpecs), len(colPtrs))
+	*/
 	var sb S.Builder
 	sb.WriteString("INSERT INTO ")
 	sb.WriteString(pTD.TableSummary.StorName)
@@ -290,8 +292,8 @@ func NewInsertStmtGnrcFunc[T DRM.RowModel](pSR *SqliteRepo, pRM T) (string, erro
 	pRM.T_Edt = now
 	*/
 
-	fmt.Fprintf(os.Stderr, "LENS: ColSpex<%d> ColPtrs<%d> \n",
-		len(pTD.ColumnSpecs), len(colPtrs))
+	// fmt.Fprintf(os.Stderr, "LENS: ColSpex<%d> ColPtrs<%d> \n",
+	//	len(pTD.ColumnSpecs), len(colPtrs))
 	var sb S.Builder
 	sb.WriteString("INSERT INTO ")
 	sb.WriteString(pTD.TableSummary.StorName)

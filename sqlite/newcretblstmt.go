@@ -62,8 +62,8 @@ func (pSR *SqliteRepo) NewCreateTableStmt(pTD *DRM.TableDetails) (string, error)
 	if pTD.PKname == "" {
 	   panic("pTD.PKname is not set")
 	}
-	stmt.WriteString(pTD.PKname +
-		" integer not null primary key autoincrement, " +
+	stmt.WriteString(pTD.PKname + // too long! use a newline
+		" integer not null \n    primary key autoincrement, " +
 		"-- NOTE: integer, not int. \n")
 	// =====================================
 	// NOW ALL THE FIELDS EXPLICITLY DEFINED
@@ -101,9 +101,9 @@ func (pSR *SqliteRepo) NewCreateTableStmt(pTD *DRM.TableDetails) (string, error)
 			
 		// Date/time fields are assumed to be ISO-8601
 		case D.BDT_DYTM: // maps to SQLYT_DATETIME 6
-		     println("column DATE-TIME:",
-		     	D.Datum(SFT.Descriptor()).String())
-			// Use ISO-8601 strings ("YYYY-MM-DD HH:MM:SS. SSS")
+		  // println("column DATE-TIME:",
+		  // 	D.Datum(SFT.Descriptor()).String())
+		  // Use ISO-8601 strings ("YYYY-MM-DD HH:MM:SS. SSS")
 		     stmt.WriteString(colName + " text not null, -- ISO-8601 \n")
 
 		// Keys get real complicated real fast 
