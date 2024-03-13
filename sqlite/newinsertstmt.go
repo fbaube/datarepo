@@ -140,7 +140,7 @@ func (pSR *SqliteRepo) NewInsertStmt(pRM DRM.RowModel) (string, error) {
 	stmt = sb.String()
 	stmt2 := stmt[:len(stmt)-2] + ") RETURNING IDX_" + pTD.StorName + ";"
 	// sb.WriteString(") RETURNING IDX_" + pTD.StorName + ";")
-	println("INSERT STMT:", stmt2) // sb.String())
+	fmt.Printf("INSERT STMT: %.60s[...] \n", stmt2) // sb.String())
 	return stmt2, nil
 }
 
@@ -340,7 +340,7 @@ func NewInsertStmtGnrcFunc[T DRM.RowModel](pSR *SqliteRepo, pRM T) (string, erro
 	stmt = sb.String()
 	stmt2 := stmt[:len(stmt)-2] + ") RETURNING IDX_" + pTD.StorName + ";"
 	// sb.WriteString(") RETURNING IDX_" + pTD.StorName + ";")
-	println("INSERT STMT:", stmt2) // sb.String())
+	fmt.Printf("INSERT STMT: %.60s[...] \n", stmt2) // sb.String())
 	return stmt2, nil
 }
 

@@ -110,7 +110,7 @@ func (p *SqliteRepo) EmptyAppTables() error {
 //
 // .
 func (p *SqliteRepo) CreateAppTables() error {
-	println("CreateAppTables")
+	// println("CreateAppTables")
 	// func (pDB SqliteRepo) CreateTable_sqlite(ts U.TableDetails) error {
 	// FIXME Check table name prefix (e.g. "mmmc_") ?
 	for _, td := range theMap {
@@ -120,7 +120,7 @@ func (p *SqliteRepo) CreateAppTables() error {
 			return e
 		}
 	}
-	L.L.Warning("SQLAR is To-Do, utils/repo/sqlite/impl_apptables.go L114")
+	// L.L.Warning("SQLAR is To-Do, datarepo/sqlite/impl_apptables.go L123")
 	return nil
 }
 

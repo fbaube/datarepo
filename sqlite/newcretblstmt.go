@@ -122,7 +122,7 @@ func (pSR *SqliteRepo) NewCreateTableStmt(pTD *DRM.TableDetails) (string, error)
 
 			// Count up underscores (per comment above)
 			ss := S.Split(refgField, "_")
-			fmt.Printf("FKey name split: %#v \n", ss)
+			// fmt.Printf("FKey name split: %#v \n", ss)
 			
 			switch len(ss) {
 
