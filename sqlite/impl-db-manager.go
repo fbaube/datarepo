@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
+	"io"
 	FU "github.com/fbaube/fileutils"
 	SU "github.com/fbaube/stringutils"
 	_ "github.com/mattn/go-sqlite3" // to get init()
@@ -191,6 +192,7 @@ func (p *SqliteDBManager) NewAtPath(aPath string) (*SqliteRepo, error) {
 	pSR := new(SqliteRepo)
 	pSR.DB = pDB
 	pSR.filepath = aPath
+	pSR.w = io.Discard
 	return pSR, nil
 }
 
@@ -220,6 +222,7 @@ func (p *SqliteDBManager) OpenExistingAtPath(aPath string) (*SqliteRepo, error) 
 		pSR.DB, e = sql.Open("sqlite3", aPath+"?foreign_keys=on")
 		// pSR.DB = sqlx.MustConnect("sqlite3", aPath)
 		pSR.filepath = aPath
+		pSR.w = io.Discard
 		if e == nil {
 			return pSR, nil
 		}

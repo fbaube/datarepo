@@ -99,6 +99,13 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 			filexist = false
 		} else {
 		        repo, e = DB_Manager.OpenAtPath(dbFilepath)
+			// Provide a DB logging file
+			dbw, dbe := FU.CreateEmpty("./db.log")
+			if dbe != nil {
+			   println("Cannot open DB logfile ./db.log: %s", dbe)
+			} else {
+			   repo.SetLogWriter(dbw)
+			}
 			// If the DB exists and we want to open
 			// it as-is, i.e. without zeroing it out,
 			// then this is where we return success:
