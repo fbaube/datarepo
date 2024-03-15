@@ -1,5 +1,7 @@
 package datarepo
 
+import "io"
+
 // SessionLifecycler is session lifecycle operations for databases.
 type SessionLifecycler interface {
 	// Open is called on an existing repo file, and can be called
@@ -7,6 +9,7 @@ type SessionLifecycler interface {
 	// initialization; however, options passed in the connection
 	// string (such as SQLite's "...?foreign_keys=on") are kosher.
 	Open() error
+	SetLogWriter(io.Writer) io.Writer
 	// TODO:? return it, for use or understanding
 	// InitString() string
 	// IsOpen pings the DB as a health check.
@@ -17,4 +20,5 @@ type SessionLifecycler interface {
 	Flush() error
 	// Close remembers the path (like os.File does).
 	Close() error
+	CloseLogWriter()
 }

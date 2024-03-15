@@ -29,6 +29,17 @@ func (p *SqliteRepo) SetLogWriter(wrtr io.Writer) io.Writer {
      return tmpw
 }
 
+func (p *SqliteRepo) CloseLogWriter() {
+     var c io.Closer
+     var ok bool 
+     c, ok = p.w.(io.Closer)
+     if ok {
+     	// ignore any error 
+     	c.Close()
+	}
+     p.w = io.Discard
+}
+
 /* init() to do type chex
 (but don't do DB stuff in init(), cos
  driver might not be initialized yet)

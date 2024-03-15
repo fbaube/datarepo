@@ -1,7 +1,6 @@
 package datarepo
 
 import (
-       "io"
 	_ "github.com/mattn/go-sqlite3"
 	// _ "github.com/fbaube/sqlite3"
 )
@@ -33,8 +32,8 @@ type SimpleRepo interface {
      // QueryRunner is for generics and has funcs that return 0,1,N rows
 	QueryRunner
 
-	// SetLogWriter returns the previous value. 
-	SetLogWriter(io.Writer) io.Writer 
+	// SetLogWriter returns the previous value. Moved to [SessionLifecycler].
+	// SetLogWriter(io.Writer) io.Writer 
 
 	RepoAppTables
 	// DBManager

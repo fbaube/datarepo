@@ -14,14 +14,21 @@ import (
 	_ "database/sql"
 )
 
+// Init9nArgs is for database management. Note that if field [UseDB]
+// is false, the contents and usage of this struct are undefined.
 type Init9nArgs struct {
      // D.DB_type is so far only D.DB_SQLite = "sqlite"
      D.DB_type
      // BaseFilename defaults to "m5.db"
      BaseFilename string 
      Dir string
-     // DoImport is a flag that access to a DB is required,
-     // and could also be set for other such operations 
+     // LogWriter is (so far) used only by package [datarepo/sqlite]
+     // and is initialized to [io.Discard]. If it is an open file, it
+     // is passed using func [datarepo/sqlite.SqliteRepo.SetLogWriter].
+     // It could actually be just an io.WriterCloser. 
+     // LogWriter *os.File 
+     // DoImport requires DB access, so it is present
+     // here, but it is not otherwise processed here. 
      DoImport bool
      // DoZeroOut says initialize the DB with the 
      // app's tables but with no data in them 
@@ -38,10 +45,13 @@ var DEFAULT_FILENAME = "m5.db"
 
 // ProcessInit9nArgs processes DN initialization arguments. 
 // It can process either a new DB OR an existing DB.
+//
+// If the returned error is non-nil, it need not be fatal.
+// Check whether the SimpleRepo return value is nil. 
 // 
-// TODO: It should not use a logger (i.e. [mlog]),
-// because we want to avoid that kind of dependency
-// in a standalone library. 
+// TODO: It should not use a complex logger (e.g. [mlog]),
+// because we want to avoid that kind of dependency in 
+// a standalone library. 
 // .
 func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 
@@ -87,37 +97,45 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 		// panic("init9n.L87")
 		return nil, fmt.Errorf("%s file error: %w", errPfx, filerror)
 	}
-	s := SU.ElideHomeDir(dbFilepath)
+	var shortPath string 
+	shortPath = SU.ElideHomeDir(dbFilepath)
+	var openError error 
 	if filexist {
-		L.L.Info("DB exists: " + s)
+		L.L.Info("DB exists: " + shortPath)
 		if fileinfo.Size() == 0 {
-			L.L.Info("DB is empty: " + s)
+			L.L.Info("DB is empty: " + shortPath)
 			e = os.Remove(dbFilepath)
 			if e != nil {
 				panic(e)
 			}
 			filexist = false
 		} else {
-		        repo, e = DB_Manager.OpenAtPath(dbFilepath)
-			// Provide a DB logging file
-			dbw, dbe := FU.CreateEmpty("./db.log")
-			if dbe != nil {
-			   println("Cannot open DB logfile ./db.log: %s", dbe)
-			} else {
-			   repo.SetLogWriter(dbw)
-			}
-			// If the DB exists and we want to open
-			// it as-is, i.e. without zeroing it out,
-			// then this is where we return success:
-			if e == nil && !p.DoZeroOut {
-				L.L.Info("DB opened: " + s)
-				return repo, nil
-			}
+		        repo, openError = DB_Manager.OpenAtPath(dbFilepath)
 		}
+	}
+	// Now we have (or will have) a repo and we 
+	// will use it, so provide a DB logging file.
+	dbw, dbe := FU.CreateEmpty("./db.log")
+	if dbe != nil {
+	   L.L.Warning("Cannot open DB logfile ./db.log: %w", dbe)
+	} else {
+	   repo.SetLogWriter(dbw)
+	}
+	// If the DB exists and we want to open
+	// it as-is, i.e. without zeroing it out,
+	// then this is where we return success:
+	if filexist && repo != nil /* && openError == nil */ && !p.DoZeroOut {
+	   	// A non-fatal error ? 
+	   	if openError != nil {
+		   L.L.Warning("Expect DB problems: " +
+		   	"DB init got error: %w", openError)
+		}
+		L.L.Info("DB file opened OK: " + shortPath)
+		return repo, nil
 	}
 	if !filexist {
 	   	println("DB: Creating anew.")
-		L.L.Info("Creating DB: " + s)
+		L.L.Info("Creating DB: " + shortPath)
 		if p.DoZeroOut {
 			L.L.Info("Zeroing out the DB is redundant")
 		}
@@ -132,7 +150,7 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 
 	pSQR, ok := repo.(*DRS.SqliteRepo)
 	if !ok {
-		panic("init9n.L118")
+		panic("init9n.L153")
 		return nil, errors.New("processDBargs: is not sqlite")
 	}
 	// At this point we have finished all execution paths
