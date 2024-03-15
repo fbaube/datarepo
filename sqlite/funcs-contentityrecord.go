@@ -54,7 +54,7 @@ func NewContentityRow(pPP *FU.PathProps, pPA *CA.PathAnalysis) (*DRM.ContentityR
 			pPA.MimeTypeAsSnift)
 		switch pPA.MimeTypeAsSnift {
 		case "text/xml/image/svg+xml":
-			println("SVG!!")
+			// println("SVG!!")
 			pPA.MType = "xml/cnt/svg"
 		}
 	}
@@ -93,17 +93,18 @@ func (p SqliteRepo) GetContentityAll() (pp []*DRM.ContentityRow, err error) {
 		panic("GetContentityAll")
 	}
 	for rows.Next() {
-		p := new(DRM.ContentityRow)
+		pcr := new(DRM.ContentityRow)
 		// err := rows.StructScan(p)
-		if err = rows.Scan(p.ColumnPtrsMethod(true)...); err != nil {
+		if err = rows.Scan(pcr.ColumnPtrsMethod(true)...); err != nil {
 			return nil, fmt.Errorf("GetContentityAll: "+
 				"row.Scan error: %w \n\t (%s)", err, q)
 		}
 		if err != nil {
 			log.Fatalln(err)
 		}
-		fmt.Printf("    DD:%#v\n", *p)
-		pp = append(pp, p)
+		// fmt.Printf("    DD:%#v\n", *p)
+		fmt.Fprintf(p.w, "Contentity: %#v\n", *pcr)
+		pp = append(pp, pcr)
 	}
 	if err = rows.Err(); err != nil {
 		return nil, fmt.Errorf("GetContentityAll: "+
@@ -140,7 +141,7 @@ func (p SqliteRepo) InsertContentityRow(pC *DRM.ContentityRow) (int, error) {
 		":xmlcontype, :ditaflavor, :ditacontype);"
 
 	// rslt, e = tx.NamedExec(stmt, pC)
-	fmt.Printf("funcs_contentity.L141: " +
+	fmt.Fprintf(p.w, "funcs_contentity.L144: " +
 		"skipping NamedExec(INSERT INTO CONTENTITY(values)) \n")
 	tx.Commit()
 	// println("=== ### ===")
@@ -151,6 +152,7 @@ func (p SqliteRepo) InsertContentityRow(pC *DRM.ContentityRow) (int, error) {
 		println("========")
 		println("DB: NamedExec: ERROR:", e.Error())
 		println("========")
+		fmt.Fprintf(p.w, "DB: NamedExec: ERROR: %s \n", e.Error())
 		fnam := "./insert-Contentity-failed.sql"
 		e = ioutil.WriteFile(fnam, []byte(stmt), 0644)
 		if e != nil {

@@ -115,7 +115,7 @@ func (pSR *SqliteRepo) NewInsertStmt(pRM DRM.RowModel) (string, error) {
 	    */
 	    sn = pTD.ColumnSpecs[iii].StorName
 	    dt = D.SemanticFieldType(pTD.ColumnSpecs[iii].Datatype)
-	    fmt.Printf("[%d] %s / %s / %T \n", iii, sn, dt, cp)
+	    fmt.Fprintf(pSR.w, "[%d] %s / %s / %T \n", iii, sn, dt, cp)
 	    // sft = D.SemanticFieldType(ppp.Datatype)
 	    switch cp.(type) {
 	    	   case *string:
@@ -140,7 +140,7 @@ func (pSR *SqliteRepo) NewInsertStmt(pRM DRM.RowModel) (string, error) {
 	stmt = sb.String()
 	stmt2 := stmt[:len(stmt)-2] + ") RETURNING IDX_" + pTD.StorName + ";"
 	// sb.WriteString(") RETURNING IDX_" + pTD.StorName + ";")
-	fmt.Printf("INSERT STMT: %.60s[...] \n", stmt2) // sb.String())
+	fmt.Fprintf(pSR.w, "INSERT STMT: %.60s[...] \n", stmt2) // sb.String())
 	return stmt2, nil
 }
 
@@ -174,7 +174,7 @@ func StringFromPtr[SS ~string](ss *SS) string {
 
 	for _, pCS := range pTD.ColumnSpecs {
 		colName := pCS.StorName // column name in DB
-		fmt.Sprintf("Creating column: %s \n", pCS.String())
+		fmt.Printf("Creating column: %s \n", pCS.String())
 		SFT := D.SemanticFieldType(pCS.Datatype)
                 BDT := SFT.BasicDatatype()
 
@@ -315,7 +315,7 @@ func NewInsertStmtGnrcFunc[T DRM.RowModel](pSR *SqliteRepo, pRM T) (string, erro
 	    */
 	    sn = pTD.ColumnSpecs[iii].StorName
 	    dt = D.SemanticFieldType(pTD.ColumnSpecs[iii].Datatype)
-	    fmt.Printf("[%d] %s / %s / %T \n", iii, sn, dt, cp)
+	    fmt.Fprintf(pSR.w, "[%d] %s / %s / %T \n", iii, sn, dt, cp)
 	    // sft = D.SemanticFieldType(ppp.Datatype)
 	    switch cp.(type) {
 	    	   case *string:
@@ -340,7 +340,7 @@ func NewInsertStmtGnrcFunc[T DRM.RowModel](pSR *SqliteRepo, pRM T) (string, erro
 	stmt = sb.String()
 	stmt2 := stmt[:len(stmt)-2] + ") RETURNING IDX_" + pTD.StorName + ";"
 	// sb.WriteString(") RETURNING IDX_" + pTD.StorName + ";")
-	fmt.Printf("INSERT STMT: %.60s[...] \n", stmt2) // sb.String())
+	fmt.Fprintf(pSR.w, "INSERT STMT: %.60s[...] \n", stmt2) // sb.String())
 	return stmt2, nil
 }
 

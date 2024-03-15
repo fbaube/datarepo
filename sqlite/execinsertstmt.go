@@ -34,12 +34,12 @@ func (pSR *SqliteRepo) ExecInsertStmt(stmt string) (int, error) {
 	L.L.Info("Trying EXEC INSERT: " + stmt)
 	res, e = pSR.Exec(stmt)
 	if e != nil {
-	     	println("EXEC failed:", e.Error())
+	     	L.L.Error("Exec.Ins failed: %w", e)
 		return -1, e
 		} 
 	id, e = res.LastInsertId()
 	if e != nil {
-	     	println("EXEC:LastInsertId failed:", e.Error())
+	     	println("Exec.Ins.LastInsertId failed: %w", e)
 		return -1, e
 		} 
 	fmt.Printf("Exec Insert: id<%d> \n", id)

@@ -1,7 +1,6 @@
 package sqlite
 
 import (
-       "os"
 	"fmt"
 	D "github.com/fbaube/dsmnd"
 	DRM "github.com/fbaube/datarepo/rowmodels"
@@ -49,7 +48,7 @@ func (pSR *SqliteRepo) NewCreateTableStmt(pTD *DRM.TableDetails) (string, error)
 		    bdt := pCS.Datatype
 		    sbDbg.WriteString(fmt.Sprintf("%s:%s, ", cnm, bdt))
 		}
-		println(sbDbg.String())
+		fmt.Fprintf(pSR.w, sbDbg.String() + "\n")
 	}
         // stmt is for building the actual SQL statement
 	var stmt S.Builder
@@ -164,7 +163,7 @@ func (pSR *SqliteRepo) NewCreateTableStmt(pTD *DRM.TableDetails) (string, error)
 			}
 		  }
 		default:
-			fmt.Fprintf(os.Stderr, "OOPS: col<%s> bdt<%s> sft<%s> \n",
+			fmt.Fprintf(pSR.w, "OOPS: col<%s> bdt<%s> sft<%s> \n",
 				colName, BDT, SFT) 
 			panic(pCS.Datatype)
 		}
@@ -173,7 +172,7 @@ func (pSR *SqliteRepo) NewCreateTableStmt(pTD *DRM.TableDetails) (string, error)
 	ss := stmt.String()
 	// and add STRICT 
 	stmt3 := ss[0:len(ss)-2] + "\n) STRICT;"
-	fmt.Fprintf(os.Stderr, "SQL for CRE TBL: %s \n", stmt3) 
+	fmt.Fprintf(pSR.w, "SQL for CRE TBL: %s \n", stmt3) 
 	return stmt3, nil
 }
 

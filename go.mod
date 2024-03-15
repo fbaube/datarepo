@@ -8,7 +8,7 @@ require (
 	github.com/fbaube/contentanalysis v0.0.0-20240117104147-e12c9546e1cc
 	github.com/fbaube/ctoken v0.0.0-20240117104044-e4c4f08f089a
 	github.com/fbaube/dsmnd v0.0.0-20240130143636-adbc149a7741
-	github.com/fbaube/fileutils v0.0.0-20231218210156-f6a37eab1eae
+	github.com/fbaube/fileutils v0.0.0-20240313201955-760dba24347d
 	github.com/fbaube/mlog v0.0.0-20230904080411-cfac35fed413
 	github.com/fbaube/stringutils v0.0.0-20240227182912-df670eade115
 	github.com/mattn/go-sqlite3 v1.14.22
@@ -25,7 +25,7 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mgutz/str v1.2.0 // indirect
-	golang.org/x/exp v0.0.0-20240222234643-814bf88cf225 // indirect
+	golang.org/x/exp v0.0.0-20240314144324-c7f7c6466f7f // indirect
 	golang.org/x/net v0.22.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/tools v0.19.0 // indirect

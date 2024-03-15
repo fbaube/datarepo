@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"time"
-
 	L "github.com/fbaube/mlog"
 	DRM "github.com/fbaube/datarepo/rowmodels"
 )
@@ -57,7 +56,8 @@ func (p SqliteRepo) Add_Inbatch(pIB *DRM.InbatchRow) (int, error) {
 		") VALUES(" +
 		":descr, :filct, :t_cre, :relfp, :absfp)" // " RETURNING i_INB", p)
 	// rslt, e = tx.NamedExec(stmt, pIB)
-	fmt.Printf("funcs_inbatch.L59: "+
+	// fmt.Printf("funcs_inbatch.L60: "+
+	fmt.Fprintf(p.w, "funcs_inbatch.L60: "+
 		"skipping NamedExec(INSERT INTO INBATCH(values)) <%s>\n", stmt)
 	tx.Commit()
 	// println("=== ### ===")

@@ -1,7 +1,6 @@
 package sqlite
 
 import (
-       "os"
 	_ "database/sql" // to get init()
 	"errors"
 	"fmt"
@@ -76,7 +75,7 @@ func (p *SqliteRepo) EmptyAppTables() error {
 			// OOPS! Create it!
 			e2 := p.createAppTable(&c)
 			if e2 != nil {
-			   fmt.Fprintf(os.Stderr, "CRE TBL BARFED: %s \n", e2.Error())
+			   return fmt.Errorf("EmptyAppTbls.CreTbl failed: %w", e2)
 			// panic(e2.Error())
 			   }
 			} else {
@@ -146,8 +145,7 @@ func (p *SqliteRepo) createAppTable(td *DRM.TableDetails) error {
 	_, err := p.Exec(CTS)
 	if err != nil {
 		// panic(err)
-		fmt.Println("p.Exec(CreTbl) barfed: %s", err.Error())
-		return err
+		return fmt.Errorf("CreAppTbl failed: %w", err)
 	}
 	/*
 	ss, e := p.DumpTableSchema_sqlite(td.StorName)

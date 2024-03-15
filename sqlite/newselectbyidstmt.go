@@ -34,7 +34,7 @@ func (pSR *SqliteRepo) NewSelectByIdStmt(pTD *DRM.TableDetails, anID int) (strin
 	}
 	var colPtrs []any // []*any
 	colPtrs = pTD.ColumnPtrsFunc(pRM, false)
-	fmt.Fprintf(os.Stderr, "LENS: ColSpex<%d> ColPtrs<%d> \n",
+	fmt.Fprintf(pSR.w, "LENS: ColSpex<%d> ColPtrs<%d> \n",
 		len(pTD.ColumnSpecs), len(colPtrs))
 	*/
 	var sb S.Builder
@@ -50,7 +50,7 @@ func (pSR *SqliteRepo) NewSelectByIdStmt(pTD *DRM.TableDetails, anID int) (strin
 	
 	var stmt string 
 	stmt = sb.String()
-	println("SELECT byID STMT:", stmt) 
+	fmt.Fprintf(pSR.w, "SELECT by ID STMT: %s \n", stmt) 
 	return stmt, nil
 }
 
@@ -226,7 +226,8 @@ func NewInsertStmtGenrcFunc[T DRM.RowModeler](pSR *SqliteRepo, pRM T) (string, e
 	    * /
 	    sn = pTD.ColumnSpecs[iii].StorName
 	    dt = D.SemanticFieldType(pTD.ColumnSpecs[iii].Datatype)
-	    fmt.Printf("[%d] %s / %s / %T \n", iii, sn, dt, cp)
+	    fmt.Fprintf(pSR.w, "NewInsStmtGenc: [%d] %s / %s / %T \n",
+	    	iii, sn, dt, cp)
 	    // sft = D.SemanticFieldType(ppp.Datatype)
 	    switch cp.(type) {
 	    	   case *string:
@@ -251,7 +252,7 @@ b		   	sb.WriteString(fmt.Sprintf("'%s', ", CTRval(cp)))
 	stmt = sb.String()
 	stmt2 := stmt[:len(stmt)-2] + ") RETURNING IDX_" + pTD.StorName + ";"
 	// sb.WriteString(") RETURNING IDX_" + pTD.StorName + ";")
-	println("INSERT STMT:", stmt2) // sb.String())
+	fmt.Fprintf(pSR.w, "NewInsStmtGenc: INSERT STMT: %s \n", stmt2) 
 	return stmt2, nil
 }
 */

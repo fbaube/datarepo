@@ -101,7 +101,7 @@ func (p *SqliteDBManager) OpenAtPath(path string) (*SqliteRepo, error) {
 	filexist, fileinfo, filerror := FU.IsFileAtPath(path)
 	if filexist && (fileinfo.Size() == 0) {
 		// Bye!
-		fmt.Printf("DB file is empty (0-len): deleting it.")
+		L.L.Warning("DB file is empty (0-len): deleting it.")
 		e := os.Remove(path)
 		if e != nil {
 			return nil, fmt.Errorf("sqlite.OpenAtPath: "+
@@ -128,7 +128,7 @@ func (p *SqliteDBManager) NewAtPath(aPath string) (*SqliteRepo, error) {
 // func (p *SqliteDBManager) NewAtPath(aPath string) (DR.SimpleRepo, error) {
 
 	if !S.HasSuffix(aPath, ".db") {
-		println("sqlite.repo.new: missing suffix \".db\": " + aPath)
+		L.L.Warning("newSqliteRepo: missing suffix \".db\": " + aPath)
 	}
 	if !FP.IsAbs(aPath) {
 		// println("BEFOR", aPath)
@@ -205,7 +205,7 @@ func (p *SqliteDBManager) NewAtPath(aPath string) (*SqliteRepo, error) {
 // .
 func (p *SqliteDBManager) OpenExistingAtPath(aPath string) (*SqliteRepo, error) {
 	if !S.HasSuffix(aPath, ".db") {
-		println("sqlite.repo.openAt: missing \".db\": " + aPath)
+	   L.L.Warning("SqliteRepo.openAt: missing \".db\": " + aPath)
 	}
 	aPath = FU.ResolvePath(aPath)
 	// func IsFileAtPath(aPath string) (bool, *os.FileInfo, error) {

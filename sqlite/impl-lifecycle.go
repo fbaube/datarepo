@@ -26,6 +26,7 @@ import (
 	"database/sql"
 	"fmt"
 	"strings"
+	// L "github.com/fbaube/mlog"
 )
 
 // RepoLifecycle is lifecycle operations for databases.
@@ -77,7 +78,7 @@ func (p *SqliteRepo) Close() error {
 	// Conn.Close()
 	e := p.DB.Close()
 	if e != nil {
-		println("db.close failed:", e.Error())
+		// println("db.close failed:", e.Error())
 		return fmt.Errorf("sqliterepo.close failed: %w", e)
 	}
 	return e
