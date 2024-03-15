@@ -118,8 +118,6 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 	dbw, dbe := FU.CreateEmpty("./db.log")
 	if dbe != nil {
 	   L.L.Warning("Cannot open DB logfile ./db.log: %w", dbe)
-	} else {
-	   repo.SetLogWriter(dbw)
 	}
 	// If the DB exists and we want to open
 	// it as-is, i.e. without zeroing it out,
@@ -131,6 +129,7 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 		   	"DB init got error: %w", openError)
 		}
 		L.L.Info("DB file opened OK: " + shortPath)
+	   	repo.SetLogWriter(dbw)
 		return repo, nil
 	}
 	if !filexist {
@@ -144,6 +143,7 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 	if e != nil {
 		return nil, fmt.Errorf("%s DB failure: %w", errPfx, e)
 	}
+	repo.SetLogWriter(dbw)
 	repoAbsPath := repo.Path()
 	println("DB: status OK.")
 	L.L.Info("DB OK: " + SU.ElideHomeDir(repoAbsPath))
