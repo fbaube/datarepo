@@ -6,7 +6,9 @@ import (
 	L "github.com/fbaube/mlog" // Brings in global var L
 )
 
-// ExecInsertStmt executes a simple (not prepared) SQL statement.
+// ExecInsertStmt executes a simple (not prepared) SQL statement
+// and returns the ID (primary key) of the added item.
+// 
 // Conceptually, it should use Exec() and not Query().
 //
 // Notes on this:
@@ -31,7 +33,7 @@ func (pSR *SqliteRepo) ExecInsertStmt(stmt string) (int, error) {
 	var e error 
 	// ==========
 	// EXEC
-	L.L.Info("Trying EXEC INSERT: " + stmt)
+	fmt.Fprintf(pSR.w, "=== ExecInsStmt.SQL ===\n%s\n", stmt)
 	res, e = pSR.Exec(stmt)
 	if e != nil {
 	     	L.L.Error("Exec.Ins failed: %w", e)
@@ -39,13 +41,14 @@ func (pSR *SqliteRepo) ExecInsertStmt(stmt string) (int, error) {
 		} 
 	id, e = res.LastInsertId()
 	if e != nil {
-	     	println("Exec.Ins.LastInsertId failed: %w", e)
-		return -1, e
+	     	L.L.Error("Exec.Ins.LastInsertId failed: %w", e)
+		return -1, fmt.Errorf("ExecInsStmt.LastInsertId: %w", e)
 		} 
-	fmt.Printf("Exec Insert: id<%d> \n", id)
+	fmt.Fprintf(pSR.w, "=== ExecInsStmt.RETval.id: %d ===\n", id)
 	/*
+	// ===================
 	// or try QUERY + Scan
-	// ==========
+	// ===================
 	var rowQ *sql.Row
 	var idQ int 
 	var errQ error 

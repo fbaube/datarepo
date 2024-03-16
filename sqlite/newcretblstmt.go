@@ -43,7 +43,7 @@ func (pSR *SqliteRepo) NewCreateTableStmt(pTD *DRM.TableDetails) (string, error)
 	{
 		var sbDbg S.Builder
 		sbDbg.WriteString(fmt.Sprintf(
-			"=== %s.GenCreTblStmt: ColSpex: ", pTD.StorName))
+			"=== %s.GenCreTblStmt.ColSpex ===\n", pTD.StorName))
 		for _, pCS := range pTD.ColumnSpecs {
 		    cnm := pCS.StorName // column name
 		    bdt := pCS.Datatype
@@ -176,7 +176,8 @@ func (pSR *SqliteRepo) NewCreateTableStmt(pTD *DRM.TableDetails) (string, error)
 	ss := sqlStmt.String()
 	// and add STRICT 
 	stmt3 := ss[0:len(ss)-2] + "\n) STRICT;"
-	fmt.Fprintf(pSR.w, "=== %s.CreTbl.SQL: %s \n", pTD.StorName, stmt3) 
+	fmt.Fprintf(pSR.w, "=== %s.GenCreTblStmt.SQL ===\n%s \n",
+		pTD.StorName, stmt3) 
 	return stmt3, nil
 }
 
