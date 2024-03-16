@@ -42,7 +42,8 @@ only by counting underscores in the StorName.
 func (pSR *SqliteRepo) NewCreateTableStmt(pTD *DRM.TableDetails) (string, error) {
 	{
 		var sbDbg S.Builder
-		sbDbg.WriteString("reposqlite.GenCreTblStmt: ")
+		sbDbg.WriteString(fmt.Sprintf(
+			"=== %s.GenCreTblStmt: ColSpex: ", pTD.StorName))
 		for _, pCS := range pTD.ColumnSpecs {
 		    cnm := pCS.StorName // column name
 		    bdt := pCS.Datatype
@@ -50,18 +51,20 @@ func (pSR *SqliteRepo) NewCreateTableStmt(pTD *DRM.TableDetails) (string, error)
 		}
 		fmt.Fprintf(pSR.w, sbDbg.String() + "\n")
 	}
-        // stmt is for building the actual SQL statement
-	var stmt S.Builder
-	stmt.WriteString(fmt.Sprintf("CREATE TABLE %s(\n", pTD.StorName))
+        // sqlStmt is for building the actual SQL statement
+	var sqlStmt S.Builder
+	sqlStmt.WriteString(fmt.Sprintf("CREATE TABLE %s(\n", pTD.StorName))
 
-	// ====================================
-	// PRIMARY KEY IS ASSUMED - DO IT FIRST
-	// idx_mytable integer not null primary key autoincrement,
-	// ====================================
+	// ======================================
+	//  PRIMARY KEY IS ASSUMED - DO IT FIRST
+	//     idx_mytable integer not null
+	//     primary key autoincrement,
+	// ======================================
 	if pTD.PKname == "" {
-	   panic("pTD.PKname is not set")
+	   panic("pTD(" + pTD.StorName + ").PKname is not set")
 	}
-	stmt.WriteString(pTD.PKname + // too long! use a newline
+	// stmt is too long, so use a newline
+	sqlStmt.WriteString(pTD.PKname + 
 		" integer not null \n    primary key autoincrement, " +
 		"-- NOTE: integer, not int. \n")
 	// =====================================
@@ -91,19 +94,20 @@ func (pSR *SqliteRepo) NewCreateTableStmt(pTD *DRM.TableDetails) (string, error)
 		
 		// Text fields are simple
 		case D.BDT_TEXT: // maps to SQLITE_TEXT 3
-			stmt.WriteString(colName + " text not null,\n")
+			sqlStmt.WriteString(colName + " text not null,\n")
 			
-		// Int(eger) fields are simple (they're not keys) 
-		case D.BDT_INTG: // maps to SQLITE_INTEGER filect
+		// Int(eger) fields are simple (they are not keys) 
+		case D.BDT_INTG: // maps to SQLITE_INTEGER 1 
 			// TODO: int not null check (filect >= 0) default 0
-			stmt.WriteString(colName + " int not null,\n")
+			sqlStmt.WriteString(colName + " int not null,\n")
 			
-		// Date/time fields are assumed to be ISO-8601
+		// Date/time fields are assumed to be ISO-8601,
+		// using SQLITE TEXT 
 		case D.BDT_DYTM: // maps to SQLYT_DATETIME 6
 		  // println("column DATE-TIME:",
 		  // 	D.Datum(SFT.Descriptor()).String())
 		  // Use ISO-8601 strings ("YYYY-MM-DD HH:MM:SS. SSS")
-		     stmt.WriteString(colName + " text not null, -- ISO-8601 \n")
+		     sqlStmt.WriteString(colName + " text not null, -- ISO-8601 \n")
 
 		// Keys get real complicated real fast 
 		case D.BDT_KEYY: // PRIMARY/FOREIGN/OTHER KEY (SQLite "INTEGER")
@@ -135,7 +139,7 @@ func (pSR *SqliteRepo) NewCreateTableStmt(pTD *DRM.TableDetails) (string, error)
 				//     primary key autoincrement,
 				// idx_inbatch integer not null
 				//     references inbatch(idx_inbatch),
-				stmt.WriteString(fmt.Sprintf(
+				sqlStmt.WriteString(fmt.Sprintf(
 					"%s integer not null references %s(%s),\n",
 					refgField, refdTable, refgField))
 			case 3: // multiple indices into same table, e.g.
@@ -149,7 +153,7 @@ func (pSR *SqliteRepo) NewCreateTableStmt(pTD *DRM.TableDetails) (string, error)
 				if S.EqualFold(ss[0], "idx") &&
 					S.EqualFold(ss[1][0:1], refdTable[0:1]) {
 					refdField = "idx_" + refdTable
-					stmt.WriteString(fmt.Sprintf(
+					sqlStmt.WriteString(fmt.Sprintf(
 					  "%s integer not null references %s(%s),\n",
 					   refgField, refdTable, refdField))
 				} else {
@@ -163,16 +167,16 @@ func (pSR *SqliteRepo) NewCreateTableStmt(pTD *DRM.TableDetails) (string, error)
 			}
 		  }
 		default:
-			fmt.Fprintf(pSR.w, "OOPS: col<%s> bdt<%s> sft<%s> \n",
-				colName, BDT, SFT) 
+			fmt.Fprintf(pSR.w, "pTD.StorName CreTbl OOPS: " +
+				"col<%s> bdt<%s> sft<%s> \n", colName, BDT, SFT) 
 			panic(pCS.Datatype)
 		}
 	}
 	// trim off final ",\n"
-	ss := stmt.String()
+	ss := sqlStmt.String()
 	// and add STRICT 
 	stmt3 := ss[0:len(ss)-2] + "\n) STRICT;"
-	fmt.Fprintf(pSR.w, "SQL for CRE TBL: %s \n", stmt3) 
+	fmt.Fprintf(pSR.w, "=== %s.CreTbl.SQL: %s \n", pTD.StorName, stmt3) 
 	return stmt3, nil
 }
 
