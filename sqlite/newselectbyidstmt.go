@@ -37,20 +37,21 @@ func (pSR *SqliteRepo) NewSelectByIdStmt(pTD *DRM.TableDetails, anID int) (strin
 	fmt.Fprintf(pSR.w, "LENS: ColSpex<%d> ColPtrs<%d> \n",
 		len(pTD.ColumnSpecs), len(colPtrs))
 	*/
-	var sb S.Builder
+	var sqlBldr S.Builder
 	// FIX: We need the own-table ID here too 
-	sb.WriteString("SELECT " + pTD.PKname + ", ")
-	sb.WriteString(pTD.ColumnNamesCSV)
-	sb.WriteString(" FROM ")
-	sb.WriteString(pTD.TableSummary.StorName)
-	sb.WriteString(" WHERE ")
-	sb.WriteString(pTD.PKname)
-	sb.WriteString(" = ")
-	sb.WriteString(fmt.Sprintf("%d;", anID))
+	sqlBldr.WriteString("SELECT " + pTD.PKname + ", ")
+	sqlBldr.WriteString(pTD.ColumnNamesCSV)
+	sqlBldr.WriteString(" FROM ")
+	sqlBldr.WriteString(pTD.TableSummary.StorName)
+	sqlBldr.WriteString(" WHERE ")
+	sqlBldr.WriteString(pTD.PKname)
+	sqlBldr.WriteString(" = ")
+	sqlBldr.WriteString(fmt.Sprintf("%d;", anID))
 	
 	var stmt string 
-	stmt = sb.String()
-	fmt.Fprintf(pSR.w, "SELECT by ID STMT: %s \n", stmt) 
+	stmt = sqlBldr.String()
+	fmt.Fprintf(pSR.w, "== %s.NewSelByIdStmt.SQL ===\n%s\n",
+		pTD.StorName, stmt) 
 	return stmt, nil
 }
 

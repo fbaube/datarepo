@@ -102,7 +102,8 @@ func (pSR *SqliteRepo) NewInsertStmt(pRM DRM.RowModel) (string, error) {
 	sb.WriteString(") VALUES(")
 	// var sft D.SemanticFieldType
 	var sn string
-	var dt D.SemanticFieldType 
+	var dt D.SemanticFieldType
+	fmt.Fprintf(pSR.w, "=== %s.NewInsStmt.ColSpex ===\n")
 	for iii, cp := range colPtrs {
 	    /*
 	    if iii == 0 {
