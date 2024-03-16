@@ -294,15 +294,20 @@ func NewInsertStmtGnrcFunc[T DRM.RowModel](pSR *SqliteRepo, pRM T) (string, erro
 
 	// fmt.Fprintf(os.Stderr, "LENS: ColSpex<%d> ColPtrs<%d> \n",
 	//	len(pTD.ColumnSpecs), len(colPtrs))
-	var sb S.Builder
-	sb.WriteString("INSERT INTO ")
-	sb.WriteString(pTD.TableSummary.StorName)
-	sb.WriteString("(")
-	sb.WriteString(pTD.ColumnNamesCSV)
-	sb.WriteString(") VALUES(")
+
+	// Add some log info 
+	fmt.Fprintf(pSR.w, "=== %s.NewInStmtGenc.ColSpex ===\n", pTD.StorName)
+	// Build the statement  
+	var sqlBldr S.Builder
+	sqlBldr.WriteString("INSERT INTO ")
+	sqlBldr.WriteString(pTD.TableSummary.StorName)
+	sqlBldr.WriteString("(")
+	sqlBldr.WriteString(pTD.ColumnNamesCSV)
+	sqlBldr.WriteString(") VALUES(")
 	// var sft D.SemanticFieldType
 	var sn string
 	var dt D.SemanticFieldType 
+
 	for iii, cp := range colPtrs {
 	    /*
 	    if iii == 0 {
@@ -315,6 +320,7 @@ func NewInsertStmtGnrcFunc[T DRM.RowModel](pSR *SqliteRepo, pRM T) (string, erro
 	    */
 	    sn = pTD.ColumnSpecs[iii].StorName
 	    dt = D.SemanticFieldType(pTD.ColumnSpecs[iii].Datatype)
+	    // Add some log info 
 	    fmt.Fprintf(pSR.w, "[%d] %s / %s / %T \n", iii, sn, dt, cp)
 	    // sft = D.SemanticFieldType(ppp.Datatype)
 	    switch cp.(type) {
@@ -323,24 +329,25 @@ func NewInsertStmtGnrcFunc[T DRM.RowModel](pSR *SqliteRepo, pRM T) (string, erro
 			var sS string
 			pS = cp.(*string)
 			sS = *pS
-		   	sb.WriteString(fmt.Sprintf("'%s', ", sS))
+		   	sqlBldr.WriteString(fmt.Sprintf("'%s', ", sS))
 	    	   case *FU.AbsFilePath:
-		   	sb.WriteString(fmt.Sprintf("'%s', ", AFPval(cp)))
+		   	sqlBldr.WriteString(fmt.Sprintf("'%s', ", AFPval(cp)))
 	    	   case *SU.MarkupType:
-		   	sb.WriteString(fmt.Sprintf("'%s', ", MTval(cp)))
+		   	sqlBldr.WriteString(fmt.Sprintf("'%s', ", MTval(cp)))
 	    	   case *CT.Raw:
-		   	sb.WriteString(fmt.Sprintf("'%s', ", CTRval(cp)))
+		   	sqlBldr.WriteString(fmt.Sprintf("'%s', ", CTRval(cp)))
 		   case *int:
 		   	var pI *int
 			pI = cp.(*int)
-		   	sb.WriteString(fmt.Sprintf("%d, ", *pI))
+		   	sqlBldr.WriteString(fmt.Sprintf("%d, ", *pI))
 	    }
 	}
 	var stmt string 
-	stmt = sb.String()
+	stmt = sqlBldr.String()
 	stmt2 := stmt[:len(stmt)-2] + ") RETURNING IDX_" + pTD.StorName + ";"
-	// sb.WriteString(") RETURNING IDX_" + pTD.StorName + ";")
-	fmt.Fprintf(pSR.w, "INSERT STMT: %.60s[...] \n", stmt2) // sb.String())
+	// sqlBldr.WriteString(") RETURNING IDX_" + pTD.StorName + ";")
+	fmt.Fprintf(pSR.w, "=== %s.NewInsStmtGenc.SQL ===\n%s\n",
+		pTD.StorName, stmt2)
 	return stmt2, nil
 }
 

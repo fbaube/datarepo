@@ -3,10 +3,9 @@ package sqlite
 import (
        "io"
        "fmt"
-       "time"
 	"database/sql"
 	D "github.com/fbaube/dsmnd"
-	// DR "github.com/fbaube/datarepo"
+	SU "github.com/fbaube/stringutils"
 )
 
 type SqliteRepo struct {
@@ -24,8 +23,7 @@ func (p *SqliteRepo) DBImplementationName() D.DB_type {
 func (p *SqliteRepo) SetLogWriter(wrtr io.Writer) io.Writer {
      tmpw := p.w
      p.w = wrtr
-     fmt.Fprintf(p.w, "# DB logfile opened at %s \n",
-     	time.Now().Local().Format(time.RFC3339))
+     fmt.Fprintf(p.w, "# DB logfile opened at %s \n", SU.Now())
      return tmpw
 }
 
