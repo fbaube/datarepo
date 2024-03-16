@@ -44,7 +44,7 @@ func (pSR *SqliteRepo) ExecInsertStmt(stmt string) (int, error) {
 	     	L.L.Error("Exec.Ins.LastInsertId failed: %w", e)
 		return -1, fmt.Errorf("ExecInsStmt.LastInsertId: %w", e)
 		} 
-	fmt.Fprintf(pSR.w, "=== ExecInsStmt.RETval.id: %d ===\n", id)
+	fmt.Fprintf(pSR.w, "=>> ExecInsStmt.RET.id: %d ===\n", id)
 	/*
 	// ===================
 	// or try QUERY + Scan
