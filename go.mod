@@ -5,12 +5,12 @@ go 1.22
 toolchain go1.22.0
 
 require (
-	github.com/fbaube/contentanalysis v0.0.0-20240117104147-e12c9546e1cc
-	github.com/fbaube/ctoken v0.0.0-20240117104044-e4c4f08f089a
+	github.com/fbaube/contentanalysis v0.0.0-20240319104033-db838f836ab0
+	github.com/fbaube/ctoken v0.0.0-20240318064251-0d73030038b5
 	github.com/fbaube/dsmnd v0.0.0-20240130143636-adbc149a7741
-	github.com/fbaube/fileutils v0.0.0-20240313201955-760dba24347d
+	github.com/fbaube/fileutils v0.0.0-20240319103908-a02f921e7413
 	github.com/fbaube/mlog v0.0.0-20230904080411-cfac35fed413
-	github.com/fbaube/stringutils v0.0.0-20240227182912-df670eade115
+	github.com/fbaube/stringutils v0.0.0-20240318064103-bf7b5a2b5f11
 	github.com/mattn/go-sqlite3 v1.14.22
 )
 
@@ -25,7 +25,7 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mgutz/str v1.2.0 // indirect
-	golang.org/x/exp v0.0.0-20240314144324-c7f7c6466f7f // indirect
+	golang.org/x/exp v0.0.0-20240318143956-a85f2c67cd81 // indirect
 	golang.org/x/net v0.22.0 // indirect
 	golang.org/x/sys v0.18.0 // indirect
 	golang.org/x/tools v0.19.0 // indirect

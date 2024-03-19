@@ -108,12 +108,12 @@ func ColumnPtrsFuncCNT(acro RowModel, inclPK bool) []any {
 	}
      list = []any {
 		&cro.Idx_Inbatch,
-		&cro.PathProps.RelFP, &cro.PathProps.AbsFP,
+		&cro.FSItem.FPs.RelFP, &cro.FSItem.FPs.AbsFP,
 		&cro.Descr, &cro.T_Cre, &cro.T_Imp, &cro.T_Edt,
-		&cro.PathProps.TypedRaw.MarkupType,
+		&cro.FSItem.TypedRaw.MarkupType,
 		&cro.PathAnalysis.ContypingInfo.MimeType,
 		&cro.PathAnalysis.ContypingInfo.MType,
-		&cro.PathProps.TypedRaw.Raw, 
+		&cro.FSItem.TypedRaw.Raw, 
 		}
 	if !inclPK { return list }
 	// names = slices.Insert(names, 1, "Bill", "Billie")
@@ -151,18 +151,24 @@ var TableDetailsCNT = TableDetails{
 // ContentityRow describes (in the DB) the entity's content
 // plus its "dead properties" - basically, properties that
 // are set by the user, rather than calculated as needed.
-// The Raw content is in [PathProps.TypedRaw.Raw].
+// Raw content is in [FSItem.TypedRaw.Raw] and directory
+// typing is in [FSItem.TypedRaw.MarkupType] and they
+// are MUTUALLY EXCLUSIVE.
 type ContentityRow struct {
 	Idx_Contentity int
 	Idx_Inbatch    int // NOTE: Rename to FILESET? Could be multiple?
 	Descr          string
 	// Times is T_Cre, T_Imp, T_Edt string
 	DRU.Times
-	// PathProps has Raw and is // => EntityProps !!
+	// FSItem has Raw [the byte content) AND path and 
+	// name information AND whether it is a directory
+	// (indicated by SU.MarkupType == MU_type_DIRLIKE).
+	// NOTE that directory-like and byte-content are
+	// mutually exclusive !!
 	// CT.TypedRaw { Raw, SU.MarkupType string };
 	// RelFP, ShortFP string;
 	// FileMeta { os.FileInfo, exists bool, MU.Errer }
-	FU.PathProps
+	FU.FSItem
 	// PathAnalysis is a ptr, so that we get a
 	// NPE if it is not initialized properly;
 	// or if analysis failed, if (for example)

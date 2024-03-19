@@ -16,11 +16,11 @@ import (
 )
 
 // NewContentityRow does content fetching &
-// analysis, while "promoting" a [PathProps];
+// analysis, while "promoting" an [FSItem];
 // it work for directories and symlinks too.
 // .
-func NewContentityRow(pPP *FU.PathProps, pPA *CA.PathAnalysis) (*DRM.ContentityRow, error) {
-	if pPP == nil || pPA == nil {
+func NewContentityRow(pFSI *FU.FSItem, pPA *CA.PathAnalysis) (*DRM.ContentityRow, error) {
+	if pFSI == nil || pPA == nil {
 		panic("OOPS")
 	}
 	if pPA.MarkupType() == "UNK" {
@@ -30,20 +30,20 @@ func NewContentityRow(pPP *FU.PathProps, pPA *CA.PathAnalysis) (*DRM.ContentityR
 	}
 	// var e error
 	pNewCR := new(DRM.ContentityRow)
-	pNewCR.PathProps = *pPP
+	pNewCR.FSItem = *pFSI
 	pNewCR.PathAnalysis = pPA
 
-	if !pPP.Exists() {
-		L.L.Error(pPP.String())
+	if !pFSI.Exists() {
+		L.L.Error(pFSI.String())
 		return nil, errors.New(
-			"input PathProps does not exist: " + pPP.AbsFP.S())
+			"input PathProps does not exist: " + pFSI.FPs.AbsFP.S())
 	}
-	if pPP.IsDir() || pPP.IsSymlink() {
+	if pFSI.IsDir() || pFSI.IsSymlink() {
 		// COMMENTING THIS OUT IS A FIX
 		// pCR.SetError(errors.New("Is directory or symlink"))
 		return pNewCR, nil
 	}
-	if !pPP.IsFile() {
+	if !pFSI.IsFile() {
 		return pNewCR, errors.New("is not valid file")
 	}
 	// =======================
