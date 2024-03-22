@@ -15,35 +15,33 @@ import (
 	CA "github.com/fbaube/contentanalysis"
 )
 
-// NewContentityRow does content fetching &
-// analysis, while "promoting" an [FSItem];
-// it work for directories and symlinks too.
+// NewContentityRow does content fetching & analysis, while "promoting"
+// an [FSItem]; it work for "Dirlike" (directories and symlinks) too.
+// If the second argument is nil, the first argument is verified to be
+// Dirlike. In such case (Dirlike), the return value *ContentityRow is
+// basically a shell.
 // .
 func NewContentityRow(pFSI *FU.FSItem, pPA *CA.PathAnalysis) (*DRM.ContentityRow, error) {
-	if pFSI == nil || pPA == nil {
+	if pFSI == nil {
 		panic("OOPS")
 	}
-	if pPA.MarkupType() == "UNK" {
-		// panic("UNK MarkupType in ExecuteStages")
-		return nil, fmt.Errorf(
-			"reposqlite.fxCntyrow.NewCR: got MarkupType UNK")
-	}
-	// var e error
-	pNewCR := new(DRM.ContentityRow)
-	pNewCR.FSItem = *pFSI
-	pNewCR.PathAnalysis = pPA
-
 	if !pFSI.Exists() {
 		L.L.Error(pFSI.String())
 		return nil, errors.New(
 			"input PathProps does not exist: " + pFSI.FPs.AbsFP.S())
 	}
-	if pFSI.IsDir() || pFSI.IsSymlink() {
-		// COMMENTING THIS OUT IS A FIX
-		// pCR.SetError(errors.New("Is directory or symlink"))
-		return pNewCR, nil
+	pNewCR := new(DRM.ContentityRow)
+	pNewCR.FSItem = *pFSI
+	pNewCR.PathAnalysis = pPA
+	if pPA == nil ||
+	   pPA.MarkupTypeOfMType() == SU.MU_type_DIRLIKE ||
+	   pPA.MarkupTypeOfMType() == SU.MU_type_UNK {
+	   // Here we could call FU.IsDirAndExists,
+	   // but then what if it's a symlink ??
+
+	   return pNewCR, nil
 	}
-	if !pFSI.IsFile() {
+	if !pFSI.IsFile() { // should not happen 
 		return pNewCR, errors.New("is not valid file")
 	}
 	// =======================
@@ -59,8 +57,8 @@ func NewContentityRow(pFSI *FU.FSItem, pPA *CA.PathAnalysis) (*DRM.ContentityRow
 		}
 	}
 	// pNewCR.PathAnalysis = pPA // repeats the above 
-	if pNewCR.MarkupType() == "UNK" {
-		panic("UNK MarkupType in NewContentityRow")
+	if pNewCR.MarkupTypeOfMType() == SU.MU_type_UNK {
+		panic("UNK MarkupTypeOfMType in NewContentityRow")
 	}
 	// SPLIT FILE!
 	if !pPA.ContentityBasics.HasNone() {
@@ -68,10 +66,10 @@ func NewContentityRow(pFSI *FU.FSItem, pPA *CA.PathAnalysis) (*DRM.ContentityRow
 			pPA.ContentityBasics.XmlRoot.Info(),
 			pPA.ContentityBasics.Meta.Info(),
 			pPA.ContentityBasics.Text.Info())
-	} else if pPA.MarkupType() == SU.MU_type_MKDN {
+	} else if pPA.MarkupTypeOfMType() == SU.MU_type_MKDN {
 		// pPA.KeyElms.SetToAllText()
 		// L.L.Warning("TODO set MKDN all text, and ranges")
-	} else if pPA.MarkupType() == SU.MU_type_BIN {
+	} else if pPA.MarkupTypeOfMType() == SU.MU_type_BIN {
 	} else {
 		L.L.Warning("Found no key elms (root,meta,text)")
 	}
