@@ -5,12 +5,12 @@ go 1.22
 toolchain go1.22.0
 
 require (
-	github.com/fbaube/contentanalysis v0.0.0-20240319104033-db838f836ab0
-	github.com/fbaube/ctoken v0.0.0-20240320075402-d501c60baf3e
+	github.com/fbaube/contentanalysis v0.0.0-20240322200038-dcc26d251e02
+	github.com/fbaube/ctoken v0.0.0-20240322195920-6d5d80a301ae
 	github.com/fbaube/dsmnd v0.0.0-20240130143636-adbc149a7741
-	github.com/fbaube/fileutils v0.0.0-20240321184736-e74b758e4e0d
+	github.com/fbaube/fileutils v0.0.0-20240322195951-f7eac492460a
 	github.com/fbaube/mlog v0.0.0-20230904080411-cfac35fed413
-	github.com/fbaube/stringutils v0.0.0-20240318064103-bf7b5a2b5f11
+	github.com/fbaube/stringutils v0.0.0-20240322200159-80cb818c8713
 	github.com/mattn/go-sqlite3 v1.14.22
 )
 
@@ -20,7 +20,7 @@ require (
 	github.com/fbaube/logutils v0.0.0-20240118190821-fba0e702dd07 // indirect
 	github.com/fbaube/miscutils v0.0.0-20240307083109-5e380dcbb1e7 // indirect
 	github.com/fbaube/wasmutils v0.0.0-20231209183154-e25018375bc2 // indirect
-	github.com/fbaube/xmlutils v0.0.0-20240117103856-0d26c14e3769 // indirect
+	github.com/fbaube/xmlutils v0.0.0-20240322200140-f0ad2fb0183d // indirect
 	github.com/gabriel-vasile/mimetype v1.4.3 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect

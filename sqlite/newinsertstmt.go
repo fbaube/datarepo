@@ -297,7 +297,7 @@ func NewInsertStmtGnrcFunc[T DRM.RowModel](pSR *SqliteRepo, pRM T) (string, erro
 	//	len(pTD.ColumnSpecs), len(colPtrs))
 
 	// Add some log info 
-	fmt.Fprintf(pSR.w, "=== %s.NewInStmtGenc.ColSpex ===\n", pTD.StorName)
+	fmt.Fprintf(pSR.w, "=== %s.NewInsStmtGenc.ColSpex ===\n", pTD.StorName)
 	// Build the statement  
 	var sqlBldr S.Builder
 	sqlBldr.WriteString("INSERT INTO ")
