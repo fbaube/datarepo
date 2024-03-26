@@ -14,7 +14,7 @@ func init() {
      /*
      pSR, ok = env.SimpleRepo.(*SqliteRepo)
      if !ok {
-     	fmt.Printf("PROBLEM! *SqliteRepo is not SimpleRepo.")
-	pSR = 
-     	*/
+     	println("PROBLEM! *SqliteRepo is not SimpleRepo.")
 	}
+	*/
+}
