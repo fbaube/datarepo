@@ -5,10 +5,10 @@ go 1.22
 toolchain go1.22.0
 
 require (
-	github.com/fbaube/contentanalysis v0.0.0-20240322200038-dcc26d251e02
-	github.com/fbaube/ctoken v0.0.0-20240322195920-6d5d80a301ae
+	github.com/fbaube/contentanalysis v0.0.0-20240326135212-a64c83951c24
+	github.com/fbaube/ctoken v0.0.0-20240326135115-74e3cecb9b66
 	github.com/fbaube/dsmnd v0.0.0-20240130143636-adbc149a7741
-	github.com/fbaube/fileutils v0.0.0-20240325110318-0c80a6fa64f5
+	github.com/fbaube/fileutils v0.0.0-20240326135138-a85c3bc4c0ed
 	github.com/fbaube/mlog v0.0.0-20230904080411-cfac35fed413
 	github.com/fbaube/stringutils v0.0.0-20240322200159-80cb818c8713
 	github.com/mattn/go-sqlite3 v1.14.22

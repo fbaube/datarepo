@@ -6,6 +6,7 @@ import (
 	FU "github.com/fbaube/fileutils"
 	DRU "github.com/fbaube/datarepo/utils"
 	CA "github.com/fbaube/contentanalysis"
+	L "github.com/fbaube/mlog"
 	// "github.com/fbaube/nurepo/db"
 	// "runtime/debug"
 )
@@ -95,12 +96,12 @@ func ColumnPtrsFuncCNT(acro RowModel, inclPK bool) []any {
      var cro *ContentityRow
      cro = acro.(*ContentityRow)
      if cro == nil {
-     	println("ColumnPtrsFuncCNT nil *ContentityRow")
+     	L.L.Warning("ColumnPtrsFuncCNT nil *ContentityRow")
 	cro = new(ContentityRow)
 	}
      var list []any
      if cro.PathAnalysis == nil {
-     	println("NIL cro.PathAnalysis !!")
+     	L.L.Warning("CtyRowCore.ColPtrsFunc: NIL cro.PathAnalysis")
 	// Dump stack (but now comment out cos was
 	// trigrd accidentally by debugging stuff)
 	// debug.PrintStack()
