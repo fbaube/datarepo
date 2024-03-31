@@ -4,6 +4,7 @@ import (
        "slices"
 	D "github.com/fbaube/dsmnd"
 	FU "github.com/fbaube/fileutils"
+	SU "github.com/fbaube/stringutils"
 	DRU "github.com/fbaube/datarepo/utils"
 	CA "github.com/fbaube/contentanalysis"
 	L "github.com/fbaube/mlog"
@@ -101,12 +102,16 @@ func ColumnPtrsFuncCNT(acro RowModel, inclPK bool) []any {
 	}
      var list []any
      if cro.PathAnalysis == nil {
-     	L.L.Warning("CtyRowCore.ColPtrsFunc: NIL cro.PathAnalysis")
-	// Dump stack (but now comment out cos was
-	// trigrd accidentally by debugging stuff)
-	// debug.PrintStack()
-	cro.PathAnalysis = new(CA.PathAnalysis)
+     	if cro.MarkupType == SU.MU_type_DIRLIKE {
+	   L.L.Info("Making dummy PathAnalysis for DIR in DB")
+	} else {
+     	  L.L.Warning("CtyRowCore.ColPtrsFunc: NIL cro.PathAnalysis")
+	  // Dump stack (but now comment out cos was
+	  // trigrd accidentally by debugging stuff)
+	  // debug.PrintStack()
 	}
+	cro.PathAnalysis = new(CA.PathAnalysis)
+     }
      list = []any {
 		&cro.Idx_Inbatch,
 		&cro.FSItem.FPs.RelFP, &cro.FSItem.FPs.AbsFP,
