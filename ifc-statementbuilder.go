@@ -11,5 +11,5 @@ type StatementBuilder interface {
 	// BuildQueryStmt(*DRU.QuerySpec) (string, error)
 	NewCreateTableStmt(*DRM.TableDetails) (string, error)
 	NewSelectByIdStmt(*DRM.TableDetails, int) (string, error)
-	NewInsertStmt(DRM.RowModel) (string, error)
+	// NewInsertStmt(DRM.RowModel) (string, error)
 }

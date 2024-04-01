@@ -28,6 +28,8 @@ github.com/fbaube/ctoken v0.0.0-20240326135115-74e3cecb9b66 h1:SeqfuxSxFOqF70+dD
 github.com/fbaube/ctoken v0.0.0-20240326135115-74e3cecb9b66/go.mod h1:a6iJmepHufrugrAfsr80vskX6krzXcuYXYmEg3CRK6s=
 github.com/fbaube/ctoken v0.0.0-20240327145556-74a636fac33d h1:WFf7aF79i5QUeBmgM4RcSSUDXbzO1bjwZfBPS6g/u3E=
 github.com/fbaube/ctoken v0.0.0-20240327145556-74a636fac33d/go.mod h1:60M9YGqLxZXikUa5+/rl6X4WuC5kDXq8JkHpTAO7Al0=
+github.com/fbaube/ctoken v0.0.0-20240331170316-48bee35bdbb4 h1:Sq/dmGPntC6YVeYrYvKCrZCkX46lqrMkYozEVBWox6M=
+github.com/fbaube/ctoken v0.0.0-20240331170316-48bee35bdbb4/go.mod h1:60M9YGqLxZXikUa5+/rl6X4WuC5kDXq8JkHpTAO7Al0=
 github.com/fbaube/dsmnd v0.0.0-20240130143636-adbc149a7741 h1:1qmauz9VF6WcTp4umXA40TQ65UftqHE80pgx4wQSpWo=
 github.com/fbaube/dsmnd v0.0.0-20240130143636-adbc149a7741/go.mod h1:7FFQTZsr7f2vA243fKLohCwszP3Xrzi/xbFkOyPF+YQ=
 github.com/fbaube/fileutils v0.0.0-20231218210156-f6a37eab1eae h1:zU2TS8foMExseNqJE/vnlkoEzMzJhqsqSL8A02S2vuM=
