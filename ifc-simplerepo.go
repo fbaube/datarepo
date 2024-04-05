@@ -29,6 +29,9 @@ type SimpleRepo interface {
 	SessionLifecycler
      // StatementBuilder uses [TableDescriptor] and [QuerySpec] 
 	StatementBuilder
+     // Transactioner is for transactions
+     	Transactioner
+     	
      // QueryRunner is for generics and has funcs that return 0,1,N rows
 	QueryRunner
 

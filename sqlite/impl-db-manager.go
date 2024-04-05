@@ -20,6 +20,20 @@ import (
 //	OpenAtPath(string) (string, error)
 //	NewAtPath(string) (string, error)
 //	OpenExistingAtPath(string) (string, error)
+//	InitznPragmas() string // multiline
+//      ReadonlyPragma() string 
+
+var initznPragmas =
+`PRAGMA journal_mode = WAL;
+PRAGMA busy_timeout = 5000;
+PRAGMA synchronous = NORMAL;
+PRAGMA cache_size = 1000000000;
+PRAGMA foreign_keys = true;
+PRAGMA temp_store = memory;`
+
+var readonlyPragma = "PRAGMA query_only = TRUE;"
+
+// func (p *SqliteRepo) DoPragma(s string) {
 
 /* OpenFile flags etc.
 // Flags to OpenFile wrapping those of the underlying system.
@@ -239,3 +253,12 @@ func (p *SqliteDBManager) OpenExistingAtPath(aPath string) (*SqliteRepo, error) 
 	return nil, errors.New(
 		"sqlite.repo.openAt: file not found: " + aPath)
 }
+
+func (p *SqliteDBManager) InitznPragmas() string { // multiline
+     return initznPragmas
+     }
+     
+func (p *SqliteDBManager) ReadonlyPragma() string {
+     return readonlyPragma
+     }
+
