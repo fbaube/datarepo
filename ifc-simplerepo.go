@@ -38,7 +38,7 @@ type SimpleRepo interface {
 	// SetLogWriter returns the previous value. Moved to [SessionLifecycler].
 	// SetLogWriter(io.Writer) io.Writer 
 
-	RepoAppTables
+	AppTableSetter
 	// DBManager
 }
 

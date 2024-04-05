@@ -5,11 +5,11 @@ import (
 	DRM "github.com/fbaube/datarepo/rowmodels"
 )
 
-// RepoAppTables is table-related methods for a specified app's schema.
-// The app name is case-insensitive, and used as all lower case, and
-// prefixed to table names as "appname_". If the app name is left blank
-// (""), a default namespace is used and no prefix is added to table names.
-type RepoAppTables interface {
+// AppTableSetter is table-related methods for a specified app's schema.
+// The app name is case-insensitive, and used as all lower case, and pre-
+// fixed to table names as "appname_". If the app name is left blank (""),
+// a default namespace is used and no prefix is added to table names.
+type AppTableSetter interface {
 	// SetAppTables specifies the schemata of the specified app's
 	// tables, which this interface creates and/or manages. Multiple
 	// calls, whether with tables previously specified or not before

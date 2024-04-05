@@ -23,12 +23,10 @@ func init() {
 	theMap = make(map[string]DRM.TableDetails)
 }
 
-// RepoAppTables is table-related methods for a specified app's schema.
-// The app name is case-insensitive, and used as all lower case, and
-// prefixed to table names as "appname_". If the app name is left blank
-// (""), a default namespace is used and no prefix is added to table names.
-//
-// type RepoAppTables interface {
+// Interface AppTableSetter is table-related methods for a specified app's 
+// schema. The app name is case-insensitive, and used as all lower case, and 
+// preixed to table names as "appname_". If the app name is left blank (""),
+// a default namespace is used and no prefix is added to table names.
 
 // SetAppTables specifies the schemata of the specified app's
 // tables, which this interface creates and/or manages. Multiple
