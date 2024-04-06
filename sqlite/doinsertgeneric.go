@@ -38,13 +38,14 @@ func DoInsertGeneric[T DRM.RowModel](pSR *SqliteRepo, pRM T) (int, error) {
 	//  4) Write out the values to the stmt
 	//  5) Add RETURNING
 	//  6) (the stmt's user) Use that returned that ID
-
+/*
 	switch DRM.RowModel(pRM).(type) {
 	       case *DRM.ContentityRow:
 	       	    L.L.Warning("ins CTY")
 	       case *DRM.InbatchRow:
 	       	    L.L.Warning("ins INB")
 	}
+*/
 	var colPtrs []any
 	var cp any 
 	var iCol int 
@@ -131,7 +132,8 @@ func DoInsertGeneric[T DRM.RowModel](pSR *SqliteRepo, pRM T) (int, error) {
 		
 	// return theSQL, nil
 	// }
-// func (pSR *SqliteRepo) ExecInsertStmt(stmt string) (int, error) {
+
+// (COPIED) (pSR *SqliteRepo) ExecInsertStmt(stmt string) (int, error) {
 
 	var res sql.Result
 	var id int64

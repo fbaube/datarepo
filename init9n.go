@@ -76,7 +76,7 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 	}
 	
 	// Start by checking on the status of the filename.
-	// This assumes that the DB is SQLite, a single file.
+	// NOTE: This assumes that the DB is SQLite, a single file.
 	// Note that a path is used to derive a FILE path.
 	var dbFilepath string
 	// println("misc.go: BEFOR:", p.Dir)
@@ -88,20 +88,22 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 	dbFilepath = FU.ResolvePath(
 		p.Dir + FU.PathSep + DEFAULT_FILENAME)
 	println("DB: full path:", dbFilepath)
-	errPfx := fmt.Errorf("processDBargs(%s):", dbFilepath)
-	// func IsFileAtPath(aPath string) (bool, *os.FileInfo, error) {
+	errPfx := fmt.Errorf("DB.Init9n(%s):", dbFilepath)
 
 	var fileinfo os.FileInfo
 	filexist, fileinfo, filerror := FU.IsFileAtPath(dbFilepath)
 	if filerror != nil {
-		// panic("init9n.L87")
 		return nil, fmt.Errorf("%s file error: %w", errPfx, filerror)
 	}
 	var shortPath string 
-	shortPath = SU.ElideHomeDir(dbFilepath)
-	var openError error 
+	shortPath = SU.Tildotted(dbFilepath)
+	var openError error
+	// If the DB already exists already and 
+	// is non-zero then go ahead and open it
 	if filexist {
 		L.L.Info("DB exists: " + shortPath)
+		// If the file is zero-length, it is removed, altho this may
+		// remove some special permissions that were configured
 		if fileinfo.Size() == 0 {
 			L.L.Info("DB is empty: " + shortPath)
 			e = os.Remove(dbFilepath)
@@ -122,8 +124,8 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 	// If the DB exists and we want to open
 	// it as-is, i.e. without zeroing it out,
 	// then this is where we return success:
-	if filexist && repo != nil /* && openError == nil */ && !p.DoZeroOut {
-	   	// A non-fatal error ? 
+	if filexist && repo != nil && !p.DoZeroOut {
+	   	// Some weirdness ? A non-fatal error ? 
 	   	if openError != nil {
 		   L.L.Warning("Expect DB problems: " +
 		   	"DB init got error: %w", openError)
@@ -139,6 +141,13 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 			L.L.Info("Zeroing out the DB is redundant")
 		}
 		repo, e = DB_Manager.NewAtPath(dbFilepath)
+		// Now configure it using pragmas
+		ps, pe := repo.DoPragmas(DB_Manager.InitznPragmas())
+		if pe != nil {
+		   L.L.Warning("Expect DB problems: " +
+                        "DB init pragmas got error: %w", pe)
+			}
+		L.L.Info("Ran init pragmas on DB: " + ps)
 	}
 	if e != nil {
 		return nil, fmt.Errorf("%s DB failure: %w", errPfx, e)

@@ -17,7 +17,7 @@ type SessionLifecycler interface {
 	// It is the therefore the sole responsibility of a caller to 
 	// determine which pragmas(s) to execute, and when. 
 	DoPragmas(string) (string, error)
-	// IsOpen pings the DB as a health check.
+	// IsOpen also pings the DB as a health check.
 	IsOpen() bool
 	// Verify runs app-level sanity & consistency checks (but things
 	// like foreign key integtrity should be delegated to DB setup).

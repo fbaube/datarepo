@@ -8,7 +8,6 @@ import DRU "github.com/fbaube/datarepo/utils"
 //   - ExecContext is used when no rows are returned ("0")
 //   - QueryContext is used for retrieving rows ("N")
 //   - QueryRowContext is used where only a single row is expected ("1")
-//
 // .
 type QueryRunner interface {
 	RunQuery0(*DRU.QuerySpec) (any, error)   // ie. Exec()

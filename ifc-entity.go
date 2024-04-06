@@ -8,17 +8,16 @@ import (
 	// _ "github.com/mattn/go-sqlite3"
 )
 
-// Entity provides realization-related
-// operations for databases.
-//
-// It defines methods on a (probably empty)
-// singleton that selects (for now: only)
-// SQLite implementations of this interface.
-// .
+// Entity provides operations for database entities (i.e. instances).
 type Entity interface {
-	Handle() *sql.DB    // (noun) the handle to the DB
-	Type() D.DB_type    // DB_SQLite ("sqlite", equiv.to "sqlite3")
-	Path() string       // file/URL (or dir/URL, if uses multiple files)
-	IsURL() bool        // false for a local SQLite file
-	IsSingleFile() bool // true for SQLite
+     	// Handle (noun) is the handle to the DB.
+	Handle() *sql.DB
+	// Type has value DB_SQLite ("sqlite", equiv.to "sqlite3").
+	Type() D.DB_type
+	// Path is the file/URL (or dir/URL, if uses multiple files) to the DB.
+	Path() string
+	// IsURL is false for a local SQLite file.
+	IsURL() bool
+	// IsSingleFile is true for SQLite. 
+	IsSingleFile() bool 
 }

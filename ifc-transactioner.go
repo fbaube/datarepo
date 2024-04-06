@@ -2,8 +2,14 @@ package datarepo
 
 import "database/sql"
 
-// Transactioner methods come from the Go stdlib, with the exception that
-// Begin() returns a new Transactioner that has an active Transaction in it. 
+// Transactioner methods come from the Go stdlib, but are modified 
+// to work with a single possibly-active transaction. If it is active, 
+// the trio of Exec/Query/QueryRow usw it, and if not, the calls go
+// straight to the sql.DB .
+//
+// There are a couple of problems with this, mainly when there are
+// multiple threads accessing. The fix would be that a call to Begin
+// would return the shared sql.DB but a unique sql.Tx .
 type Transactioner interface {
      GetTx() *sql.Tx
      IsInTx() bool 

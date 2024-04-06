@@ -15,16 +15,20 @@ func init() {
 //
 // NOTE: The recommended action is to call OpenAtPath,
 // which then selects one of the other two.
-//
-// It defines (for now: only) SQLite implementations.
 // .
 type DBManager interface {
+	// OpenAtPath should be
 	// OpenAtPath(string) (SimpleRepo, error) // recommended 
 	OpenAtPath(string) (*sqlite.SqliteRepo, error) // recommended 
+	// NewAtPath should be
 	// NewAtPath(string) (SimpleRepo, error)
 	NewAtPath(string) (*sqlite.SqliteRepo, error)
+	// OpenExistingAtPath should be
 	// OpenExistingAtPath(string) (SimpleRepo, error)
 	OpenExistingAtPath(string) (*sqlite.SqliteRepo, error)
-	InitznPragmas() string // multiline
+	// InitznPragmas is assumed to be multiline 
+	InitznPragmas() string
+	// ReadonlyPragma is assumed to be a single pragma that
+	// returns some sort of status message
 	ReadonlyPragma() string 
 }

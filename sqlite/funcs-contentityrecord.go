@@ -4,12 +4,10 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 
 	FU "github.com/fbaube/fileutils"
 	L "github.com/fbaube/mlog"
-	// DRU "github.com/fbaube/datarepo/utils"
 	DRM "github.com/fbaube/datarepo/rowmodels"
 	SU "github.com/fbaube/stringutils"
 	CA "github.com/fbaube/contentanalysis"
@@ -111,6 +109,7 @@ func (p SqliteRepo) GetContentityAll() (pp []*DRM.ContentityRow, err error) {
 	return pp, nil
 }
 
+/*
 // InsertContentityRow adds a content item (i.e. a file) to the DB.
 func (p SqliteRepo) InsertContentityRow(pC *DRM.ContentityRow) (int, error) {
 	var rslt sql.Result
@@ -166,3 +165,4 @@ func (p SqliteRepo) InsertContentityRow(pC *DRM.ContentityRow) (int, error) {
 	// fmt.Printf("    DD:InsertFile: ID %d nR %d \n", liid, naff)
 	return int(liid), nil
 }
+*/
