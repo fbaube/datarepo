@@ -13,8 +13,12 @@ import "database/sql"
 type Transactioner interface {
      GetTx() *sql.Tx
      IsInTx() bool 
-     // func (db *DB) Begin() (*Tx, error)
-     Begin() error // for re-entrancy return (Transactioner, error)
+     // Begin on an sql.DB is: func (db *DB) Begin() (*Tx, error).
+     // This method signature here has problems with re-entrancy,
+     // and a re-entrant version would have a signature like:
+     // Begin() (Transactioner, error)
+     Begin() error 
+     BeginImmed() error 
      Commit() error
      Rollback() error
      Exec(query string, args ...any) (sql.Result, error)
