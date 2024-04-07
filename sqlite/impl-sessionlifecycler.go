@@ -112,7 +112,7 @@ func (p *SqliteRepo) IsOpen() bool {
 // for a server application.
 // .
 func (p *SqliteRepo) Flush() error {
-     _, err := p.Exec("PRAGMA wal_checkpoint(TRUNCATE)")
+     _, err := p.Exec("PRAGMA wal_checkpoint(TRUNCATE);")
      if err != nil {
      	return fmt.Errorf("SQLiteRepo.Flush: PRAGMA wal_checkpoint: %w", err)
  	}
