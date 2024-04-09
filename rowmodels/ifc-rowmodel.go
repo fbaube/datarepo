@@ -1,7 +1,7 @@
 package rowmodels
 
 // RowModel is implemented by ptrs to structs in 
-// package [github.com/fbaube/datarepo/rowmodels] 
+// package [github.com/fbaube/m5db] 
 type RowModel interface {
      TableDetails() TableDetails 
      ColumnNamesCsv(bool) string 
