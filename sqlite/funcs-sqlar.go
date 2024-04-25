@@ -51,7 +51,7 @@ func NewSqlarRecord(pPP *FU.PathProps, pPA *FU.PathAnalysis) (*RU.ContentityRow,
 	// OK, it's a valid file. But maybe it's empty!
 	// If it's not, copy it into a convenient local variable.
 	if pPP.Size() == 0 {
-		L.L.Progress("Skipping fetch for zero-length content")
+		L.L.Info("Skipping fetch for zero-length content")
 	} else {
 		// e = pPP.FetchRaw()
 		e = pPP.GoGetFileContents()

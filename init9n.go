@@ -175,7 +175,7 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 		e = pSQR.CreateAppTables()
 
 	} else if p.DoZeroOut {
-		L.L.Progress("Zeroing out DB (init9nb.go)")
+		L.L.Info("Zeroing out DB (init9nb.go)")
 		_, e := repo.CopyToBackup()
 		if e != nil {
 			panic(e)

@@ -136,7 +136,7 @@ func (p *SqliteRepo) createAppTable(td *DRM.TableDetails) error {
 	if e != nil {
 		L.L.Error("Could not write file: " + fnam)
 	} else {
-		L.L.Dbg("Wrote \"CREATE TABLE " +
+		L.L.Debug("Wrote \"CREATE TABLE " +
 			td.StorName + " ... \" to: " + fnam)
 	}
 	// p.Handle().MustExec(CTS)
@@ -151,7 +151,7 @@ func (p *SqliteRepo) createAppTable(td *DRM.TableDetails) error {
 		return fmt.Errorf("simplerepo.createtable.sqlite: "+
 			"DumpTableSchema<%s> failed: %w", e)
 	}
-	L.L.Dbg(td.StorName + " SCHEMA: " + ss)
+	L.L.Debug(td.StorName + " SCHEMA: " + ss)
 	*/
 	// println("TODO: (maybe) Insert record with IDX 0 and string descr's")
 	//    and ("TODO: (then) Dump all table records (i.e. just one)")
