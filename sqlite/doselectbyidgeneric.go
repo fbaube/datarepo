@@ -4,11 +4,9 @@ import (
 	"fmt"
 	S "strings"
 	"database/sql"
-	L "github.com/fbaube/mlog" // Brings in global var L
+	L "github.com/fbaube/mlog" 
 	DRM "github.com/fbaube/datarepo/rowmodels"
 )
-
-// case *FU.AbsFilePath, *SU.MarkupType, *CT.Raw:
 
 // DoSelectByIdGeneric returns true/false indicating whether the ID
 // was found.
@@ -16,7 +14,7 @@ import (
 // In order to process the ID, the func needs a generic argument that can
 // be used in the body of the func. A [RowModel] is a pointer - having 
 // write access - so we kill two birds with one stone by passing in a 
-// RowModel pointing to a destination buffer to Scan the DB fetch.
+// RowModel pointing to a destination buffer to Scan the DB fetch into.
 // . 
 func DoSelectByIdGeneric[T DRM.RowModel](pSR *SqliteRepo, anID int, pDest T) (bool, error) {
 

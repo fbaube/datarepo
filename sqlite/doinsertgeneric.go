@@ -122,7 +122,8 @@ func DoInsertGeneric[T DRM.RowModel](pSR *SqliteRepo, pRM T) (int, error) {
 	*/
 	// ===============================
 	//  3) Trim off the last ", " and
-	//      ask for the added index
+	//     add RETURNING, which asks 
+	//     for the added index
 	// ===============================
 	var theSQL string 
 	theSQL = S.TrimSuffix(sqlBldr.String(), ", ")

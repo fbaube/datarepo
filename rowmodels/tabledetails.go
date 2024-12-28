@@ -129,5 +129,7 @@ type TableDetails struct {
 	// this was insufficient information, because we need
 	// the table name AND (sometimes) a unique field name. 
 	// ForenKeys   []string
+
+	// FuncNew func() RowModel
 }
 

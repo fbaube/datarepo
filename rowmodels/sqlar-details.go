@@ -46,4 +46,12 @@ var TableDetails_SqlarRow = TableDetails{
 	ColumnSpecs_SqlarRow, // []D.ColumnSpec
 	nil,
 	nil,
+	// NewSqlarRow,
 }
+
+/*
+func NewSqlarRow() *SqlarRow {
+     return new(SqlarRow)
+}
+*/
+

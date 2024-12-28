@@ -6,6 +6,11 @@ type RowModel interface {
      TableDetails() TableDetails 
      ColumnNamesCsv(bool) string 
      ColumnPtrsMethod(bool) []any
+     // The generic REST interface takes a ptr to 
+     // a buffer, and each such ptr is a RowModel, 
+     // so this interface must include a way to use 
+     // a table name to get a typed memory allocator. 
+     // FuncNew() RowModel
      // When generic, include *T
      // *T
 }
