@@ -86,7 +86,7 @@ func NewSqlarRecord(pPP *FU.PathProps, pPA *FU.PathAnalysis) (*RU.ContentityRow,
 		switch pAR.MimeTypeAsSnift {
 		case "text/xml/image/svg+xml":
 			println("SVG!!")
-			pAR.MType = "xml/cnt/svg"
+			pAR.MType = "xml/img/svg"
 		}
 	}
 	if pAR == nil {
