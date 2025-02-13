@@ -21,6 +21,7 @@ type QueryUniqueSpec struct {
 	Table string
 	// If field is empty, it is UNIQUE ID. 
 	Field string
-	// Value has to be flexible.
-	Value any
+	// Value has to be flexible, but let's
+	// plan on a lot of atoi and itoa.
+	Value string // or: any
 }

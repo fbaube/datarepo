@@ -3,7 +3,7 @@ package sqlite
 import(
 	"database/sql"
 	DRU "github.com/fbaube/datarepo/utils"
-	RM "github.com/fbaube/datarepo/rowmodels"
+	DRM "github.com/fbaube/datarepo/rowmodels"
 	)
 
 type Zork struct {
@@ -18,7 +18,7 @@ type Zork struct {
 //   - Delete (del,Delete,remove)
 // . 
 type TypedRepoer[T any] interface {
-     	RM.RowModel // Must satisfy this interface
+     	DRM.RowModel // Must satisfy this interface
 	*T // Must be a pointer
 	
 	Insert(T)  (int, error)
