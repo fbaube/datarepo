@@ -1,7 +1,7 @@
 package rowmodels
 
-// RowModel is implemented by ptrs to structs in 
-// package [github.com/fbaube/m5db] 
+// RowModel is implemented by ptrs-to-structs 
+// in package [github.com/fbaube/m5db] 
 type RowModel interface {
      TableDetails() TableDetails 
      ColumnNamesCsv(bool) string 
@@ -18,11 +18,10 @@ type RowModel interface {
 /*
 Here is another type of constraint:
 
-// EndpointOf applies structural type constraints to T and makes sure
-// it implements the unmarshaler interface.
+// EndpointOf applies structural type constraints to T and 
+// makes sure it implements the unmarshaler interface.
 type EndpointOf[T any] interface {
 	*T
 	encoding.BinaryUnmarshaler
 }
-
 */

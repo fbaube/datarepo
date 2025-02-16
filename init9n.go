@@ -6,7 +6,7 @@ import (
 	D "github.com/fbaube/dsmnd"
 	FU "github.com/fbaube/fileutils"
 	L "github.com/fbaube/mlog"
-	DRS "github.com/fbaube/datarepo/sqlite"
+	// DRS "github.com/fbaube/datarepo/sqlite"
 	DRM "github.com/fbaube/datarepo/rowmodels"
 	_ "github.com/mattn/go-sqlite3"
 	SU "github.com/fbaube/stringutils"
@@ -22,11 +22,11 @@ type Init9nArgs struct {
      // BaseFilename defaults to "m5.db"
      BaseFilename string 
      Dir string
-     // LogWriter is (so far) used only by package [datarepo/sqlite]
-     // and is initialized to [io.Discard]. If it is an open file, it
-     // is passed using func [datarepo/sqlite.SqliteRepo.SetLogWriter].
+     // LogWriter is initialized to [io.Discard]. If it is an open file, 
+     // it is passed using func [datarepo/SimpleRepo.SetLogWriter].
      // It could actually be just an io.WriterCloser. 
-     // LogWriter *os.File 
+     // LogWriter *os.File
+     
      // DoImport requires DB access, so it is present
      // here, but it is not otherwise processed here. 
      DoImport bool
@@ -157,9 +157,10 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 	println("DB: status OK.")
 	L.L.Info("DB OK: " + SU.ElideHomeDir(repoAbsPath))
 
-	pSQR, ok := repo.(*DRS.SqliteRepo)
+	// pSQR, ok := repo.(*DRS.SqliteRepo)
+	pSQR, ok := repo.(SimpleRepo)
 	if !ok {
-		panic("init9n.L153")
+		panic("init9n.L163")
 		return nil, errors.New("processDBargs: is not sqlite")
 	}
 	// At this point we have finished all execution paths

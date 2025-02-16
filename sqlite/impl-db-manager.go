@@ -10,10 +10,15 @@ import (
 	SU "github.com/fbaube/stringutils"
 	_ "github.com/mattn/go-sqlite3" // to get init()
 	L "github.com/fbaube/mlog"
+	DRP "github.com/fbaube/datarepo"
 	"os"
 	FP "path/filepath"
 	S "strings"
 )
+
+func init() {
+     DRP.DB_Manager = SQLite_DB_Manager
+     }
 
 // Methods in this file implement
 // type DBManager interface {
@@ -107,7 +112,8 @@ os.Chmod, os.Chown, os.Close, os.Read, os.ReadAt, os.ReadDir,
 os.Readdirnames, os.Seek, os.Truncate
 */
 
-func (p *SqliteDBManager) OpenAtPath(path string) (*SqliteRepo, error) {
+// func (p *SqliteDBManager) OpenAtPath(path string) (*SqliteRepo, error) {
+func (p *SqliteDBManager) OpenAtPath(path string) (DRP.SimpleRepo, error) {
 	/* N'YET
 	if p.DBImplementationName != D.DB_SQLite { panic("not sqlite ?!") }
 	*/
@@ -138,8 +144,8 @@ func (p *SqliteDBManager) OpenAtPath(path string) (*SqliteRepo, error) {
 //
 // The repo type will be "sqlite" (equivalent to "sqlite3").
 // .
-func (p *SqliteDBManager) NewAtPath(aPath string) (*SqliteRepo, error) {
-// func (p *SqliteDBManager) NewAtPath(aPath string) (DR.SimpleRepo, error) {
+// func (p *SqliteDBManager) NewAtPath(aPath string) (*SqliteRepo, error) {
+func (p *SqliteDBManager) NewAtPath(aPath string) (DRP.SimpleRepo, error) {
 
 	if !S.HasSuffix(aPath, ".db") {
 		L.L.Warning("newSqliteRepo: missing suffix \".db\": " + aPath)
@@ -217,7 +223,8 @@ func (p *SqliteDBManager) NewAtPath(aPath string) (*SqliteRepo, error) {
 //
 // The repo type will be "sqlite" (equivalent to "sqlite3").
 // .
-func (p *SqliteDBManager) OpenExistingAtPath(aPath string) (*SqliteRepo, error) {
+// func (p *SqliteDBManager) OpenExistingAtPath(aPath string) (*SqliteRepo, error) {
+func (p *SqliteDBManager) OpenExistingAtPath(aPath string) (DRP.SimpleRepo, error) {
 	if !S.HasSuffix(aPath, ".db") {
 	   L.L.Warning("SqliteRepo.openAt: missing \".db\": " + aPath)
 	}

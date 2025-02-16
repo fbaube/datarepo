@@ -33,7 +33,7 @@ func DoSelectByIdGeneric[T DRM.RowModel](pSR *SqliteRepo, anID int, pDest T) (bo
 	sb.WriteString(pTD.ColumnNamesCSV + " FROM ")
 	sb.WriteString(pTD.TableSummary.StorName)
 	sb.WriteString(" WHERE " + pTD.PKname + " = ")
-	// We don't worry about SQL injection here 
+	// We don't worry about SQL injection here (tho we should?) 
 	sb.WriteString(fmt.Sprintf("%d;", anID))
 	
 	var theStmt string 

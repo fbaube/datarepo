@@ -1,16 +1,20 @@
+// ==> REPLACE SqliteRepo w SimpleRepo !!!!
+
 package sqlite
 
 import (
 	"fmt"
+	"io"
+	DRP "github.com/fbaube/datarepo"
 	D "github.com/fbaube/dsmnd"
 	S "strings"
 	DRM "github.com/fbaube/datarepo/rowmodels"
 	"database/sql"
-	L "github.com/fbaube/mlog" // Brings in global var L
+	L "github.com/fbaube/mlog" // Bring in global var L
 )
 
 // DoInsertGeneric takes a generic RowModel and "does" a simple
-// (not prepared) SQL INSERT dtatement, returning the inserted
+// (not prepared) SQL INSERT statement, returning the inserted
 // item's ID (i.e. primary key). A statement is created, then
 // envalued & executed using regular parameter substitution
 // with Exec(..).
@@ -30,7 +34,8 @@ import (
 //  - Err() returns any error hit when running the query
 //  - If not nil, the error is also returned from Scan(..)
 // .
-func DoInsertGeneric[T DRM.RowModel](pSR *SqliteRepo, pRM T) (int, error) {
+// func DoInsertGeneric[T DRM.RowModel](pSR *SqliteRepo, pRM T) (int, error) {
+func DoInsertGeneric[T DRM.RowModel](pSR DRP.SimpleRepo, pRM T) (int, error) {
 	// [This is a bit OBS:] So, we have to 
 	//  1) Check the struct-type of the RowModeler-instance
 	//  2) Fetch the FieldPtrs
@@ -38,14 +43,7 @@ func DoInsertGeneric[T DRM.RowModel](pSR *SqliteRepo, pRM T) (int, error) {
 	//  4) Write out the values to the stmt
 	//  5) Add RETURNING
 	//  6) (the stmt's user) Use that returned that ID
-/*
-	switch DRM.RowModel(pRM).(type) {
-	       case *DRM.ContentityRow:
-	       	    L.L.Warning("ins CTY")
-	       case *DRM.InbatchRow:
-	       	    L.L.Warning("ins INB")
-	}
-*/
+	
 	var colPtrs []any
 	var cp any 
 	var iCol int 
@@ -58,16 +56,20 @@ func DoInsertGeneric[T DRM.RowModel](pSR *SqliteRepo, pRM T) (int, error) {
 	// false says do not include primary key 
 	colPtrs = pTD.ColumnPtrsFunc(pRM, false)
 	
-	/* TMP
+	/* TMP - why was this disabled ? 
 	pRM.T_Cre = now
 	pRM.T_Imp = now
 	pRM.T_Edt = now
 	*/
 
+	var w io.Writer
+	// w = pSR.w
+	w = pSR.LogWriter()
+
 	// fmt.Fprintf(os.Stderr, "LENS: ColSpex<%d> ColPtrs<%d> \n",
 	//	len(pTD.ColumnSpecs), len(colPtrs))
 	// Add some log info 
-	fmt.Fprintf(pSR.w, "=== %s.DoInsGenc.ColSpex ===\n", pTD.StorName)
+	fmt.Fprintf(w, "=== %s.DoInsGenc.ColSpex ===\n", pTD.StorName)
 
 	// ===========================
 	//  1) Write table name and 
@@ -75,7 +77,7 @@ func DoInsertGeneric[T DRM.RowModel](pSR *SqliteRepo, pRM T) (int, error) {
 	// ===========================
 	// colPtrs should NOT include
 	// the primary key, D.SFT_PRKEY
-	var sqlBldr S.Builder
+	var sqlBldr S.Builder // simpl,e StringBuilder
 	sqlBldr.WriteString("INSERT INTO ")
 	sqlBldr.WriteString(pTD.TableSummary.StorName)
 	sqlBldr.WriteString("(")
@@ -94,7 +96,7 @@ func DoInsertGeneric[T DRM.RowModel](pSR *SqliteRepo, pRM T) (int, error) {
 	    // Add some log info 
 	    sn = pTD.ColumnSpecs[iCol].StorName
 	    dt = D.SemanticFieldType(pTD.ColumnSpecs[iCol].Datatype)
-	    fmt.Fprintf(pSR.w, "[%d] %s / %s / %T \n", iCol, sn, dt, cp)
+	    fmt.Fprintf(w, "[%d] %s / %s / %T \n", iCol, sn, dt, cp)
 	}
 	/* OBSOLETE
 	// Stuff that was used when composing
@@ -128,13 +130,13 @@ func DoInsertGeneric[T DRM.RowModel](pSR *SqliteRepo, pRM T) (int, error) {
 	var theSQL string 
 	theSQL = S.TrimSuffix(sqlBldr.String(), ", ")
 	theSQL += ") RETURNING IDX_" + pTD.StorName + ";"
-	fmt.Fprintf(pSR.w, "=== %s.DoInsGenc.SQL ===\n%s\n",
+	fmt.Fprintf(w, "=== %s.DoInsGenc.SQL ===\n%s\n",
 		pTD.StorName, theSQL)
 		
 	// return theSQL, nil
 	// }
 
-// (COPIED) (pSR *SqliteRepo) ExecInsertStmt(stmt string) (int, error) {
+// (COPIED from...) (pSR *SqliteRepo) ExecInsertStmt(stmt string) (int, error) {
 
 	var res sql.Result
 	var id int64
@@ -143,7 +145,7 @@ func DoInsertGeneric[T DRM.RowModel](pSR *SqliteRepo, pRM T) (int, error) {
 	//  4) Call Exec(..) on the stmt, 
 	//     with all columns (?pointers)
 	// ================================
-	res, e = pSR.Exec(theSQL, colPtrs...)
+	res, e = pSR.Handle().Exec(theSQL, colPtrs...)
 	if e != nil {
 	     	L.L.Error("Exec.Ins failed: %w", e)
 		return -1, e
@@ -153,7 +155,7 @@ func DoInsertGeneric[T DRM.RowModel](pSR *SqliteRepo, pRM T) (int, error) {
 	     	L.L.Error("Exec.Ins.LastInsertId failed: %w", e)
 		return -1, fmt.Errorf("ExecInsStmt.LastInsertId: %w", e)
 		} 
-	fmt.Fprintf(pSR.w, "=>> ExecInsStmt.RET.id: %d ===\n", id)
+	fmt.Fprintf(w, "=>> ExecInsStmt.RET.id: %d ===\n", id)
 	/*
 	// ===================
 	// or try QUERY + Scan

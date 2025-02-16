@@ -3,16 +3,13 @@ package datarepo
 import (
 	"database/sql"
 	D "github.com/fbaube/dsmnd"
-	// "github.com/jmoiron/sqlx"
-	// "github.com/pocketbase/dbx"
-	// _ "github.com/mattn/go-sqlite3"
 )
 
 // Entity provides operations for database entities (i.e. instances).
 type Entity interface {
      	// Handle (noun) is the handle to the DB.
 	Handle() *sql.DB
-	// Type has value DB_SQLite ("sqlite", equiv.to "sqlite3").
+	// Type has value [dsmnd.DB_SQLite] ("sqlite", equiv.to "sqlite3").
 	Type() D.DB_type
 	// Path is the file/URL (or dir/URL, if uses multiple files) to the DB.
 	Path() string

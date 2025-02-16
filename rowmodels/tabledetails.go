@@ -89,10 +89,10 @@ type TableDetails struct {
         // [dsmnd.TableSummary] is a [dsmnd.Datum] 
 	// and has four fields, used thusly:
 	//  - [dsmnd.BasicDatatype]: [D.SCT_TABLE] 
-	//  - StorName: the name of the table in the 
-	//    DB, e.g. inbatch, contentity, topicref 
+	//  - StorName: the name of the table in the DB,
+	//    e.g. "inbatch", "contentity", "topicref" 
 	//  - DispName: a short (three-letter) version 
-	//    of the name to use in the names of other
+	//    of the name to embed in the names of other
 	//    variables, e.g. inb, cnt, trf 
 	//  - Description: as is appropriate 
      	D.TableSummary
@@ -100,17 +100,18 @@ type TableDetails struct {
 	// PKname is the (auto-generatable as "idx_foo"!) name 
 	// of the index (i.e. primary key) field, which we use 
 	// in the same format BOTH as primary key in own-table 
-	// AND as foreign key in other tables. Natural joins! 
+	// AND as foreign key in other tables. Enabling natural
+	// joins, without using "AS"! 
 	PKname string
 	
-	// ColumnNamesCSV is all column names (except primary key), 
-	// in a specific (auto-generatable!) order, comma-separated, 
-	// for use in SQL statements. We omit the primary key so 
+	// ColumnNamesCSV is all column names (except primary key),
+	// ready-to-use in SQL, in a specific (auto-generatable!)
+	// order, comma-separated. We omit the primary key so 
 	// that we can use it for SQL INSERT statements too.
 	ColumnNamesCSV string
 	
-	// ColumnSpecs is a list of [dsmnd.D.ColumnSpec] that 
-	// omits the primary key that we automatically include.
+	// ColumnSpecs is a list of [dsmnd.D.ColumnSpec] that omits
+	// the primary key (which can be brought in when needed).
 	ColumnSpecs []D.ColumnSpec
 	
 	// ColumnPtrsFunc return a slice of ptrs to every field
@@ -121,9 +122,8 @@ type TableDetails struct {
 	ColumnPtrsFunc columnPtrsFunc
 	// ColumnPtrsMthd columnPtrsMthd
 
+	// BlankInstance might be needed at some point
 	BlankInstance RowModel
-	
-	// Instance RowModel // an empty instance 
 	
 	// We used to have ForenKeys defined by name only, but
 	// this was insufficient information, because we need

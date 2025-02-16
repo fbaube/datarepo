@@ -1,7 +1,6 @@
 package datarepo
 
 import (
-	// _ "database/sql"
 	DRM "github.com/fbaube/datarepo/rowmodels"
 )
 
@@ -17,7 +16,8 @@ type AppTableSetter interface {
 	//  - If a table name is repeated but with a different schema,
 	//    the result is undefined
 	//  - If the tables already exist in the DB, it is not verified
-	//    that their structure matches what this schema specifies 
+	//    that their structure matches what this schema specifies
+	//    (but this might be a future TODO) 
 	SetAppTables(string, []DRM.TableDetails) error
 	// EmptyAllTables deletes (app-level) data from the app's tables
 	// but does not delete any tables (i.e. no DROP TABLE are done).
