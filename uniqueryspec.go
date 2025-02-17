@@ -16,6 +16,12 @@ package datarepo
 //  - sql UPDATE / crud UPDATE / http PUT  / "Mod"  (pass in a record) 
 //  - sql DELETE / crud DELETE / http DEL. / "Del"  (beware: FKey issues) 
 //
+// An error should be returned only if the SQL was rejected. If
+// the unique row is not found, return a nil object and no error.
+//
+// This is meant to be passed to a query composer (not "builder")
+// that is specific to a DB. Which means, for now, SQLite.
+// 
 // DBOp should probably be defined in package dsmnd.
 // .
 type UniquerySpec[keyT comparable] struct {
