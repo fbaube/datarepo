@@ -1,14 +1,14 @@
 package datarepo
 
-// UniquerySpec specifies a query that keys on
-// equality for a UNIQUE column. The Go type of
-// the keyed-on column is (using generics) "keyT".
+// UniquerySpec specifies a query that keys on equality for a
+// UNIQUE column. Generics instantiation requires the Go type
+// of the keyed-on column `keyT`, e.g. `UniquerySpec[string]`.
 //
-// In principle it can be any UNIQUE column,
+// In principle the keyed-on column can be any UNIQUE column,
 // but the most common case is 
-//  - column name "ID" (or "{TBL}_ID") 
-//  - Go  type "int"
-//  - SQL type "INT" (or, in SQLite, "INTEGER")
+//  - column name `ID` (or `{TBL}_ID`) 
+//  - Go  type `int`
+//  - SQL type `INT` (or, in SQLite, `INTEGER`)
 // 
 // For DBOp we can/could have
 //  - sql INSERT / crud CREATE / http POST / "Add"  (pass in a record, get an ID)
