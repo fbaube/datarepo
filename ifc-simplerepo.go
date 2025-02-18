@@ -19,6 +19,7 @@ import (
 // A SimpleRepo is expected to implement DBBackups.
 // .
 type SimpleRepo interface {
+     // Caller
      // Entity is Repo type, path, etc.
 	Entity
      // Backupable is copy, move, restoreFrom 

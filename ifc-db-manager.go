@@ -1,12 +1,10 @@
 package datarepo
 
-import(
-	// DRS "github.com/fbaube/datarepo/sqlite"
-)
-
 // DB_Manager is a global, maybe for SQLite, maybe for
 // ebberyting. It probably needs some sort of mutex. 
 var DB_Manager DBManager
+
+// func init() { DB_Manager = DRS.SQLite_DB_Manager }
 
 // DBManager has methods to create, open, and configure databases.
 //
@@ -14,8 +12,8 @@ var DB_Manager DBManager
 // which then selects one of the other two.
 // .
 type DBManager interface {
-	OpenAtPath(string) (SimpleRepo, error) // recommended 
-	NewAtPath (string) (SimpleRepo, error)
+	OpenAtPath(string) (SimpleRepo, error) 
+	 NewAtPath(string) (SimpleRepo, error)
 	OpenExistingAtPath(string) (SimpleRepo, error)
 	// InitznPragmas is assumed to be multiline 
 	InitznPragmas() string
