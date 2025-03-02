@@ -38,7 +38,7 @@ type Init9nArgs struct {
      // copy using a hard-coded naming scheme 
      DoBackup bool
      // TableDetailz are app tables' details 
-     TableDetailz []DRM.TableDetails
+     TableDetailz []*DRM.TableDetails
 }
 
 var DEFAULT_FILENAME = "m5.db"
@@ -157,8 +157,9 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 	println("DB: status OK.")
 	L.L.Info("DB OK: " + SU.ElideHomeDir(repoAbsPath))
 
+	var pSR SimpleRepo
 	// pSQR, ok := repo.(*DRS.SqliteRepo)
-	pSQR, ok := repo.(SimpleRepo)
+	pSR, ok := repo.(SimpleRepo)
 	if !ok {
 		panic("init9n.L163")
 		return nil, errors.New("processDBargs: is not sqlite")
@@ -170,10 +171,10 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 	   println("DB: missing app table details. Aborting.")
 	   return nil, errors.New("Missing app DB table details")
 	}
-	e = pSQR.SetAppTables("", p.TableDetailz) // DRM.M5_TableDetails)
+	e = pSR.RegisterAppTables("", p.TableDetailz) // DRM.M5_TableDetails)
 	if !filexist {
 		// env.SimpleRepo.ForceExistDBandTables()
-		e = pSQR.CreateAppTables()
+		e = pSR.CreateAppTables()
 
 	} else if p.DoZeroOut {
 		L.L.Info("Zeroing out DB (init9nb.go)")
@@ -181,7 +182,7 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 		if e != nil {
 			panic(e)
 		}
-		pSQR.EmptyAppTables()
+		pSR.EmptyAppTables()
 	}
 	return repo, nil
 }

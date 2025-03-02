@@ -10,39 +10,39 @@ import (
 	S "strings"
 )
 
-// theMap holds all table schemata passed to SetAppTables(..).
+// theMap holds all table schemata passed to RegisterAppTables(..).
 // Map key is "appname_tablename", where appname is forced to
 // lower case and tablename is taken from the TableDetails.
 // Map key is simply "tablename" if appname was "".
 //
 // Map value is the associated instance of TableDetails.
 // .
-var theMap map[string]DRM.TableDetails
+var theMap map[string]*DRM.TableDetails
 
 func init() {
-	theMap = make(map[string]DRM.TableDetails)
+	theMap = make(map[string]*DRM.TableDetails)
 }
 
-// Interface AppTableSetter is table-related methods for a specified app's 
-// schema. The app name is case-insensitive, and used as all lower case, and 
-// preixed to table names as "appname_". If the app name is left blank (""),
-// a default namespace is used and no prefix is added to table names.
+// Interface AppTableSetter is table-related methods for a specified
+// app's schema. The app name is case-insensitive, and used as all
+// lower case, and preixed to table names as "appname_". If the app
+// name is left blank (""), a default namespace is used and no prefix
+// is added to table names.
 
-// SetAppTables specifies the schemata of the specified app's
+// RegisterAppTables processes the schemata of the specified app's
 // tables, which this interface creates and/or manages. Multiple
 // calls, whether with tables previously specified or not before
 // seen do not conflict; if a table name is repeated but with a
 // different schema, the result is undefined.
 // .
-func (p *SqliteRepo) SetAppTables(appName string, cfg []DRM.TableDetails) error {
-	L.L.Info("SetAppTables: got %d table definitions", len(cfg))
+func (p *SqliteRepo) RegisterAppTables(appName string, cfg []*DRM.TableDetails) error {
+	L.L.Info("RegisterAppTables: got %d table definitions", len(cfg))
 	for _, c := range cfg {
 		theMap[ /*pfx+*/ S.ToLower(c.StorName)] = c
 		L.L.Info("Reg'd the config for app table: " +
 			S.ToLower(c.StorName))
 	}
 	return nil
-
 }
 
 // EmptyAllTables deletes (app-level) data from the app's tables
@@ -71,7 +71,7 @@ func (p *SqliteRepo) EmptyAppTables() error {
 			if S.HasPrefix(strerr, "no such table:") {
 				L.L.Info("No such table: " + c.StorName)
 			// OOPS! Create it!
-			e2 := p.createAppTable(&c)
+			e2 := p.createAppTable(c)
 			if e2 != nil {
 			   return fmt.Errorf("EmptyAppTbls.CreTbl failed: %w", e2)
 			// panic(e2.Error())
@@ -111,7 +111,7 @@ func (p *SqliteRepo) CreateAppTables() error {
 	// func (pDB SqliteRepo) CreateTable_sqlite(ts U.TableDetails) error {
 	// FIXME Check table name prefix (e.g. "mmmc_") ?
 	for _, td := range theMap {
-		e := p.createAppTable(&td)
+		e := p.createAppTable(td)
 		if e != nil {
 			// FIXME
 			return e
@@ -156,4 +156,8 @@ func (p *SqliteRepo) createAppTable(td *DRM.TableDetails) error {
 	// println("TODO: (maybe) Insert record with IDX 0 and string descr's")
 	//    and ("TODO: (then) Dump all table records (i.e. just one)")
 	return nil
+}
+
+func GetTableDetailsByCode(s string) *DRM.TableDetails {
+     return theMap[S.ToLower(s)]
 }

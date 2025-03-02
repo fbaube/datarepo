@@ -1,14 +1,27 @@
 package datarepo
 
+import D "github.com/fbaube/dsmnd"
+
 // UniquerySpec specifies a query that keys on equality for a
-// UNIQUE column. Generics instantiation requires the Go type
-// of the keyed-on column `keyT`, e.g. `UniquerySpec[string]`.
+// UNIQUE column.
+//
+// Field [Value] is passed as a string, n0 matter what type
+// column [Field] is. This is kind of dodgy, but since we
+// are only really using strings and ints, it should not
+// cause any breakage.
+// 
+// 2025.02: Generics were tried for field [Value] with the
+// constraint "comparable". Then instantiation required that
+// we provide the Go type of the keyed-on column `keyT`, e.g.
+// `UniquerySpec[int]`. But it got too messy, so instead the
+// field [FVtype] is used to keep things typesafe going into
+// and out of the DB. 
 //
 // In principle the keyed-on column can be any UNIQUE column,
 // but the most common case is 
 //  - column name `ID` (or `{TBL}_ID`) 
 //  - Go  type `int`
-//  - SQL type `INT` (or, in SQLite, `INTEGER`)
+//  - SQL type `INT`/`INTEGER` ([dsmnd.SQLITE_INTEGER])
 // 
 // For DBOp we can/could have
 //  - sql INSERT / crud CREATE / http POST / "Add"  (pass in a record, get an ID)
@@ -24,10 +37,11 @@ package datarepo
 // 
 // DBOp should probably be defined in package dsmnd.
 // .
-type UniquerySpec[keyT comparable] struct {
-	DBOp   string
-	Table  string
+type UniquerySpec struct { // [keyT comparable] struct {
+//	DBOp   string
+//	Table  string
 	Field  string
-	Value  keyT
+	Value  string 
+	FVtypes D.SqliteDatatype
 }
 

@@ -36,8 +36,8 @@ type SimpleRepo interface {
      // So maybe have to use typecasting to access these methods.
      // Caller[DRM.InbatchRow]
      	
-     // QueryRunner is for generics and has funcs that return 0,1,N rows
-// >>	QueryRunner
+     // QuerySpecRunner is for generics and has funcs that return 0,1,N rows
+     // QuerySpecRunner
 
 	// AppTableSetter is table mgmt for a specific Repo-using app.
 	AppTableSetter
