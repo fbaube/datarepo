@@ -37,8 +37,11 @@ func init() {
 // .
 func (p *SqliteRepo) RegisterAppTables(appName string, cfg []*DRM.TableDetails) error {
 	L.L.Info("RegisterAppTables: got %d table definitions", len(cfg))
-	for _, c := range cfg {
-		theMap[ /*pfx+*/ S.ToLower(c.StorName)] = c
+	var c *DRM.TableDetails
+	for _, c = range cfg {
+	       	sindex := S.ToLower(c.DispName) // c.StorName)
+		println("REG TBL DTLS: " + sindex)
+		theMap[sindex] = c
 		L.L.Info("Reg'd the config for app table: " +
 			S.ToLower(c.StorName))
 	}
@@ -159,5 +162,13 @@ func (p *SqliteRepo) createAppTable(td *DRM.TableDetails) error {
 }
 
 func GetTableDetailsByCode(s string) *DRM.TableDetails {
-     return theMap[S.ToLower(s)]
+     s = S.ToLower(s) 
+     println("GetTableDetailsByCode: " + s)
+  // return theMap[S.ToLower(s)]
+     ret := theMap[s]
+     if ret == nil {
+     	for k, v := range theMap {
+	    fmt.Printf("MAP: %+v %+v \n", k, *v) }
+	    }
+     return ret 
 }

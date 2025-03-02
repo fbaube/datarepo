@@ -61,8 +61,11 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, whereSpec *DR
      var idxdPlcNrs, PlcNrs string // with ID; no ID 
 
      pTD = GetTableDetailsByCode(tableName)
-     // TODO: Handle nil return 
-     
+     if pTD == nil {
+     	s := "NO TblDtls FOR: " + tableName
+     	println(s)
+	return errors.New(s), 0
+     }
      CSV = pTD.ColumnNamesCSV // no ID column 
      CPF = pTD.ColumnPtrsFunc(RM, false) // no ID column 
      idxdCSV = pTD.PKname + ", " + CSV // "IDX_" + pTD.StorName + ", " + CSV
@@ -76,10 +79,11 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, whereSpec *DR
      idxdPlcNrs = S.TrimSuffix(idxdPlcNrs, ", ")
 
      // Log info about the columns 
-     writeFieldDebugInfo(w, pTD)
+     // writeFieldDebugInfo(w, pTD)
 
      // switch dbOp {
-     switch S.ToUpper(dbOp[0:0]) { 
+     println("DB OP IS: " + S.ToUpper(dbOp[0:1]))
+     switch S.ToUpper(dbOp[0:1]) { 
 
      	// ======================================================
 	case "A", "C", "I", "N":
@@ -156,7 +160,8 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, whereSpec *DR
 }
 
 func writeFieldDebugInfo(w io.Writer, pTD *DRM.TableDetails) {
-	CPF := pTD.ColumnPtrsFunc(pTD.BlankInstance, true) // with ID column
+     	// TODO: Check the correctness of this! It seemed to overrun with "true"
+	CPF := pTD.ColumnPtrsFunc(pTD.BlankInstance, false) // true) // with ID column
 	for iCol, cp := range CPF {
 	    sn := pTD.ColumnSpecs[iCol].StorName
 	    dt := D.SemanticFieldType(pTD.ColumnSpecs[iCol].Datatype)
