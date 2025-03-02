@@ -19,7 +19,6 @@ import (
 // A SimpleRepo is expected to implement DBBackups.
 // .
 type SimpleRepo interface {
-     // Caller
      // Entity is Repo type, path, etc.
 	Entity
      // Backupable is copy, move, restoreFrom 
@@ -28,18 +27,12 @@ type SimpleRepo interface {
 	SessionLifecycler
      // StatementBuilder uses [TableDescriptor] and [QuerySpec] 
 	StatementBuilder
-     // Transactioner is for transactions
-     // 2025.02 Removed, cos unhelpful complexity 
-     // Transactioner // Instead:
 
      // Caller is basic DB access operations but FIXME: uses generics.
      // So maybe have to use typecasting to access these methods.
      // Caller[DRM.InbatchRow]
      	
-     // QuerySpecRunner is for generics and has funcs that return 0,1,N rows
-     // QuerySpecRunner
-
-	// AppTableSetter is table mgmt for a specific Repo-using app.
+     // AppTableSetter is table mgmt for a specific Repo-using app.
 	AppTableSetter
 	
 	DBEnginer

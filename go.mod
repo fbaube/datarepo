@@ -18,7 +18,7 @@ require (
 	github.com/fbaube/humanbytes v0.0.0-20250119091546-d58fbfdd444c // indirect
 	github.com/fbaube/logutils v0.0.0-20240425064504-eb572963f0fc // indirect
 	github.com/fbaube/miscutils v0.0.0-20250126181629-6a2fa9af43b7 // indirect
-	github.com/fbaube/wasmutils v0.0.0-20231209183154-e25018375bc2 // indirect
+	github.com/fbaube/wasmutils v0.0.0-20250302100751-c3d5b233f416 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mgutz/str v1.2.0 // indirect

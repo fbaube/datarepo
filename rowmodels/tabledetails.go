@@ -6,7 +6,7 @@ import D "github.com/fbaube/dsmnd"
 type columnPtrsFunc func(RowModel, bool) []any 
 // type columnPtrsMthd func(bool) []any 
 
-// type newInstance RowModeler
+type NewInstanceFunc func() RowModel
 
 // TableDetails is key to the entire data repository scheme:
 // it contains metadata required to manage corresppondences
@@ -124,6 +124,7 @@ type TableDetails struct {
 
 	// BlankInstance might be needed at some point
 	BlankInstance RowModel
+	NewInstance NewInstanceFunc
 	
 	// We used to have ForenKeys defined by name only, but
 	// this was insufficient information, because we need
