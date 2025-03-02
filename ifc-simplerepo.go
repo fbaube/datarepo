@@ -41,7 +41,8 @@ type SimpleRepo interface {
 
 	// AppTableSetter is table mgmt for a specific Repo-using app.
 	AppTableSetter
-	// DBManager
+	
+	DBEnginer
 
 	LogWriter() io.Writer
 }
