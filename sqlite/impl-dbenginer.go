@@ -48,11 +48,13 @@ import(
 //
 // NOTE: Also implement COUNT(*) ?
 // . 
-func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, whereSpec *DRP.UniquerySpec, RM DRM.RowModel) (error, int) {
+func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.UniquerySpec, RM DRM.RowModel) (error, int) {
 
      var pTD *DRM.TableDetails
+     var pRM DRM.RowModel
      var w = pSR.LogWriter()
-     var sSQL string 
+     var sSQL string
+     
      // Column-pointers function 
      var idxdCPF, CPF []any  // with ID; no ID
      // Comma-separated column names 
@@ -66,6 +68,10 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, whereSpec *DR
      	println(s)
 	return errors.New(s), 0
      }
+     if pWS != nil && S.EqualFold("id", pWS.Field) {
+     	pWS.Field = pTD.PKname
+     }
+     pRM = pTD.NewInstance()
      CSV = pTD.ColumnNamesCSV // no ID column 
      CPF = pTD.ColumnPtrsFunc(RM, false) // no ID column 
      idxdCSV = pTD.PKname + ", " + CSV // "IDX_" + pTD.StorName + ", " + CSV
@@ -92,7 +98,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, whereSpec *DR
 	// INSERT INTO tblNm (fld1, fld2) VALUES(val1, val2);
 	// INSERT INTO tblNm (fld1, fld2) VALUES($1,$2); + any...
      	// ======================================================
-	if whereSpec != nil {
+	if pWS != nil {
 	   return errors.New("EngineUnique: INSERT: unwanted WHERE"), 0 
 	}
 	// Write table name and all column names (as CSV).
@@ -129,29 +135,55 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, whereSpec *DR
 	// SELECT fld1, fld2 FROM tblNm WHERE expr
 	// https://www.sqlite.org/syntax/expr.html 
      	// =======================================
-	if whereSpec == nil {
+	if pWS == nil {
 	   return errors.New("EngineUnique: SELECT: missing WHERE"), 0
 	}
 	sSQL =  "SELECT " + idxdCSV +
-		" FROM " + pTD.TableSummary.StorName +
-		" WHERE " + whereSpec.Field + " = " + whereSpec.Value + ";"
-	// TODO: QueryRow(..) 
+		" FROM "  + pTD.TableSummary.StorName +
+		" WHERE " + pWS.Field + " = " + pWS.Value + ";"
+		
+	// TODO: QueryRow(..)
+	row := pSR.Handle().QueryRow(sSQL)
+	// ==========
+	// What if there is no row in the result, and .Scan() can't
+	// scan a value. What then? The error constant sql.ErrNoRows
+	// is returned by QueryRow() when the result is empty.
+	// This needs to be handled as a special case in most cases.
+	// You should only see this error when you're using QueryRow().
+	// If you see this error elsewhere, you're doing something wrong.
+	
+	// pDest is a RowModel 
+	var colPtrs []any
+	var e error 
+	colPtrs = pRM.ColumnPtrsMethod(true) // not pDest
+	e = row.Scan(colPtrs...)
+	switch e {
+	  case sql.ErrNoRows:
+	       return nil, 0 // false, nil
+	  case nil:
+	       return nil, 1 // true, nil 
+	  default:
+		println("SQL ERROR: (" + e.Error() + ") SQL: " + sSQL)
+		return fmt.Errorf("EngineUnique(get) " +
+		       "(%s=%s) failed: %w", pWS.Field, pWS.Value, e), 0
+	}
+	panic("Oops, fallthru in SELECT")
 	
      	// ============================================
-        case "M", "U": // Modify, Update
+	case "M", "U": // Modify, Update
 	// https://www.sqlite.org/lang_update.html
 	// UPDATE tblNm SET stuff WHERE expr RET'G expr 
 	// https://www.sqlite.org/syntax/expr.html 
      	// ============================================
-     	if whereSpec == nil {
-           return errors.New("EngineUnique: SELECT: missing WHERE"), 0 
+     	if pWS == nil {
+	   return errors.New("EngineUnique: SELECT: missing WHERE"), 0 
      	   }
      	// =======================================
-        case "D": // Delete, Discard, Drop
+	case "D": // Delete, Discard, Drop
 	// https://www.sqlite.org/lang_delete.html
 	// DELETE FROM tblNm WHERE expr RET'G expr
      	// =======================================
-	if whereSpec == nil {
+	if pWS == nil {
      	   return errors.New("EngineUnique: SELECT: missing WHERE"), 0 
      	}
      // default:
