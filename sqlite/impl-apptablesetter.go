@@ -44,6 +44,8 @@ func (p *SqliteRepo) RegisterAppTables(appName string, cfg []*DRM.TableDetails) 
 		theMap[sindex] = c
 		L.L.Info("Reg'd the config for app table: " +
 			S.ToLower(c.StorName))
+		// Do schema-related initialisations
+		e := GenerateColumnStringsCSV(c)
 	}
 	return nil
 }

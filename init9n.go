@@ -164,6 +164,7 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 		panic("init9n.L163")
 		return nil, errors.New("processDBargs: is not sqlite")
 	}
+	
 	// At this point we have finished all execution paths
 	// that do NOT require the app table details, and so
 	// now we do have to have apptable details.
@@ -172,6 +173,7 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 	   return nil, errors.New("Missing app DB table details")
 	}
 	e = pSR.RegisterAppTables("", p.TableDetailz) // DRM.M5_TableDetails)
+
 	if !filexist {
 		// env.SimpleRepo.ForceExistDBandTables()
 		e = pSR.CreateAppTables()
