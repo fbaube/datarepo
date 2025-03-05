@@ -33,11 +33,21 @@ type ColumnStringsCSV struct {
 // for every struct that has been registered using method
 // datarepo/RegisterAppTables of interface datarepo/SimpleRepo .
 //
+// TODO: It should be guarded by a Do.Once()
+//
 // It does not modify or even access the database. It should 
 // be called ASAP after program start. It does not need to be 
 // called before a database is opened, but it DOES need to be 
 // called any SQL is executed against the database. 
-func GenerateColumnStringsCSV() {
+func GenerateColumnStringsCSV(pTD *TableDetails) error {
+     var colSpex []D.ColumnSpec
+     colSpex = pTD.ColumnSpecs
+     // nSpex := len(colSpex)
+     // skip primary key "{table}_ID" at [0]
+     for i, pCS := range colSpex {
+     	println("GenColStrs: [%d]%s: %s", i, pTD.StorName, pCS.String())
+     }
+     return nil
 }
 
 // columnPtrsFunc is used in struct [TableDetails.ColumnPtrsFunc],
