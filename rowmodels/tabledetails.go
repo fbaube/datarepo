@@ -39,14 +39,19 @@ type ColumnStringsCSV struct {
 // It does not modify or even access the database. It should 
 // be called ASAP after program start. It does not need to be 
 // called before a database is opened, but it DOES need to be 
-// called any SQL is executed against the database. 
+// called any SQL is executed against the database.
+//
+// Note that a table's primary key, named "{table}_ID", 
+// is not listed in the slice of TableDetails.
+// .
 func GenerateColumnStringsCSV(pTD *TableDetails) error {
      var colSpex []D.ColumnSpec
      colSpex = pTD.ColumnSpecs
      // nSpex := len(colSpex)
      // skip primary key "{table}_ID" at [0]
      for i, pCS := range colSpex {
-     	fmt.Printf("GenColStrs: [%d]%s: %s \n", i, pTD.StorName, pCS.String())
+     	fmt.Printf("%s[%d]: %s \n", pTD.StorName, i, pCS.String())
+	
      }
      return nil
 }
@@ -156,7 +161,7 @@ type TableDetails struct {
 	// AND as foreign key in other tables. Enabling natural
 	// joins, without using "AS"! 
 	PKname string
-	
+
 	// ColumnNamesCSV is all column names (except primary key),
 	// ready-to-use in SQL, in a specific (auto-generatable!)
 	// order, comma-separated. We omit the primary key so that
@@ -190,5 +195,7 @@ type TableDetails struct {
 	// ForenKeys   []string
 
 	// FuncNew func() RowModel
+
+	pCSVs *ColumnStringsCSV
 }
 
