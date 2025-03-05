@@ -1,6 +1,7 @@
 package rowmodels
 
 import(
+	"fmt"
 	D "github.com/fbaube/dsmnd"
 )
 
@@ -45,7 +46,7 @@ func GenerateColumnStringsCSV(pTD *TableDetails) error {
      // nSpex := len(colSpex)
      // skip primary key "{table}_ID" at [0]
      for i, pCS := range colSpex {
-     	println("GenColStrs: [%d]%s: %s", i, pTD.StorName, pCS.String())
+     	fmt.Printf("GenColStrs: [%d]%s: %s", i, pTD.StorName, pCS.String())
      }
      return nil
 }
