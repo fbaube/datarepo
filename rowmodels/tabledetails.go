@@ -46,7 +46,7 @@ func GenerateColumnStringsCSV(pTD *TableDetails) error {
      // nSpex := len(colSpex)
      // skip primary key "{table}_ID" at [0]
      for i, pCS := range colSpex {
-     	fmt.Printf("GenColStrs: [%d]%s: %s", i, pTD.StorName, pCS.String())
+     	fmt.Printf("GenColStrs: [%d]%s: %s \n", i, pTD.StorName, pCS.String())
      }
      return nil
 }
