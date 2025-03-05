@@ -1,8 +1,14 @@
 package rowmodels
 
-import D "github.com/fbaube/dsmnd"
+import(
+	D "github.com/fbaube/dsmnd"
+)
 
-// columnPtrsFunc should be used below for [TableDetails.ColumnPtrsFunc]
+// columnPtrsFunc is used in struct [TableDetails.ColumnPtrsFunc],
+// below. Note that ColumnPtrsFunc is a func, and/but while there
+// is also a method on interface [RowModel] with the signature: 
+// (p RowModel) ColumnPtrsMethod(bool) []any
+
 type columnPtrsFunc func(RowModel, bool) []any 
 // type columnPtrsMthd func(bool) []any 
 

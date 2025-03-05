@@ -16,10 +16,10 @@ import(
 // EngineUnique acts on a single DB record, based on the value of 
 // of a column that is specified as UNIQUE (for example, a row ID). 
 // One of four basic actions is performed (listed as SQL/CRUD/HTTP):
-//  - SELECT / Retrieve / GET
-//  - INSERT / Create / POST 
-//  - UPDATE / Update / PUT
-//  - DELETE / Delete / DELETE
+//  - SELECT / Retrieve / GET  (returns 0/1 + buffer) 
+//  - INSERT / Create / POST   (returns new-ID + nil) 
+//  - UPDATE / Update / PUT    (returns 0/1 + nil) 
+//  - DELETE / Delete / DELETE (returns 0/1 + nil) 
 // 
 // It takes four input arguments:
 //  - The DB operation, one of the four listed above; the dbOp is
@@ -35,12 +35,12 @@ import(
 //
 // It returns two values:
 //  - An error: if it is non-nil, the other return value is invalid
-//  - An int that is (if INSERT) the newly-added row ID (else) 0 or 1
-//    to indicate whether a record was affected.
+//  - An int that is (if INSERT) the newly-added row ID (else) 0 or 1 to
+//    indicate how many records were (i.e. whether a record was) affected.
 //
 // NOTE: When using whereSpec, if a record is not found, this is indicated
-// by the second return value (the int), NOT by the error, which is reserved
-// for when the DB rejects the SQL.
+// by the second return value (the int), NOT by the first return value 
+// (the error, which is reserved for when the DB rejects the SQL.
 //
 // NOTE: In an UPDATE, if the whereSpec does not refer to the ID, and the
 // ID of the input record does not match the ID of the record found by the
@@ -54,27 +54,31 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.Uniq
      var pRM DRM.RowModel
      var w = pSR.LogWriter()
      var sSQL string
-     
-     // Column-pointers function 
+
+     // Declare some vars used by multiple ops 
+     // Table's column-pointers function 
      var idxdCPF, CPF []any  // with ID; no ID
-     // Comma-separated column names 
+     // Table's comma-separated column names 
      var idxdCSV, CSV string // with ID; no ID
-     // '$'-numbered parameters (Postgres-style)
+     // Table's '$'-numbered parameters (Postgres-style)
      var idxdPlcNrs, PlcNrs string // with ID; no ID 
 
+     // Fetch the table's details and fill in the vars 
      pTD = GetTableDetailsByCode(tableName)
      if pTD == nil {
+     	// FIXME err msgs 
      	s := "NO TblDtls FOR: " + tableName
      	println(s)
 	return errors.New(s), 0
      }
+     // For convenience, callers can use "ID", and we fix it 
      if pWS != nil && S.EqualFold("id", pWS.Field) {
      	pWS.Field = pTD.PKname
      }
-     pRM = pTD.NewInstance()
+     pRM = pTD.NewInstance() // output buffer 
      CSV = pTD.ColumnNamesCSV // no ID column 
      CPF = pTD.ColumnPtrsFunc(RM, false) // no ID column 
-     idxdCSV = pTD.PKname + ", " + CSV // "IDX_" + pTD.StorName + ", " + CSV
+     idxdCSV = pTD.PKname + ", " + CSV // with ID column 
      idxdCPF = pTD.ColumnPtrsFunc(RM, true) // with ID column
      var i int 
      for i = range len(CPF) {
@@ -88,6 +92,8 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.Uniq
      // writeFieldDebugInfo(w, pTD)
 
      // switch dbOp {
+     // We only use the first letter of the 
+     // DB op, so callers can be creative :-P 
      println("DB OP IS: " + S.ToUpper(dbOp[0:1]))
      switch S.ToUpper(dbOp[0:1]) { 
 
@@ -152,10 +158,10 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.Uniq
 	// You should only see this error when you're using QueryRow().
 	// If you see this error elsewhere, you're doing something wrong.
 	
-	// pDest is a RowModel 
 	var colPtrs []any
-	var e error 
-	colPtrs = pRM.ColumnPtrsMethod(true) // not pDest
+	var e error
+	// idxdCPF = = pTD.ColumnPtrsFunc(RM, true)
+	colPtrs = pRM.ColumnPtrsMethod(true) 
 	e = row.Scan(colPtrs...)
 	switch e {
 	  case sql.ErrNoRows:
@@ -169,15 +175,51 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.Uniq
 	}
 	panic("Oops, fallthru in SELECT")
 	
-     	// ============================================
+     	// ================================================
 	case "M", "U": // Modify, Update
 	// https://www.sqlite.org/lang_update.html
-	// UPDATE tblNm SET stuff WHERE expr RET'G expr 
+	// Obnoxious syntax: 
+	// UPDATE tblNm SET fld1=val1,fld2=val2 WHERE expr: 
+	// (or..) SET fld1=$1, fld2=$2 WHERE expr; + any...
 	// https://www.sqlite.org/syntax/expr.html 
-     	// ============================================
+     	// ================================================
      	if pWS == nil {
-	   return errors.New("EngineUnique: SELECT: missing WHERE"), 0 
+	   return errors.New("EngineUnique: UPDATE: missing WHERE"), 0 
      	   }
+// ====================================================
+	// For UPDATE (only), we have to generate an SQL
+	// string that involves all columns (except the ID). 
+	// Write assignment pairts as CSV: f1 = $1, f2 = $2, ...
+	// We do NOT include the primary key, D.SFT_PRKEY
+
+
+	sSQL = "UPDATE " +
+	        pTD.TableSummary.StorName + " SET " + 
+		"(" + CSV + ") " +
+		"VALUES(" + PlcNrs + ") " +
+		"RETURNING " + pTD.PKname + ";"
+	fmt.Fprintf(w, "INSERT.sql: " + sSQL + "\n")
+	
+	// It is now ready for Exec()
+	var theRes sql.Result
+	var newID  int64
+	var e      error
+	// Call Exec(..) on the stmt, with all column ptrs
+	theRes, e = pSR.Handle().Exec(sSQL, CPF...)
+	if e != nil {
+		fmt.Fprintf(w, "INSERT.exec: failed: %s", e)
+		return fmt.Errorf("engineunique: insert: exec: %w", e), -1
+	}
+	newID, e = theRes.LastInsertId()
+	if e != nil {
+		fmt.Fprintf(w, "INSERT.lastinsertId: failed: %s", e)
+		return fmt.Errorf("engineunique: insert: lastinsertId: %w",e),-1
+	}
+	fmt.Fprintf(w, "INSERT: OK: LastInsertID: %d \n", newID)
+	return nil, int(newID)
+
+// ====================================================
+
      	// =======================================
 	case "D": // Delete, Discard, Drop
 	// https://www.sqlite.org/lang_delete.html
