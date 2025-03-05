@@ -4,6 +4,42 @@ import(
 	D "github.com/fbaube/dsmnd"
 )
 
+// ColumnStringsCSV stores strings useful for composing 
+// SQL statements. Each string includes all the columns, 
+// in order, comma-separated. SQL using these strings
+// defaults to setting/getting every field in a DB record.
+//
+// The strings have no trailing commas. Each string has a 
+// "full" version (suffixed with "_wID") that includes the 
+// primary key (named "{table}_ID") for output from SELECT, 
+// and (importantly!) a version withOUT the "{table}_ID" 
+// primary key, for input to INSERT (where the ID is new)
+// and input to UPDATE (where the ID finds the record).
+// .
+type ColumnStringsCSV struct {
+	// FieldNames   [+withID primarykey] is a list of 
+	// column (i.e. field) names, in order: "F1, F2, F3" 
+	FieldNames,     FieldNames_wID  string
+	// PlaceNumbers [+withID primarykey] is a list of 
+	// '$'-numbered parameters (like Postgres): "$1, $2, $3" 
+	PlaceNumbers,   PlaceNrs_wID    string
+	// FieldUpdates [+withID primarykey] is a list of
+	// column/field names with "=", and the values as
+	// '$'-numbered parameters: "F1 = $1, F2 = $2, F3 = $3" 
+	UpdateNames,    UpdateNames_wID string
+}
+
+// GenerateColumnStringsCSV generates struct [ColumnStringsCSV] 
+// for every struct that has been registered using method
+// datarepo/RegisterAppTables of interface datarepo/SimpleRepo .
+//
+// It does not modify or even access the database. It should 
+// be called ASAP after program start. It does not need to be 
+// called before a database is opened, but it DOES need to be 
+// called any SQL is executed against the database. 
+func GenerateColumnStringsCSV() {
+}
+
 // columnPtrsFunc is used in struct [TableDetails.ColumnPtrsFunc],
 // below. Note that ColumnPtrsFunc is a func, and/but while there
 // is also a method on interface [RowModel] with the signature: 
@@ -92,7 +128,7 @@ type NewInstanceFunc func() RowModel
 // .
 type TableDetails struct {
 
-        // [dsmnd.TableSummary] is a [dsmnd.Datum] 
+     	// [dsmnd.TableSummary] is a [dsmnd.Datum] 
 	// and has four fields, used thusly:
 	//  - [dsmnd.BasicDatatype]: [D.SCT_TABLE] 
 	//  - StorName: the name of the table in the DB,
@@ -112,24 +148,29 @@ type TableDetails struct {
 	
 	// ColumnNamesCSV is all column names (except primary key),
 	// ready-to-use in SQL, in a specific (auto-generatable!)
-	// order, comma-separated. We omit the primary key so 
-	// that we can use it for SQL INSERT statements too.
+	// order, comma-separated. We omit the primary key so that
+	// we can use it for SQL INSERT statements too. REPLACED!! 
 	ColumnNamesCSV string
 	
 	// ColumnSpecs is a list of [dsmnd.D.ColumnSpec] that omits
 	// the primary key (which can be brought in when needed).
 	ColumnSpecs []D.ColumnSpec
 	
-	// ColumnPtrsFunc return a slice of ptrs to every field
-	// in the passed-by-ptr [Rowmodeler] struct (maybe incl.
-	// the primary key). Used for DB Scan(..) funcs. 
-	// Func signature must be like: func (any) []any ; 
-	// Although it should be like: func (*any) []*any
+	// ColumnPtrsFunc return a slice of ptrs to every field 
+	// in the passed-by-ptr struct (that implements interface
+	// [Rowmodel]), and sometimes includes the primary key.
+	// The slice is used for database Scan(..) funcs.
+	// 
+	// Note that ColumnPtrsFunc is a func, and/but there 
+	// is also this method in interface [RowModel]:
+	// (p RowModel) ColumnPtrsMethod(bool) []any
+	// .
 	ColumnPtrsFunc columnPtrsFunc
-	// ColumnPtrsMthd columnPtrsMthd
 
 	// BlankInstance might be needed at some point
-	BlankInstance RowModel
+	// BlankInstance RowModel
+	// NewInstance returns a ptr to just that, 
+	// and is useful for resolving generics. 
 	NewInstance NewInstanceFunc
 	
 	// We used to have ForenKeys defined by name only, but

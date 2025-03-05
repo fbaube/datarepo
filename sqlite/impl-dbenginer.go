@@ -187,11 +187,10 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.Uniq
 	   return errors.New("EngineUnique: UPDATE: missing WHERE"), 0 
      	   }
 // ====================================================
-	// For UPDATE (only), we have to generate an SQL
-	// string that involves all columns (except the ID). 
-	// Write assignment pairts as CSV: f1 = $1, f2 = $2, ...
+	// For UPDATE (only), we have to generate here+now an 
+	// SQL string that involves all columns (except the ID). 
+	// Write assignment pairs as CSV: f1 = $1, f2 = $2, ...
 	// We do NOT include the primary key, D.SFT_PRKEY
-
 
 	sSQL = "UPDATE " +
 	        pTD.TableSummary.StorName + " SET " + 
@@ -235,7 +234,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.Uniq
 
 func writeFieldDebugInfo(w io.Writer, pTD *DRM.TableDetails) {
      	// TODO: Check the correctness of this! It seemed to overrun with "true"
-	CPF := pTD.ColumnPtrsFunc(pTD.BlankInstance, false) // true) // with ID column
+	CPF := pTD.ColumnPtrsFunc(pTD.NewInstance(), false) // true) // with ID column
 	for iCol, cp := range CPF {
 	    sn := pTD.ColumnSpecs[iCol].StorName
 	    dt := D.SemanticFieldType(pTD.ColumnSpecs[iCol].Datatype)
