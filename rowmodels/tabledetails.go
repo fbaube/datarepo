@@ -196,6 +196,6 @@ type TableDetails struct {
 
 	// FuncNew func() RowModel
 
-	pCSVs *ColumnStringsCSV
+	CSVs *ColumnStringsCSV
 }
 
