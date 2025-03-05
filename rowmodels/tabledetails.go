@@ -2,6 +2,7 @@ package rowmodels
 
 import(
 	"fmt"
+	"errors"
 	D "github.com/fbaube/dsmnd"
 )
 
@@ -45,10 +46,18 @@ type ColumnStringsCSV struct {
 // is not listed in the slice of TableDetails.
 // .
 func GenerateColumnStringsCSV(pTD *TableDetails) error {
+     if pTD.CSVs != nil {
+     	println("GenerateColumnStringsCSV: DUPE CALL")
+	return errors.New("GenerateColumnStringsCSV: dupe initialisation")
+	}
+     pTD.CSVs = new(ColumnStringsCSV)
      var colSpex []D.ColumnSpec
-     colSpex = pTD.ColumnSpecs
-     // nSpex := len(colSpex)
-     // skip primary key "{table}_ID" at [0]
+     colSpex   = pTD.ColumnSpecs
+     // type ColumnStringsCSV struct {
+     //   FieldNames,     FieldNames_wID  string  "F1, F2, F3" 
+     //   PlaceNumbers,   PlaceNrs_wID    string  "$1, $2, $3" 
+     //   UpdateNames,    UpdateNames_wID string  "F1=$1,F2=$2,F3=$3" 
+     // }
      for i, pCS := range colSpex {
      	fmt.Printf("%s[%d]: %s \n", pTD.StorName, i, pCS.String())
 	
