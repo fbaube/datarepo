@@ -3,6 +3,8 @@ package rowmodels
 import(
 	"fmt"
 	"errors"
+	"strconv"
+	S "strings"
 	D "github.com/fbaube/dsmnd"
 )
 
@@ -57,11 +59,19 @@ func GenerateColumnStringsCSV(pTD *TableDetails) error {
      //   FieldNames,     FieldNames_wID  string  "F1, F2, F3" 
      //   PlaceNumbers,   PlaceNrs_wID    string  "$1, $2, $3" 
      //   UpdateNames,    UpdateNames_wID string  "F1=$1,F2=$2,F3=$3" 
-     // }
+     var sbFN, sbPN, sbUN S.Builder
+     var columnName, placeNumber string
      for i, pCS := range colSpex {
-     	fmt.Printf("%s[%d]: %s \n", pTD.StorName, i, pCS.String())
-	
+	columnName  = pCS.StorName
+	placeNumber = strconv.Itoa(i+1)
+     	fmt.Printf("%s[%d]=%s: %s \n", pTD.StorName, i, columnName, pCS.String())
+	sbFN.WriteString(columnName  + ", ")
+	sbPN.WriteString(placeNumber + ", ")
+	sbUN.WriteString(columnName  + " = $" + placeNumber + ", ")
      }
+     println("FieldNames", sbFN.String())
+     println("PlaceNmbrs", sbPN.String())
+     println("UpdatNames", sbUN.String())
      return nil
 }
 
