@@ -40,7 +40,7 @@ func (p *SqliteRepo) RegisterAppTables(appName string, cfg []*DRM.TableDetails) 
 	var c *DRM.TableDetails
 	for _, c = range cfg {
 	       	sindex := S.ToLower(c.DispName) // c.StorName)
-		println("REG TBL DTLS: " + sindex)
+		// println("REG TBL DTLS: " + sindex)
 		theMap[sindex] = c
 		L.L.Info("Reg'd the config for app table: " +
 			S.ToLower(c.StorName))
@@ -165,7 +165,7 @@ func (p *SqliteRepo) createAppTable(td *DRM.TableDetails) error {
 
 func GetTableDetailsByCode(s string) *DRM.TableDetails {
      s = S.ToLower(s) 
-     println("GetTableDetailsByCode: " + s)
+  // println("GetTableDetailsByCode: " + s)
   // return theMap[S.ToLower(s)]
      ret := theMap[s]
      if ret == nil {

@@ -94,7 +94,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.Uniq
      // switch dbOp {
      // We only use the first letter of the 
      // DB op, so callers can be creative :-P 
-     println("DB OP IS: " + S.ToUpper(dbOp[0:1]))
+     // println("DB OP IS: " + S.ToUpper(dbOp[0:1]))
      switch S.ToUpper(dbOp[0:1]) { 
 
      	// ======================================================

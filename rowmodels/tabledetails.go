@@ -1,7 +1,7 @@
 package rowmodels
 
 import(
-	"fmt"
+	// "fmt"
 	"errors"
 	"strconv"
 	S "strings"
@@ -65,7 +65,8 @@ func GenerateColumnStringsCSV(pTD *TableDetails) error {
      for i, pCS := range colSpex {
 	columnName  = pCS.StorName
 	placeNumber = strconv.Itoa(i+1)
-     	fmt.Printf("%s[%d]=%s: %s \n", pTD.StorName, i, columnName, pCS.String())
+     	// fmt.Printf("%s[%d]=%s: %s \n",
+	// 	pTD.StorName, i, columnName, pCS.String())
 	sbFN.WriteString(columnName  + ", ")
 	sbPN.WriteString("$" + placeNumber + ", ")
 	sbUN.WriteString(columnName  + " = $" + placeNumber + ", ")
@@ -79,12 +80,13 @@ func GenerateColumnStringsCSV(pTD *TableDetails) error {
      pTD.CSVs.FieldNames_wID = pTD.PKname + ", " + sFN
      pTD.CSVs.PlaceNrs_wID   = sPN + "$" + strconv.Itoa(len(colSpex)+1)
      pTD.CSVs.PlaceNumbers   = S.TrimSuffix(pTD.CSVs.PlaceNumbers, ", ")
-     
+/*     
      println("FieldNames    ", pTD.CSVs.FieldNames)
      println("FieldNames wID", pTD.CSVs.FieldNames_wID)
      println("PlaceNmbrs    ", pTD.CSVs.PlaceNumbers)
      println("PlaceNmbrs wID", pTD.CSVs.PlaceNrs_wID)
-     println("UpdatwNames   ", pTD.CSVs.UpdateNames)
+     println("UpdateNames   ", pTD.CSVs.UpdateNames)
+*/
      return nil
 }
 
