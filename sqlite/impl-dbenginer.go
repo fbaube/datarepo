@@ -51,10 +51,16 @@ import(
 func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.UniquerySpec, RM DRM.RowModel) (error, int) {
 
      var pTD *DRM.TableDetails
+     var pCS *DRM.ColumnStringsCSV
      var pRM DRM.RowModel
      var w = pSR.LogWriter()
      var sSQL string
 
+/* type ColumnStringsCSV struct {
+        FieldNames,     FieldNames_wID  string  // "F1, F2, F3" 
+        PlaceNumbers,   PlaceNrs_wID    string  // "$1, $2, $3" 
+        UpdateNames     string   // "F1 = $1, F2 = $2, F3 = $3" 
+*/
      // Declare some vars used by multiple ops 
      // Table's column-pointers function 
      var idxdCPF, CPF []any  // with ID; no ID
@@ -71,6 +77,9 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.Uniq
      	println(s)
 	return errors.New(s), 0
      }
+     pCS = pTD.CSVs
+     if pCS == nil { panic("nil TableDetails ColumnStrings") }
+     
      // For convenience, callers can use "ID", and we fix it 
      if pWS != nil && S.EqualFold("id", pWS.Field) {
      	pWS.Field = pTD.PKname
