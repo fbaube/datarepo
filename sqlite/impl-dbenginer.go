@@ -47,27 +47,21 @@ import(
 // DB, the function panics. So, for UPDATE, just match on the ID. 
 //
 // NOTE: Also implement COUNT(*) ?
+//
+// TODO: switch on dbOp to call a new mini func that assembles the SQL statement.
+// 
+// TODO: TD.pCSVs should also use DB.Prepare to gather sql.Stmt's
 // . 
-func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.UniquerySpec, RM DRM.RowModel) (error, int) {
+func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.UniquerySpec, pRM DRM.RowModel) (error, int) {
 
-     var pTD *DRM.TableDetails
-     var pCS *DRM.ColumnStringsCSV
-     var pRM DRM.RowModel
+     var pTD   *DRM.TableDetails
+     var pCSVs *DRM.ColumnStringsCSV
+  // var RM     DRM.RowModel
+     var sSQL  string
      var w = pSR.LogWriter()
-     var sSQL string
-
-/* type ColumnStringsCSV struct {
-        FieldNames,     FieldNames_wID  string  // "F1, F2, F3" 
-        PlaceNumbers,   PlaceNrs_wID    string  // "$1, $2, $3" 
-        UpdateNames     string   // "F1 = $1, F2 = $2, F3 = $3" 
-*/
-     // Declare some vars used by multiple ops 
-     // Table's column-pointers function 
-     var idxdCPF, CPF []any  // with ID; no ID
-     // Table's comma-separated column names 
-     var idxdCSV, CSV string // with ID; no ID
-     // Table's '$'-numbered parameters (Postgres-style)
-     var idxdPlcNrs, PlcNrs string // with ID; no ID 
+     var e error 
+     // Table's column-pointers funcs 
+     var CPF, CPF_wID []any 
 
      // Fetch the table's details and fill in the vars 
      pTD = GetTableDetailsByCode(tableName)
@@ -77,25 +71,16 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.Uniq
      	println(s)
 	return errors.New(s), 0
      }
-     pCS = pTD.CSVs
-     if pCS == nil { panic("nil TableDetails ColumnStrings") }
+     pCSVs = pTD.CSVs
+     if pCSVs == nil { panic("nil TableDetails ColumnStrings") }
      
      // For convenience, callers can use "ID", and we fix it 
      if pWS != nil && S.EqualFold("id", pWS.Field) {
      	pWS.Field = pTD.PKname
      }
-     pRM = pTD.NewInstance() // output buffer 
-     CSV = pTD.ColumnNamesCSV // no ID column 
-     CPF = pTD.ColumnPtrsFunc(RM, false) // no ID column 
-     idxdCSV = pTD.PKname + ", " + CSV // with ID column 
-     idxdCPF = pTD.ColumnPtrsFunc(RM, true) // with ID column
-     var i int 
-     for i = range len(CPF) {
-	 PlcNrs += fmt.Sprintf("$%d, ", i+1) }
-     for i = range len(idxdCPF) {
-	 idxdPlcNrs += fmt.Sprintf("$%d, ", i+1) }
-     PlcNrs     = S.TrimSuffix(PlcNrs, ", ")
-     idxdPlcNrs = S.TrimSuffix(idxdPlcNrs, ", ")
+     if pRM == nil { pRM = pTD.NewInstance() } // output buffer 
+     CPF     = pTD.ColumnPtrsFunc(pRM, false) // no ID column 
+     CPF_wID = pTD.ColumnPtrsFunc(pRM, true) // with ID column
 
      // Log info about the columns 
      // writeFieldDebugInfo(w, pTD)
@@ -104,41 +89,46 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.Uniq
      // We only use the first letter of the 
      // DB op, so callers can be creative :-P 
      // println("DB OP IS: " + S.ToUpper(dbOp[0:1]))
+
+/*      FieldNames,     FieldNames_wID  string  // "F1, F2, F3" 
+        PlaceNumbers,   PlaceNrs_wID    string  // "$1, $2, $3" 
+        UpdateNames     string   // "F1 = $1, F2 = $2, F3 = $3"  */
+
      switch S.ToUpper(dbOp[0:1]) { 
 
      	// ======================================================
 	case "A", "C", "I", "N":
-	// Add, Create, Insert, New 
+	// Add, Create, Insert, New
+	// Use RETURNING to get new ID. 
 	// https://www.sqlite.org/lang_insert.html
 	// INSERT INTO tblNm (fld1, fld2) VALUES(val1, val2);
 	// INSERT INTO tblNm (fld1, fld2) VALUES($1,$2); + any...
+	// FIELDS are FieldNames[_wID]. VALUES are PlaceNrs[_wID].
      	// ======================================================
 	if pWS != nil {
 	   return errors.New("EngineUnique: INSERT: unwanted WHERE"), 0 
 	}
 	// Write table name and all column names (as CSV).
 	// Do NOT include the primary key, D.SFT_PRKEY 
-	sSQL = "INSERT INTO " +
-	        pTD.TableSummary.StorName +
-		"(" + CSV + ") " +
-		"VALUES(" + PlcNrs + ") " +
+	sSQL = "INSERT INTO " + pTD.TableSummary.StorName +
+		"(" + pCSVs.FieldNames + ") " +
+		"VALUES(" + pCSVs.PlaceNumbers + ") " +
 		"RETURNING " + pTD.PKname + ";"
 	fmt.Fprintf(w, "INSERT.sql: " + sSQL + "\n")
 	
 	// It is now ready for Exec()
 	var theRes sql.Result
 	var newID  int64
-	var e      error
 	// Call Exec(..) on the stmt, with all column ptrs
 	theRes, e = pSR.Handle().Exec(sSQL, CPF...)
 	if e != nil {
-		fmt.Fprintf(w, "INSERT.exec: failed: %s", e)
-		return fmt.Errorf("engineunique: insert: exec: %w", e), -1
+		fmt.Fprintf(w, "engineunique.insert.exec: failed: %s", e)
+		return fmt.Errorf("engineunique.insert.exec: %w", e), -1
 	}
 	newID, e = theRes.LastInsertId()
 	if e != nil {
-		fmt.Fprintf(w, "INSERT.lastinsertId: failed: %s", e)
-		return fmt.Errorf("engineunique: insert: lastinsertId: %w",e),-1
+		fmt.Fprintf(w, "engineunique.insert.lastinsertId: failed: %s", e)
+		return fmt.Errorf("engineunique.insert: lastinsertId: %w",e),-1
 	}
 	fmt.Fprintf(w, "INSERT: OK: LastInsertID: %d \n", newID)
 	return nil, int(newID)
@@ -148,30 +138,28 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.Uniq
         // Fetch, Get, List, Retrieve, Select 
         // https://www.sqlite.org/lang_select.html
 	// SELECT fld1, fld2 FROM tblNm WHERE expr
-	// https://www.sqlite.org/syntax/expr.html 
+	// https://www.sqlite.org/syntax/expr.html
+	// FIELDS are FieldNames_wID. 
      	// =======================================
 	if pWS == nil {
-	   return errors.New("EngineUnique: SELECT: missing WHERE"), 0
+	   return errors.New("engineunique.select: missing WHERE"), 0
 	}
-	sSQL =  "SELECT " + idxdCSV +
+	// TODO This should use a '$'-placeholder ?? 
+	sSQL =  "SELECT " + pCSVs.FieldNames_wID +
 		" FROM "  + pTD.TableSummary.StorName +
 		" WHERE " + pWS.Field + " = " + pWS.Value + ";"
-		
+
 	// TODO: QueryRow(..)
 	row := pSR.Handle().QueryRow(sSQL)
-	// ==========
+	// ---------------------------------------------------------
 	// What if there is no row in the result, and .Scan() can't
 	// scan a value. What then? The error constant sql.ErrNoRows
 	// is returned by QueryRow() when the result is empty.
 	// This needs to be handled as a special case in most cases.
-	// You should only see this error when you're using QueryRow().
-	// If you see this error elsewhere, you're doing something wrong.
-	
-	var colPtrs []any
-	var e error
-	// idxdCPF = = pTD.ColumnPtrsFunc(RM, true)
-	colPtrs = pRM.ColumnPtrsMethod(true) 
-	e = row.Scan(colPtrs...)
+	// You should only see this error if you're using QueryRow().
+	// If you see this error elsewhere, you're doin' it  wrong.
+	// ---------------------------------------------------------
+	e = row.Scan(CPF_wID...)
 	switch e {
 	  case sql.ErrNoRows:
 	       return nil, 0 // false, nil
@@ -179,7 +167,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.Uniq
 	       return nil, 1 // true, nil 
 	  default:
 		println("SQL ERROR: (" + e.Error() + ") SQL: " + sSQL)
-		return fmt.Errorf("EngineUnique(get) " +
+		return fmt.Errorf("engineunique.get: " +
 		       "(%s=%s) failed: %w", pWS.Field, pWS.Value, e), 0
 	}
 	panic("Oops, fallthru in SELECT")
@@ -190,41 +178,42 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.Uniq
 	// Obnoxious syntax: 
 	// UPDATE tblNm SET fld1=val1,fld2=val2 WHERE expr: 
 	// (or..) SET fld1=$1, fld2=$2 WHERE expr; + any...
-	// https://www.sqlite.org/syntax/expr.html 
+	// https://www.sqlite.org/syntax/expr.html
+	// Use UpdateNames. 
      	// ================================================
      	if pWS == nil {
-	   return errors.New("EngineUnique: UPDATE: missing WHERE"), 0 
+	   return errors.New("engineunique.update: missing WHERE"), 0 
      	   }
-// ====================================================
+	// -----------------------------------------------------
 	// For UPDATE (only), we have to generate here+now an 
 	// SQL string that involves all columns (except the ID). 
 	// Write assignment pairs as CSV: f1 = $1, f2 = $2, ...
-	// We do NOT include the primary key, D.SFT_PRKEY
-
-	sSQL = "UPDATE " +
-	        pTD.TableSummary.StorName + " SET " + 
-		"(" + CSV + ") " +
-		"VALUES(" + PlcNrs + ") " +
-		"RETURNING " + pTD.PKname + ";"
-	fmt.Fprintf(w, "INSERT.sql: " + sSQL + "\n")
+	// We do NOT include the primary key, D.SFT_PRKEY, which
+	// is used in the WHERE. 
+	// -----------------------------------------------------
+	sSQL =	"UPDATE " + pTD.TableSummary.StorName +
+		" SET " + pCSVs.UpdateNames +
+		" WHERE " + pWS.Field + " = " + pWS.Value + ";"
+	fmt.Fprintf(w, "UPDATE.sql: " + sSQL + "\n")
 	
 	// It is now ready for Exec()
 	var theRes sql.Result
-	var newID  int64
-	var e      error
+	// var newID  int64
 	// Call Exec(..) on the stmt, with all column ptrs
 	theRes, e = pSR.Handle().Exec(sSQL, CPF...)
 	if e != nil {
-		fmt.Fprintf(w, "INSERT.exec: failed: %s", e)
-		return fmt.Errorf("engineunique: insert: exec: %w", e), -1
+		fmt.Fprintf(w, "UPDATE.exec: failed: %s", e)
+		return fmt.Errorf("engineunique.update.exec: %w", e), 0
 	}
+	/*
 	newID, e = theRes.LastInsertId()
 	if e != nil {
 		fmt.Fprintf(w, "INSERT.lastinsertId: failed: %s", e)
-		return fmt.Errorf("engineunique: insert: lastinsertId: %w",e),-1
+		return fmt.Errorf("engineunique: insert: lastinsertId: %w",e),0
 	}
 	fmt.Fprintf(w, "INSERT: OK: LastInsertID: %d \n", newID)
-	return nil, int(newID)
+	*/
+	return nil, 1 // int(newID)
 
 // ====================================================
 
