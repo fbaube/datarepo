@@ -51,6 +51,12 @@ import(
 // TODO: switch on dbOp to call a new mini func that assembles the SQL statement.
 // 
 // TODO: TD.pCSVs should also use DB.Prepare to gather sql.Stmt's
+//
+// TODO: Use Result.RowsAffected
+// https://pkg.go.dev/database/sql#Result
+// RowsAffected returns the number of rows affected 
+// by an update, insert, or delete. Not every DB or 
+// driver supports it. RowsAffected() (int64, error)
 // . 
 func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.UniquerySpec, pRM DRM.RowModel) (error, int) {
 
@@ -205,6 +211,12 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.Uniq
 		fmt.Fprintf(w, "UPDATE.exec: failed: %s", e)
 		return fmt.Errorf("engineunique.update.exec: %w", e), 0
 	}
+	var nRA int64
+	nRA, e = theRes.RowsAffected()
+	if e != nil {
+		fmt.Fprintf(w, "engineunique.update.rowsaffected: failed: %s", e)
+		return fmt.Errorf("engineunique.update.rowsaffected: %w", e), 0
+	}
 	/*
 	newID, e = theRes.LastInsertId()
 	if e != nil {
@@ -213,7 +225,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.Uniq
 	}
 	fmt.Fprintf(w, "INSERT: OK: LastInsertID: %d \n", newID)
 	*/
-	return nil, 1 // int(newID)
+	return nil, int(nRA) // 1 
 
 // ====================================================
 
