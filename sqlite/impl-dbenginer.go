@@ -57,6 +57,9 @@ import(
 // RowsAffected returns the number of rows affected 
 // by an update, insert, or delete. Not every DB or 
 // driver supports it. RowsAffected() (int64, error)
+//
+// NOTE: When writing the multi-row version of this,
+// be sure to call Rows.Cloe()
 // . 
 func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.UniquerySpec, pRM DRM.RowModel) (error, int) {
 
