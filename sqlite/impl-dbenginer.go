@@ -13,6 +13,17 @@ import(
 	DRM "github.com/fbaube/datarepo/rowmodels"
 )
 
+func buildINSERT(pTD *DRM.TableDetails) string { 
+	return  "INSERT INTO " + pTD.TableSummary.StorName +
+		           "(" + pTD.CSVs.FieldNames   + ") " +
+		     "VALUES(" + pTD.CSVs.PlaceNumbers + ") " +
+		  "RETURNING " + pTD.PKname            + ";"
+}
+
+func buildSELECT(pTD *DRM.TableDetails, pFV DRP.FieldValuePair) { }
+func buildUPDATE(pTD *DRM.TableDetails, pFV DRP.FieldValuePair) { }
+func buildDELETE(pTD *DRM.TableDetails, pFV DRP.FieldValuePair) { }
+
 // EngineUnique acts on a single DB record, based on the value of 
 // of a column that is specified as UNIQUE (for example, a row ID). 
 // One of four basic actions is performed (listed as SQL/CRUD/HTTP):
@@ -61,7 +72,7 @@ import(
 // NOTE: When writing the multi-row version of this,
 // be sure to call Rows.Cloe()
 // . 
-func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.UniquerySpec, pRM DRM.RowModel) (error, int) {
+func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pFV *DRP.FieldValuePair, pRM DRM.RowModel) (error, int) {
 
      var pTD   *DRM.TableDetails
      var pCSVs *DRM.ColumnStringsCSV
@@ -84,8 +95,8 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.Uniq
      if pCSVs == nil { panic("nil TableDetails ColumnStrings") }
      
      // For convenience, callers can use "ID", and we fix it 
-     if pWS != nil && S.EqualFold("id", pWS.Field) {
-     	pWS.Field = pTD.PKname
+     if pFV != nil && S.EqualFold("id", pFV.Field) {
+     	pFV.Field = pTD.PKname
      }
      if pRM == nil { pRM = pTD.NewInstance() } // output buffer 
      CPF     = pTD.ColumnPtrsFunc(pRM, false) // no ID column 
@@ -114,15 +125,16 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.Uniq
 	// INSERT INTO tblNm (fld1, fld2) VALUES($1,$2); + any...
 	// FIELDS are FieldNames[_wID]. VALUES are PlaceNrs[_wID].
      	// ======================================================
-	if pWS != nil {
+	if pFV != nil {
 	   return errors.New("EngineUnique: INSERT: unwanted WHERE"), 0 
 	}
 	// Write table name and all column names (as CSV).
 	// Do NOT include the primary key, D.SFT_PRKEY 
-	sSQL = "INSERT INTO " + pTD.TableSummary.StorName +
+	sSQL = buildINSERT(pTD)
+/*	sSQL = "INSERT INTO " + pTD.TableSummary.StorName +
 		"(" + pCSVs.FieldNames + ") " +
 		"VALUES(" + pCSVs.PlaceNumbers + ") " +
-		"RETURNING " + pTD.PKname + ";"
+		"RETURNING " + pTD.PKname + ";" */
 	fmt.Fprintf(w, "INSERT.sql: " + sSQL + "\n")
 	
 	// It is now ready for Exec()
@@ -150,13 +162,13 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.Uniq
 	// https://www.sqlite.org/syntax/expr.html
 	// FIELDS are FieldNames_wID. 
      	// =======================================
-	if pWS == nil {
+	if pFV == nil {
 	   return errors.New("engineunique.select: missing WHERE"), 0
 	}
 	// TODO This should use a '$'-placeholder ?? 
 	sSQL =  "SELECT " + pCSVs.FieldNames_wID +
 		" FROM "  + pTD.TableSummary.StorName +
-		" WHERE " + pWS.Field + " = " + pWS.Value + ";"
+		" WHERE " + pFV.Field + " = " + pFV.Value + ";"
 
 	// TODO: QueryRow(..)
 	row := pSR.Handle().QueryRow(sSQL)
@@ -177,7 +189,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.Uniq
 	  default:
 		println("SQL ERROR: (" + e.Error() + ") SQL: " + sSQL)
 		return fmt.Errorf("engineunique.get: " +
-		       "(%s=%s) failed: %w", pWS.Field, pWS.Value, e), 0
+		       "(%s=%s) failed: %w", pFV.Field, pFV.Value, e), 0
 	}
 	panic("Oops, fallthru in SELECT")
 	
@@ -190,7 +202,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.Uniq
 	// https://www.sqlite.org/syntax/expr.html
 	// Use UpdateNames. 
      	// ================================================
-     	if pWS == nil {
+     	if pFV == nil {
 	   return errors.New("engineunique.update: missing WHERE"), 0 
      	   }
 	// -----------------------------------------------------
@@ -202,7 +214,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.Uniq
 	// -----------------------------------------------------
 	sSQL =	"UPDATE " + pTD.TableSummary.StorName +
 		" SET " + pCSVs.UpdateNames +
-		" WHERE " + pWS.Field + " = " + pWS.Value + ";"
+		" WHERE " + pFV.Field + " = " + pFV.Value + ";"
 	fmt.Fprintf(w, "UPDATE.sql: " + sSQL + "\n")
 	
 	// It is now ready for Exec()
@@ -237,7 +249,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pWS *DRP.Uniq
 	// https://www.sqlite.org/lang_delete.html
 	// DELETE FROM tblNm WHERE expr RET'G expr
      	// =======================================
-	if pWS == nil {
+	if pFV == nil {
      	   return errors.New("EngineUnique: SELECT: missing WHERE"), 0 
      	}
      // default:

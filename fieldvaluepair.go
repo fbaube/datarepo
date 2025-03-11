@@ -1,7 +1,5 @@
 package datarepo
 
-import D "github.com/fbaube/dsmnd"
-
 // UniquerySpec specifies a query that keys on equality for a
 // UNIQUE column.
 //
@@ -37,11 +35,10 @@ import D "github.com/fbaube/dsmnd"
 // 
 // DBOp should probably be defined in package dsmnd.
 // .
-type UniquerySpec struct { // [keyT comparable] struct {
-//	DBOp   string
-//	Table  string
+// typ UniquerySpec struct { // [keyT comparable] struct {
+type FieldValuePair struct { 
 	Field  string
 	Value  string 
-	FVtypes D.SqliteDatatype
+	// FVtype D.SqliteDatatype
 }
 

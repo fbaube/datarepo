@@ -6,5 +6,5 @@ import(
 	
 // DBEnginer is TBS.
 type DBEnginer interface {
-     	EngineUnique(dbOp string, tableName string, whereSpec *UniquerySpec, RM DRM.RowModel) (error, int)
+     	EngineUnique(dbOp string, tableName string, whereSpec *FieldValuePair, RM DRM.RowModel) (error, int)
 }
