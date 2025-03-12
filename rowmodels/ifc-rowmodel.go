@@ -4,7 +4,7 @@ package rowmodels
 // in package [github.com/fbaube/m5db] 
 type RowModel interface {
      TableDetails() TableDetails 
-     ColumnNamesCsv(bool) string
+//   ColumnNamesCsv(bool) string
      // Note that ColumnPtrsMethod is a method,
      // and/but while there is also a func with 
      // signature ColumnPtrsFunc(RowModel, bool) 

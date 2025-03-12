@@ -29,11 +29,13 @@ func init() {
 // name is left blank (""), a default namespace is used and no prefix
 // is added to table names.
 
-// RegisterAppTables processes the schemata of the specified app's
-// tables, which this interface creates and/or manages. Multiple
-// calls, whether with tables previously specified or not before
-// seen do not conflict; if a table name is repeated but with a
-// different schema, the result is undefined.
+// RegisterAppTables processes the schemata of the specified 
+// app's tables, which this interface creates and/or manages. 
+// This includes filling many fields in struct [TableDetails].
+//
+// Multiple calls, whether with tables previously specified or
+// not before seen do not conflict; if a table name is repeated 
+// but with a different schema, the result is undefined.
 // .
 func (p *SqliteRepo) RegisterAppTables(appName string, cfg []*DRM.TableDetails) error {
 	L.L.Info("RegisterAppTables: got %d table definitions", len(cfg))
@@ -46,8 +48,12 @@ func (p *SqliteRepo) RegisterAppTables(appName string, cfg []*DRM.TableDetails) 
 			S.ToLower(c.StorName))
 		// Do schema-related initialisations
 		_ = DRM.GenerateColumnStringsCSV(c)
+		_ = DRM.GeneratePreparedStatements(c)
 	}
 	return nil
+}
+func (p *SqliteRepo) PrepareAppTables() error {
+     return nil
 }
 
 // EmptyAllTables deletes (app-level) data from the app's tables

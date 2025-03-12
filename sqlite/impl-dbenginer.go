@@ -13,13 +13,18 @@ import(
 	DRM "github.com/fbaube/datarepo/rowmodels"
 )
 
-func buildINSERT(pTD *DRM.TableDetails) string { 
+// Set value for sDBOP, then check (non)presence of WhereSpec.
+
+// BuildINSERT writes table name + column names + placeholders. 
+// Do NOT include the primary key, D.SFT_PRKEY 
+func BuildINSERT(pTD *DRM.TableDetails) string { 
 	return  "INSERT INTO " + pTD.TableSummary.StorName +
 		           "(" + pTD.CSVs.FieldNames   + ") " +
 		     "VALUES(" + pTD.CSVs.PlaceNumbers + ") " +
 		  "RETURNING " + pTD.PKname            + ";"
 }
 
+// WITH WHERE and withOUT WHERE 
 func buildSELECT(pTD *DRM.TableDetails, pFV DRP.FieldValuePair) { }
 func buildUPDATE(pTD *DRM.TableDetails, pFV DRP.FieldValuePair) { }
 func buildDELETE(pTD *DRM.TableDetails, pFV DRP.FieldValuePair) { }
@@ -128,13 +133,8 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pFV *DRP.Fiel
 	if pFV != nil {
 	   return errors.New("EngineUnique: INSERT: unwanted WHERE"), 0 
 	}
-	// Write table name and all column names (as CSV).
 	// Do NOT include the primary key, D.SFT_PRKEY 
-	sSQL = buildINSERT(pTD)
-/*	sSQL = "INSERT INTO " + pTD.TableSummary.StorName +
-		"(" + pCSVs.FieldNames + ") " +
-		"VALUES(" + pCSVs.PlaceNumbers + ") " +
-		"RETURNING " + pTD.PKname + ";" */
+	sSQL = BuildINSERT(pTD)
 	fmt.Fprintf(w, "INSERT.sql: " + sSQL + "\n")
 	
 	// It is now ready for Exec()

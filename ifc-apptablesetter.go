@@ -19,6 +19,10 @@ type AppTableSetter interface {
 	//    that their structure matches what this schema specifies
 	//    (but this might be a future TODO) 
 	RegisterAppTables(string, []*DRM.TableDetails) error
+	// PrepareAppTables does stuff that needs table details and 
+	// needs to be done before any statements can be executed
+	// against the database. 
+	PrepareAppTables() error
 	// EmptyAllTables deletes (app-level) data from the app's tables
 	// but does not delete any tables (i.e. no DROP TABLE are done).
 	EmptyAppTables() error
