@@ -1,6 +1,6 @@
 package sqlite
 
-// check ~/go/src/github.com/simukti/sqldb-logger
+// maybe use ~/go/src/github.com/simukti/sqldb-logger
 
 import(
 	"fmt"
@@ -13,7 +13,8 @@ import(
 	DRM "github.com/fbaube/datarepo/rowmodels"
 )
 
-// Set value for sDBOP, then check (non)presence of WhereSpec.
+// TODO: Set value for sDBOP, then check (non)presence of WhereSpec,
+// so that all such validation logic is done first. 
 
 // BuildINSERT writes table name + column names + placeholders. 
 // Do NOT include the primary key, D.SFT_PRKEY 

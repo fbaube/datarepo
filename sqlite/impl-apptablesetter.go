@@ -24,17 +24,19 @@ func init() {
 }
 
 // Interface AppTableSetter is table-related methods for a specified
-// app's schema. The app name is case-insensitive, and used as all
-// lower case, and preixed to table names as "appname_". If the app
-// name is left blank (""), a default namespace is used and no prefix
-// is added to table names.
+// app's schema. Specifying a non-empty string is untested !
+//
+// The app name is case-insensitive, and used as all lower case, and
+// prefixed to table names as "appname_". If the app name is left
+// blank (""), a default namespace is used and no prefix is added
+// to table names.
 
 // RegisterAppTables processes the schemata of the specified 
 // app's tables, which this interface creates and/or manages. 
 // This includes filling many fields in struct [TableDetails].
 //
-// Multiple calls, whether with tables previously specified or
-// not before seen do not conflict; if a table name is repeated 
+// Multiple calls to this do not conflict, whether with tables
+// previously specified or not before; if a table name is repeated 
 // but with a different schema, the result is undefined.
 // .
 func (p *SqliteRepo) RegisterAppTables(appName string, cfg []*DRM.TableDetails) error {
@@ -51,10 +53,7 @@ func (p *SqliteRepo) RegisterAppTables(appName string, cfg []*DRM.TableDetails) 
 		_ = DRM.GeneratePreparedStatements(c)
 	}
 	return nil
-}
-func (p *SqliteRepo) PrepareAppTables() error {
-     return nil
-}
+} 
 
 // EmptyAllTables deletes (app-level) data from the app's tables
 // but does not delete any tables (i.e. no DROP TABLE are done).
