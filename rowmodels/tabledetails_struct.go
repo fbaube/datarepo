@@ -145,6 +145,6 @@ type TableDetails struct {
 	// FuncNew func() RowModel
 
 	CSVs *ColumnStringsCSV
-	PrepdStmts *PreparedStatements
+	Stmts *Statements
 }
 
