@@ -10,6 +10,8 @@ github.com/fbaube/humanbytes v0.0.0-20250119091546-d58fbfdd444c h1:k6VDhhlL+FI8n
 github.com/fbaube/humanbytes v0.0.0-20250119091546-d58fbfdd444c/go.mod h1:WUS3tn4t+FViNsl4VOqYiV51cJNIIeMjLI9fOfm+Ug8=
 github.com/fbaube/logutils v0.0.0-20240425064504-eb572963f0fc h1:y21oEpytLrjte0p6CuKWTYQWc9xux0ys6a/vABtEqGs=
 github.com/fbaube/logutils v0.0.0-20240425064504-eb572963f0fc/go.mod h1:Ulyk3vIjQ5L/NqJ9wmTMawBjqzAOvCs1jxF5iV3tS1w=
+github.com/fbaube/logutils v0.0.0-20250316184850-0569e5bc6b6d h1:hH8uBNU6Vasxh9Pf3bzNdA+JFAtckHavpQf+kpmvHC8=
+github.com/fbaube/logutils v0.0.0-20250316184850-0569e5bc6b6d/go.mod h1:Ulyk3vIjQ5L/NqJ9wmTMawBjqzAOvCs1jxF5iV3tS1w=
 github.com/fbaube/miscutils v0.0.0-20250126181629-6a2fa9af43b7 h1:7EDgdU9hotwYEf5Bx7w4I6SNm/rwOx88siLiD0o+xl8=
 github.com/fbaube/miscutils v0.0.0-20250126181629-6a2fa9af43b7/go.mod h1:v32q0zwZh3Ft6WFuIdeLPwPgOAIy5h0AAPoJRi9DF6k=
 github.com/fbaube/mlog v0.0.0-20240425064535-3b89e3b28a76 h1:C1SjY+GWMR1smUZqspWm52AYfDq30fIjRzmy+ar+a8M=

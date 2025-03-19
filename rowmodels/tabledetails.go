@@ -1,14 +1,36 @@
 package rowmodels
 
 import(
-	// "fmt"
+	"fmt"
 	"errors"
 	"strconv"
 	S "strings"
 	D "github.com/fbaube/dsmnd"
 )
 
-// Column Field Key Prop / Value 
+// terms: Column Field Key Prop / Value
+
+// csvNumbers is 1-based 
+func csvNumbers(pfx string, min int, max int) string {
+     var sb S.Builder
+     var i int 
+     for i = min; i < max; i++ {
+     	 _,_ = sb.WriteString(pfx + strconv.Itoa(i) + ", ")
+     }
+     _,_ = sb.WriteString(pfx + strconv.Itoa(max))
+     return sb.String()
+}
+
+// csvNames is 0-based. 
+func csvNames(CSs []D.ColumnSpec, min int, max int) string {
+     var sb S.Builder
+     var i int 
+     for i = min; i < max; i++ {
+     	 _,_ = sb.WriteString(CSs[i].StorName + ", ")
+     }
+     _,_ = sb.WriteString(CSs[max].StorName)
+     return sb.String()
+}
 
 // ColumnStringsCSV stores strings useful for composing SQL
 // statements. Each string includes all the columns, in order,
@@ -24,17 +46,22 @@ import(
 // finds the record).
 // .
 type ColumnStringsCSV struct {
-	// FieldNames   [+withID primarykey] is a list of 
+
+	// FieldNames   [with|no ID primary key] is a list of 
 	// column (i.e. field) names, in order: "F1, F2, F3" 
-	FieldNames,     FieldNames_wID  string
-	// PlaceNumbers [+withID primarykey] is a list of 
+	FieldNames_wID, FieldNames_noID  string
+	
+	// PlaceNumbers [with|no ID primary key] is a list of 
 	// '$'-numbered parameters (like Postgres): "$1, $2, $3",
 	// and with two extra when using "WHERE Field = Value" 
-	PlaceNumbers,   PlaceNrs_wID, PlaceNrs_wID_wFV  string
-	// FieldUpdates [NOT with primarykey] is a list of
+	PlaceNums_wID,  PlaceNums_noID, PlaceNums_wID_wFV  string
+	
+	// FieldUpdates [_noID: NOT with ID primarykey] is a list of 
 	// column/field names with "=", and the values as
 	// '$'-numbered parameters: "F1 = $1, F2 = $2, F3 = $3" 
 	UpdateNames     string
+
+	Where_wID, Where_noID string 
 }
 
 // Statements stores several SQL query strings customised for the
@@ -72,55 +99,57 @@ func GenerateColumnStringsCSV(pTD *TableDetails) error {
 	return errors.New("GenerateColumnStringsCSV: dupe initialisation")
 	}    
      pTD.CSVs = new(ColumnStringsCSV)
-     var colSpex []D.ColumnSpec
-     colSpex   = pTD.ColumnSpecs
+     var CSs []D.ColumnSpec
+     CSs   = pTD.ColumnSpecs
+     var N = len(pTD.ColumnSpecs)
+     // var cs D.ColumnSpec 
 
-     // Examples, if we assume 5 fields (F1=ID plus four others)
-     // type struct { id, f2, f3, f4, f5 } 
+     // Examples, if we assume N=5 fields (f[0]=ID plus four others, f[1..4])
+     // type struct { id, f1, f2, f3, f4 } 
      // type ColumnStringsCSV struct {
-     // 4 FieldNames             "f2, f3, f4, f5" 
-     // 4 PlaceNumbers           "$1, $2, $3, $4" 
-     // 5 FieldNames_wID     "id, f2, f3, f4, f5" 
+     // 4 FieldNames_noID    "f1, f2, f3, f4" 
+     // 4 PlaceNumbers_noID  "$1, $2, $3, $4" 
+     // 5 FieldNames_wID     "id, f1, f2, f3, f4" 
      // 5 PlaceNrs_wID       "$1, $2, $3, $4, $5"
      // 6 PlaceNrs_wFV       "$1, $2, $3, $4, $5, $6"
      // 7 PlaceNrs_wID_wFV   "$1, $2, $3, $4, $5, $6, $7" // 6,7=K,V // SELECT?
-     // 4 UpdateNames        "f2=$1, f3=$2, f4=$3, f5=$4" // No ID! 
-     
-     var sbFN, sbPN, sbUN S.Builder
-     var columnName, placeNumber string
-     var iCol, nCols int
-     nCols = len(pTD.ColumnSpecs)
-     // Now make lots of small, simple loops
-     for iCol = 0; iCol < nCols; iCol++ { 
-     }
+     // 4 UpdateNames        "f1=$1, f2=$2, f3=$3, f4=$4" // No ID!
 
-     for i, pCS := range colSpex {
-	columnName  = pCS.StorName
-	placeNumber = strconv.Itoa(i+1)
-	if i == 0 && !S.HasSuffix(columnName, "ID") {
+     pTD.CSVs.PlaceNums_noID    = csvNumbers("$", 1, N-1) 
+     pTD.CSVs.PlaceNums_wID     = csvNumbers("$", 1, N) 
+     pTD.CSVs.PlaceNums_wID_wFV = csvNumbers("$", 1, N+2)
+     pTD.CSVs.FieldNames_noID   = csvNames(CSs, 1, N-1)
+     pTD.CSVs.FieldNames_wID    = csvNames(CSs, 0, N-1)
+
+     // For clarity in composability: No semicolons! 
+     pTD.CSVs.Where_wID  = fmt.Sprintf(" WHERE $%d = $%d", N, N+1)
+     pTD.CSVs.Where_noID = fmt.Sprintf(" WHERE $%d = $%d", N-1, N)
+
+     // For later composability: No placeholders for UPDATE's WHERE!
+     var sbUpdtNams S.Builder
+     var i int
+     for i=1; i<N; i++ {
+     	 sbUpdtNams.WriteString(
+		CSs[i].StorName + " = $" +
+	 	strconv.Itoa(i) + ", ")
 	}
-     	// fmt.Printf("%s[%d]=%s: %s \n",
-	// 	pTD.StorName, i, columnName, pCS.String())
-	sbFN.WriteString(columnName  + ", ")
-	sbPN.WriteString("$" + placeNumber + ", ")
-	sbUN.WriteString(columnName  + " = $" + placeNumber + ", ")
-     }
-     sFN := S.TrimSuffix(sbFN.String(), ", ")
-     sPN := sbPN.String()
-     sUN := S.TrimSuffix(sbUN.String(), ", ")
-     pTD.CSVs.FieldNames   = sFN
-     pTD.CSVs.PlaceNumbers = sPN
-     pTD.CSVs.UpdateNames  = sUN
-     pTD.CSVs.FieldNames_wID = pTD.PKname + ", " + sFN
-     pTD.CSVs.PlaceNrs_wID   = sPN + "$" + strconv.Itoa(len(colSpex)+1)
-     pTD.CSVs.PlaceNumbers   = S.TrimSuffix(pTD.CSVs.PlaceNumbers, ", ")
-/*     
-     println("FieldNames    ", pTD.CSVs.FieldNames)
-     println("FieldNames wID", pTD.CSVs.FieldNames_wID)
-     println("PlaceNmbrs    ", pTD.CSVs.PlaceNumbers)
-     println("PlaceNmbrs wID", pTD.CSVs.PlaceNrs_wID)
-     println("UpdateNames   ", pTD.CSVs.UpdateNames)
-*/
+     pTD.CSVs.UpdateNames = S.TrimSuffix(sbUpdtNams.String(), ", ")
+
+     // So if (for example) we have N fields:
+     // - The first is the ID, and there are N-1 others
+     // - The N  fields are indexed as 0..N-1, or in slice notation,  [:N]
+     // - Non-ID fields are indexed as 1..N-1, or in slice notation, [1:N]
+     // - Including the ID, the placeholders are numbered $1..$N
+     // - Not including it, the placeholders are numbered $2..$N
+
+     println("FieldNames noID", pTD.CSVs.FieldNames_noID)
+     println("FieldNames  wID", pTD.CSVs.FieldNames_wID)
+     println("PlaceNmbrs noID", pTD.CSVs.PlaceNums_noID)
+     println("PlaceNmbrs  wID", pTD.CSVs.PlaceNums_wID)
+     println("UpdateNames    ", pTD.CSVs.UpdateNames)
+     println("Where noID", pTD.CSVs.Where_noID)
+     println("Where  wID", pTD.CSVs.Where_wID)
+
      return nil
 }
 
@@ -162,9 +191,9 @@ func GenerateStatements(pTD *TableDetails) error {
      // ======================================================
      pTD.Stmts.INSERTunique =
 	"INSERT INTO " + pTD.TableSummary.StorName +
-        	   "(" + pTD.CSVs.FieldNames   + ") " +
-             "VALUES(" + pTD.CSVs.PlaceNumbers + ") " +
-          "RETURNING " + pTD.PKname            + ";"
+        	   "(" + pTD.CSVs.FieldNames_noID  + ") " +
+             "VALUES(" + pTD.CSVs.PlaceNums_noID   + ") " +
+          "RETURNING " + pTD.PKname                + ";"
 
      // === SELECT ===========================================
      // Fetch, Get, List, Retrieve, Select
@@ -177,12 +206,10 @@ func GenerateStatements(pTD *TableDetails) error {
      // WITH ID (primary key D.SFT_PRKEY). 
      // The WHERE clause is tipicly on the ID but need not be. 
      // ======================================================
-     // TODO Should WHERE use '$'-placeholders ?? 
      pTD.Stmts.SELECTunique =
 	"SELECT " + pTD.CSVs.FieldNames_wID +
-	" FROM "  + pTD.TableSummary.StorName +
-     //	" WHERE " + pFV.Field + " = " + pFV.Value + ";"
-	" WHERE $FIXME1 = $FIXME2;" // FIXME FIXME FIXME FIXME FIXME 
+	" FROM "  + pTD.TableSummary.StorName + pTD.CSVs.Where_wID + ";"
+
 
      return nil
 }
@@ -194,26 +221,6 @@ func buildUPDATE(pTD *DRM.TableDetails, pFV DRP.FieldValuePair) { }
 func buildDELETE(pTD *DRM.TableDetails, pFV DRP.FieldValuePair) { }
 * /
 
-     var sbFN, sbPN, sbUN S.Builder
-     var columnName, placeNumber string
-     for i, pCS := range colSpex {
-	columnName  = pCS.StorName
-	placeNumber = strconv.Itoa(i+1)
-     	// fmt.Printf("%s[%d]=%s: %s \n",
-	// 	pTD.StorName, i, columnName, pCS.String())
-	sbFN.WriteString(columnName  + ", ")
-	sbPN.WriteString("$" + placeNumber + ", ")
-	sbUN.WriteString(columnName  + " = $" + placeNumber + ", ")
-     }
-     sFN := S.TrimSuffix(sbFN.String(), ", ")
-     sPN := sbPN.String()
-     sUN := S.TrimSuffix(sbUN.String(), ", ")
-     pTD.CSVs.FieldNames   = sFN
-     pTD.CSVs.PlaceNumbers = sPN
-     pTD.CSVs.UpdateNames  = sUN
-     pTD.CSVs.FieldNames_wID = pTD.PKname + ", " + sFN
-     pTD.CSVs.PlaceNrs_wID   = sPN + "$" + strconv.Itoa(len(colSpex)+1)
-     pTD.CSVs.PlaceNumbers   = S.TrimSuffix(pTD.CSVs.PlaceNumbers, ", ")
 /*     
      println("FieldNames    ", pTD.CSVs.FieldNames)
      println("FieldNames wID", pTD.CSVs.FieldNames_wID)

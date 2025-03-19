@@ -16,7 +16,7 @@ require (
 	github.com/fatih/color v1.18.0 // indirect
 	github.com/fbaube/ctoken v0.0.0-20250202175820-4a3ade2fbe7c // indirect
 	github.com/fbaube/humanbytes v0.0.0-20250119091546-d58fbfdd444c // indirect
-	github.com/fbaube/logutils v0.0.0-20240425064504-eb572963f0fc // indirect
+	github.com/fbaube/logutils v0.0.0-20250316184850-0569e5bc6b6d // indirect
 	github.com/fbaube/miscutils v0.0.0-20250126181629-6a2fa9af43b7 // indirect
 	github.com/fbaube/wasmutils v0.0.0-20250302100751-c3d5b233f416 // indirect
 	github.com/mattn/go-colorable v0.1.14 // indirect
