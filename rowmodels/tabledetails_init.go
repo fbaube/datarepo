@@ -32,53 +32,6 @@ func csvNames(CSs []D.ColumnSpec, min int, max int) string {
      return sb.String()
 }
 
-// ColumnStringsCSV stores strings useful for composing SQL
-// statements. Each string includes all the columns, in order,
-// comma-separated. SQL using these strings defaults to setting
-// and getting every field in a DB record.
-//
-// The strings have no trailing commas. Each string (except 
-// for UPDATE) has a "full" version (suffixed with "_wID")
-// that includes the primary key (always named "{table}_ID") 
-// for output from SELECT, and (importantly!) a version 
-// withOUT the "{table}_ID" primary key, for input to INSERT 
-// (where the ID is new) and input to UPDATE (where the ID
-// finds the record).
-// .
-type ColumnStringsCSV struct {
-
-	// FieldNames   [with|no ID primary key] is a list of 
-	// column (i.e. field) names, in order: "F1, F2, F3" 
-	FieldNames_wID, FieldNames_noID  string
-	
-	// PlaceNumbers [with|no ID primary key] is a list of 
-	// '$'-numbered parameters (like Postgres): "$1, $2, $3",
-	// and with two extra when using "WHERE Field = Value" 
-	PlaceNums_wID,  PlaceNums_noID, PlaceNums_wID_wFV  string
-	
-	// FieldUpdates [_noID: NOT with ID primarykey] is a list of 
-	// column/field names with "=", and the values as
-	// '$'-numbered parameters: "F1 = $1, F2 = $2, F3 = $3" 
-	UpdateNames     string
-
-	Where_wID, Where_noID string 
-}
-
-// Statements stores several SQL query strings customised for the
-// table. Statements vary in whether they include the primary key, 
-// and whether they include a WHERE clause.
-//
-// Statements named "*unique" are for working with single records,
-// and are used by method [datarepo.EngineUnique] of interface
-// [datarepo.DBEnginer].
-// .
-type Statements struct {
-     	INSERTunique string
-	SELECTunique string
-	UPDATEunique string
-	DELETEunique string 
-}
-
 // GenerateColumnStringsCSV generates struct [ColumnStringsCSV] 
 // for every struct that has been registered using method
 // datarepo/RegisterAppTables of interface datarepo/SimpleRepo .
@@ -153,16 +106,19 @@ func GenerateColumnStringsCSV(pTD *TableDetails) error {
      return nil
 }
 
-// GeneratePreparedStatements generates struct [PreparedStatements] 
+// GeneratePreparedStatements generates struct [Statements] 
 // for every struct that has been registered using method
 // datarepo/RegisterAppTables of interface datarepo/SimpleRepo .
 //
-// TODO: It should be guarded by a Do.Once()
+// TODO: It should maybe be guarded by a Do.Once()
 //
-// It does not modify or even access the databaseDB. It should be called
-// ASAP after program start, but AFTER [GenerateColumnStringsCSV] is 
-// called. It does not need to be called before a DB is opened, but
-// it DOES need to be called any SQL is executed against the DB.
+// NOTE: f-numbers (field names) start at "f0", and f0 is always the ID 
+// (primary key). placeholder-numbers start at "$1", Postgres-style. 
+//
+// It does not modify or even access the DB. It should be called
+// ASAP after program start, but AFTER [GenerateColumnStringsCSV]  
+// is called. It does not need to be called before a DB is opened, 
+// but it DOES need to be called any SQL is executed against the DB.
 // .
 func GenerateStatements(pTD *TableDetails) error {
      if pTD.Stmts != nil {
@@ -170,13 +126,6 @@ func GenerateStatements(pTD *TableDetails) error {
 	return errors.New("GenerateStatements: dupe initialisation")
 	}    
      pTD.Stmts = new(Statements)
-     // var colSpex []D.ColumnSpec
-     // colSpex   = pTD.ColumnSpecs
-     
-     // type ColumnStringsCSV struct {
-     //      FieldNames,   FieldNames_wID  string  "F1, F2, F3" 
-     //      PlaceNumbers, PlaceNrs_wID    string  "$1, $2, $3" 
-     //      UpdateNames                   string  "F1=$1,F2=$2,F3=$3"
      
      // === INSERT ===========================================
      // Add, Create, Insert, New
@@ -184,9 +133,9 @@ func GenerateStatements(pTD *TableDetails) error {
      // https://www.sqlite.org/lang_insert.html
      // INSERT INTO tblNm (fld1, fld2) VALUES(val1, val2);
      // INSERT INTO tblNm (fld1, fld2) VALUES($1,$2); + any...
-     // FIELDS are FieldNames[_wID]. VALUES are PlaceNrs[_wID].
      // ======================================================
      // table name + column names CSV + placeholders CSV 
+     // FIELDS are FieldNames_noID. VALUES are PlaceNums_noID.
      // WithOUT ID (primary key D.SFT_PRKEY). No WHERE clause. 
      // ======================================================
      pTD.Stmts.INSERTunique =

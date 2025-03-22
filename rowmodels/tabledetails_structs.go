@@ -17,17 +17,17 @@ type NewInstanceFunc func() RowModel
 // TableDetails is key to the entire data repository scheme:
 // it contains metadata required to manage corresppondences
 // between DB columns and struct fields. It specifies an 
-// application's data schema requirements both at the table
-// level and field-by-field. A primary key is assumed for
-// every table, and foreign keys are allowed.
+// application's data schema both at the table level and
+// field-by-field. A primary key is assumed for every table,
+// in the zeroth column, and foreign keys are allowed.
 //
 // NOTE: The case of multiple foreign indices into the same 
 // table (from TopicrefRow into ContentityRow) is 90% resolved. 
 //
 // As a convention, all DB table and column names should be 
 // in all lower case, except perhaps in the names of indices, 
-// which have names of the form Idx_*. Then SQL keywords can
-// be given in all upper case, as per SQL convention. 
+// which have names of the form (??) ID_* or Idx_*. Then SQL 
+// keywords can be given in all upper case, per SQL convention. 
 // (Note that enforcing all this might be a bit patchy.) 
 //
 // Notes on particular fields:
@@ -45,17 +45,13 @@ type NewInstanceFunc func() RowModel
 // in sync in terms of DB columns defined, struct fields 
 // defined, and their order of appearance in DB statements:
 //  - ColumnSpecs
-//  - ColumnNamesCSV
+//  - ColumnNamesCSV (2025.q1: OBS: is now auto-gen'd)
 //  - ColumnPtrsFunc
 //  - the struct corresponding to them all 
 //
 // If they are not kept in sync as required, there may be compile
 // time errors, but more likely there will be nasty runtime errors,
 // and in particular, obscure impenetrable DB errors.
-//
-// (In principle this can all be done with reflection and code
-// generation, starting from the column specs, but it would be
-// a big implementation effort.) 
 //
 // For typical DB operations like INSERT and UPDATE (altho not DELETE),
 // the funcs and vars in this file always explicitly pass the names of
@@ -64,6 +60,9 @@ type NewInstanceFunc func() RowModel
 // 
 // This means that fields can be defined in any order freely but must 
 // be referred to consistently in the same order by funcs and vars.
+// EXCEPTION: the table's primary key must be in the very first (i.e.
+// zeroth) column,
+// 
 // Note tho that DB tools will have trouble displaying (on screens)
 // the values of ALL fields, and for this reason, fields whose values
 // are shorter and more important should appear (i.e. be defined) first,
@@ -86,9 +85,6 @@ type NewInstanceFunc func() RowModel
 //
 // TODO: Rename struct fields to start with lower case,
 // and provide exported accessors ("getters"). 
-//
-// TODO: Some day all this nitpicky stuff about keeping fields
-// in sync could all be done with code generation. 
 // .
 type TableDetails struct {
 
@@ -110,12 +106,6 @@ type TableDetails struct {
 	// joins, without using "AS"! 
 	PKname string
  
-	// ColumnNamesCSV is all column names (except primary key),
-	// ready-to-use in SQL, in a specific (auto-generatable!)
-	// order, comma-separated. We omit the primary key so that
-	// we can use it for SQL INSERT statements too. REPLACED!! 
-	// ColumnNamesCSV string
-	
 	// ColumnSpecs is a list of [dsmnd.D.ColumnSpec] that omits
 	// the primary key (which can be brought in when needed).
 	ColumnSpecs []D.ColumnSpec
@@ -144,7 +134,65 @@ type TableDetails struct {
 
 	// FuncNew func() RowModel
 
+	// ColumnStringsCSV is described in full elsewhere.
 	CSVs *ColumnStringsCSV
+	// Statements is described in full elsewhere.
 	Stmts *Statements
+}
+
+// ColumnStringsCSV stores strings useful for composing SQL
+// statements. Each string includes all the columns, in order,
+// comma-separated. SQL using these strings defaults to setting
+// and getting every field in a DB record.
+//
+// The strings have no trailing commas. Each string (except 
+// for UPDATE) has two versions:
+//  - a version (suffixed with "_wID") that DOES include the primary 
+//    key (always named "{table}_ID"), for (e.g.) output from SELECT
+//  - a version (suffixed with "_noID") that does NOT include the 
+//    primary key, for (e.g.) input to INSERT (where the ID is new)
+//    and input to UPDATE (where the ID is used in a WHERE clause
+//    to find the record)
+// .
+type ColumnStringsCSV struct {
+
+	// FieldNames_* [with|no ID primary key] 
+	// list column (i.e. field) names, in order:
+	// (w/ ID) "F0=ID, F1, F2, F3, F4" 
+	// (no ID)        "F1, F2, F3, F4" 
+	FieldNames_wID, FieldNames_noID string
+	
+	// PlaceNums_* [with|no ID primary key] 
+	// list '$'-numbered parameters:
+	// (w/ ID) "$1, $2, $3, $4, $5" 
+	// (no ID)     "$1, $2, $3, $4"
+	// (where) "$1, $2, $3, $4, $5, $6, $7" (w/ ID) 
+	PlaceNums_wID, PlaceNums_noID, PlaceNums_wID_wFV string
+	
+	// FieldUpdates [_noID: NOT with ID primary key] 
+	// lists column/field names with "=", and their 
+	// new values as '$'-numbered parameters:
+	// "F1 = $1, F2 = $2, F3 = $3, F4 = $4"
+	UpdateNames string
+
+	// Where_* [with|no ID primary key] lists
+	// FIELD NAMES ?? PLACEHOLDERS ?? 
+	// for when there is also a WHERE clause:
+	Where_wID, Where_noID string 
+}
+
+// Statements stores several SQL query strings customised for the
+// table. Statements vary in whether they include the primary key, 
+// and whether they include a WHERE clause.
+//
+// Statements named "*unique" are for working with single records,
+// and are used by method [datarepo.EngineUnique] of interface
+// [datarepo.DBEnginer].
+// .
+type Statements struct {
+     	INSERTunique string
+	SELECTunique string
+	UPDATEunique string
+	DELETEunique string 
 }
 

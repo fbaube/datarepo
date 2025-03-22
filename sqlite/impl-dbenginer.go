@@ -13,12 +13,18 @@ import(
 	DRM "github.com/fbaube/datarepo/rowmodels"
 )
 
-// TODO: Set value for sDBOP, then check (non)presence of WhereSpec,
-// so that all such validation logic is done first. 
-
-// BuildINSERT writes table name + column names + placeholders. 
-// Do NOT include the primary key, D.SFT_PRKEY 
-func BuildINSERT(pTD *DRM.TableDetails) string { 
+// BuildINSERTunique writes:
+// table name + column names + placeholders.
+// 
+// Do NOT include the primary key, D.SFT_PRKEY,
+// because we will get it by using RETURNING.
+// Syntax: 
+//  - https://www.sqlite.org/lang_insert.html
+//  - INSERT INTO tblNm (fld1, fld2) VALUES(val1, val2);
+//  - INSERT INTO tblNm (fld1, fld2) VALUES($1,$2); + any...
+//  - FIELDS are FieldNames[_wID]. VALUES are PlaceNrs[_wID].
+// .
+func BuildINSERTunique(pTD *DRM.TableDetails) string { 
 	return  "INSERT INTO " + pTD.TableSummary.StorName +
 		           "(" + pTD.CSVs.FieldNames   + ") " +
 		     "VALUES(" + pTD.CSVs.PlaceNumbers + ") " +
@@ -51,7 +57,7 @@ func buildDELETE(pTD *DRM.TableDetails, pFV DRP.FieldValuePair) { }
 //    to a struct; this may be usable by GO generics
 //
 // It returns two values:
-//  - An error: if it is non-nil, the other return value is invalid
+//  - An error: if it is non-nil, the other (i.e. int) return value is invalid
 //  - An int that is (if INSERT) the newly-added row ID (else) 0 or 1 to
 //    indicate how many records were (i.e. whether a record was) affected.
 //
@@ -61,19 +67,21 @@ func buildDELETE(pTD *DRM.TableDetails, pFV DRP.FieldValuePair) { }
 //
 // NOTE: In an UPDATE, if the whereSpec does not refer to the ID, and the
 // ID of the input record does not match the ID of the record found by the
-// DB, the function panics. So, for UPDATE, just match on the ID. 
+// DB, the function panics. So, for UPDATE, it might be wise only to pass 
+// in the ID for the WHERE. 
 //
 // NOTE: Also implement COUNT(*) ?
 //
+// TODO: TD.pCSVs could also use DB.Prepare to gather sql.Stmt's, but then we
+// have to pass in a Connection, which screws up modularity pretty severely.
+//
 // TODO: switch on dbOp to call a new mini func that assembles the SQL statement.
 // 
-// TODO: TD.pCSVs should also use DB.Prepare to gather sql.Stmt's
-//
 // TODO: Use Result.RowsAffected
 // https://pkg.go.dev/database/sql#Result
-// RowsAffected returns the number of rows affected 
-// by an update, insert, or delete. Not every DB or 
-// driver supports it. RowsAffected() (int64, error)
+// RowsAffected returns the number of rows affected by an update, insert,
+// or delete. Not every DB or driver supports it. [altho mattn/SQLite does.]
+// RowsAffected() (int64, error)
 //
 // NOTE: When writing the multi-row version of this,
 // be sure to call Rows.Cloe()
@@ -102,6 +110,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pFV *DRP.Fiel
      
      // For convenience, callers can use "ID", and we fix it 
      if pFV != nil && S.EqualFold("id", pFV.Field) {
+     	println("FIXED WHERE:", pFV.Field, "=>", pTD.PKname)
      	pFV.Field = pTD.PKname
      }
      if pRM == nil { pRM = pTD.NewInstance() } // output buffer 
@@ -111,29 +120,38 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pFV *DRP.Fiel
      // Log info about the columns 
      // writeFieldDebugInfo(w, pTD)
 
-     // switch dbOp {
-     // We only use the first letter of the 
-     // DB op, so callers can be creative :-P 
+     // Convert dbOp from a long string to a single
+     // character, one of "+", "-", "=", "?"
+     // We only use the first letter of the DB op,
+     // so callers can be creative :-P
+     // Also check (non-)presence of WHERE.
      // println("DB OP IS: " + S.ToUpper(dbOp[0:1]))
+     switch S.ToUpper(dbOp[0:1]) {
+	// + Add, Create, Insert, New
+	case "A", "C", "I", "N": dbOp = "+" 
+	if pFV != nil {
+	   return errors.New("EngineUnique: INSERT: unwanted WHERE"), 0 
+	}
+        // ? Fetch, Get, List, Retrieve, Select 
+        case "F", "G", "L", "R", "S": dbOp = "?"
+	// = Modify, Update
+	case "M", "U": dbOp = "="
+	// - Delete, Discard, Drop
+	case "D": dbOp = "-"
+	default:
+	return errors.New("engineunique: bad dbOp: " + dbOp), -1
+     }
 
-/*      FieldNames,     FieldNames_wID  string  // "F1, F2, F3" 
-        PlaceNumbers,   PlaceNrs_wID    string  // "$1, $2, $3" 
-        UpdateNames     string   // "F1 = $1, F2 = $2, F3 = $3"  */
-
-     switch S.ToUpper(dbOp[0:1]) { 
+     switch dbOp { 
 
      	// ======================================================
-	case "A", "C", "I", "N":
-	// Add, Create, Insert, New
+	case "+": 
 	// Use RETURNING to get new ID. 
 	// https://www.sqlite.org/lang_insert.html
 	// INSERT INTO tblNm (fld1, fld2) VALUES(val1, val2);
 	// INSERT INTO tblNm (fld1, fld2) VALUES($1,$2); + any...
 	// FIELDS are FieldNames[_wID]. VALUES are PlaceNrs[_wID].
      	// ======================================================
-	if pFV != nil {
-	   return errors.New("EngineUnique: INSERT: unwanted WHERE"), 0 
-	}
 	// Do NOT include the primary key, D.SFT_PRKEY 
 	sSQL = BuildINSERT(pTD)
 	fmt.Fprintf(w, "INSERT.sql: " + sSQL + "\n")
