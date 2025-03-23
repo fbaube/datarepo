@@ -135,7 +135,7 @@ func GenerateStatements(pTD *TableDetails) error {
 
      // === INSERT ===========================================
      // Add, Create, Insert, New
-     // Use RETURNING to get new ID. 
+     // Use INSERT...RETURNING to get the new ID. 
      // https://www.sqlite.org/lang_insert.html
      // INSERT INTO tblNm (F1, F2, F3, F4) VALUES(val1, val2, val3, val4);-
      // INSERT INTO tblNm (F1, F2, F3, F4) VALUES($1,$2,$3,$4); + any...

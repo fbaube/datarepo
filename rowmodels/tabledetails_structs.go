@@ -140,6 +140,21 @@ type TableDetails struct {
 	Stmts *Statements
 }
 
+// Statements stores several SQL query strings customised for the
+// table. Statements vary in whether they include the primary key, 
+// and whether they include a WHERE clause.
+//
+// Statements named "*unique" are for working with single records,
+// and are used by method [datarepo.EngineUnique] of interface
+// [datarepo.DBEnginer].
+// .
+type Statements struct {
+     	INSERTunique string
+	SELECTunique string
+	UPDATEunique string
+	DELETEunique string 
+}
+
 // ColumnStringsCSV stores strings useful for composing SQL
 // statements. Each string includes all the columns, in order,
 // comma-separated. SQL using these strings defaults to setting
@@ -152,7 +167,8 @@ type TableDetails struct {
 //  - a version (suffixed with "_noID") that does NOT include the 
 //    primary key, for (e.g.) input to INSERT (where the ID is new)
 //    and input to UPDATE (where the ID is used in a WHERE clause
-//    to find the record)
+//    to find the record) ... altho the ID WHERE can be optional,
+//    if we decide to allow using the ID in the record passed in) 
 // .
 type ColumnStringsCSV struct {
 
@@ -184,20 +200,5 @@ type ColumnStringsCSV struct {
 	pTD.CSVs.Where_wVals_wID  = fmt.Sprintf(" WHERE $%d = $%d", N, N+1)
 	pTD.CSVs.Where_wVals_noID = fmt.Sprintf(" WHERE $%d = $%d", N-1, N)
 */
-}
-
-// Statements stores several SQL query strings customised for the
-// table. Statements vary in whether they include the primary key, 
-// and whether they include a WHERE clause.
-//
-// Statements named "*unique" are for working with single records,
-// and are used by method [datarepo.EngineUnique] of interface
-// [datarepo.DBEnginer].
-// .
-type Statements struct {
-     	INSERTunique string
-	SELECTunique string
-	UPDATEunique string
-	DELETEunique string 
 }
 

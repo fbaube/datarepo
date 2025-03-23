@@ -13,29 +13,6 @@ import(
 	DRM "github.com/fbaube/datarepo/rowmodels"
 )
 
-// BuildINSERTunique writes:
-// table name + column names + placeholders.
-// 
-// Do NOT include the primary key, D.SFT_PRKEY,
-// because we will get it by using RETURNING.
-// Syntax: 
-//  - https://www.sqlite.org/lang_insert.html
-//  - INSERT INTO tblNm (fld1, fld2) VALUES(val1, val2);
-//  - INSERT INTO tblNm (fld1, fld2) VALUES($1,$2); + any...
-//  - FIELDS are FieldNames[_wID]. VALUES are PlaceNrs[_wID].
-// .
-func BuildINSERTunique(pTD *DRM.TableDetails) string { 
-	return  "INSERT INTO " + pTD.TableSummary.StorName +
-		           "(" + pTD.CSVs.FieldNames_noID  + ") " +
-		     "VALUES(" + pTD.CSVs.PlaceNums_noID   + ") " +
-		  "RETURNING " + pTD.PKname                + ";"
-}
-
-// WITH WHERE and withOUT WHERE 
-func buildSELECT(pTD *DRM.TableDetails, pFV DRP.FieldValuePair) { }
-func buildUPDATE(pTD *DRM.TableDetails, pFV DRP.FieldValuePair) { }
-func buildDELETE(pTD *DRM.TableDetails, pFV DRP.FieldValuePair) { }
-
 // EngineUnique acts on a single DB record, based on the value of 
 // of a column that is specified as UNIQUE (for example, a row ID). 
 // One of four basic actions is performed (listed as SQL/CRUD/HTTP):
@@ -49,7 +26,8 @@ func buildDELETE(pTD *DRM.TableDetails, pFV DRP.FieldValuePair) { }
 //    specified by the first letter (only!) of the argument dbOp
 //  - The name of the DB table (case-insensitive)
 //  - A "whereSpec" of column name and column value (not used for INSERT; as
-//    a convenience, if the name is "ID", it is modified to be {tableNeme}_ID 
+//    a convenience, if the name is "ID", it is modified to be {tableNeme}_ID
+//    (NOTE: We might just use an ID passed in in the buffer.) 
 //  - A pointer to a buffer, used for input (if INSERT or UPDATE) or output
 //    (if SELECT); for INSERT, the  buffer is left unmodified and the ID of
 //    the new record is returned in the second return value (the int) 
@@ -93,12 +71,13 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pFV *DRP.Fiel
      var pStmts *DRM.Statements
      var w = pSR.LogWriter()
      var e error
+     var dbOp1 string // single character 
      var useQueryRow bool // true only for SELECT 
-     var SQL_toUse string
+     var SQL_toUse string // , WHERE_toUse string FIXME FIXME FIXME
      // Table's column-pointers funcs 
      var CPF_noID, CPF_wID, CPF_toUse []any 
 
-     // Fetch the table's details and fill in the vars 
+     // Fetch the table's details 
      pTD = GetTableDetailsByCode(tableName)
      if pTD == nil {
      	// FIXME err msgs 
@@ -106,6 +85,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pFV *DRP.Fiel
      	println(s)
 	return errors.New(s), 0
      }
+     // Fill in vars 
      pCSVs  = pTD.CSVs
      pStmts = pTD.Stmts
      if pCSVs  == nil { panic("nil TableDetails ColumnStrings") }
@@ -117,7 +97,6 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pFV *DRP.Fiel
      	println("FIXED WHERE:", pFV.Field, "=>", pTD.PKname)
      	pFV.Field = pTD.PKname
      }
-     if pRMbuf == nil { pRMbuf = pTD.NewInstance() } // output buffer 
      CPF_noID = pTD.ColumnPtrsFunc(pRMbuf, false)   // no ID column 
      CPF_wID  = pTD.ColumnPtrsFunc(pRMbuf, true)   // with ID column
 
@@ -136,61 +115,54 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pFV *DRP.Fiel
 	case "A", "C", "I", "N":
 	     SQL_toUse = pStmts.INSERTunique
 	     CPF_toUse = CPF_noID 
-	     dbOp = "+"
+	     dbOp1 = "+"
         // ? Fetch, Get, List, Retrieve, Select 
         case "F", "G", "L", "R", "S":
 	     SQL_toUse = pStmts.SELECTunique
 	     CPF_toUse = CPF_wID
-	     dbOp = "?"
+	     useQueryRow = true // <==
+	     dbOp1 = "?"
 	// = Modify, Update
 	case "M", "U":
 
-	     dbOp = "="
+	     dbOp1 = "="
 	// - Delete, Discard, Drop
 	case "D":
 
-	     dbOp = "-"
+	     dbOp1 = "-"
 	default:
 	return errors.New("engineunique: bad dbOp: " + dbOp), 0
      }
-     // Check the non-|presence of WHERE.
-     // No WHERE for INSERT.
-	if dbOp == "+" {
-	    if pFV != nil {
-	       return errors.New("EngineUnique: INSERT: unwanted WHERE"), 0 
-	       }
-     // WHERE is needed for others.
-	} else if pFV == nil {
-	       return errors.New("EngineUnique: INSERT: missing WHERE"), 0 
-	}
+     // Check re. WHERE spec and/or input/output buffer.
+     // if INSERT, no WHERE.
+     if dbOp1 == "+" {
+	if pFV != nil {
+	   return errors.New("EngineUnique: INSERT: unwanted WHERE"), 0 
+	   }
+     // else is SELECT/UPDATE/DELETE 
+      } else {
+	// Need a search spec: either (1) a WHERE spec, or 
+	// (2) an input buffer (where we can find an ID).
+	// TODO: If a WHERE spec, it must be on a UNIQUE column. 
+	   if (pFV == nil) && (pRMbuf == nil ) {
+	       return errors.New("EngineUnique: " + dbOp + "(" + dbOp1 +
+		  "): missing search spec (no WHERE spec or buffer with ID"), 0 
+	   }
+ 	// If UPDATE, need an  input buffer 
+ 	// If SELECT, need an output buffer 
+	   if (dbOp1 != "-") && (pRMbuf == nil) {
+	    	return errors.New("EngineUnique: " + dbOp +
+		        "(" + dbOp1 + "): missing buffer"), 0 
+	   }
+	// Now set WHERE_toUse !!! TODO TODO TODO 
+     }
 
-     switch dbOp { 
+     // ================
+     //  TIME to EXECUTE 	
+     // ================
+      fmt.Fprintf(w, "SQL: " + SQL_toUse + "\n")	
 
-     // =========
-	case "+": 
-     // =========
-	// Use RETURNING to get new ID. 
-	// fmt.Fprintf(w, "INSERT.sql: " + sSQL + "\n")	
-	// It is now ready for Exec()
-	var theRes sql.Result
-	var newID  int64
-	// Call Exec(..) on the stmt, with all column ptrs (except ID) 
-	theRes, e = pSR.Handle().Exec(SQL_toUse, CPF_noID...)
-	if e != nil {
-		fmt.Fprintf(w, "engineunique.insert.exec: failed: %s", e)
-		return fmt.Errorf("engineunique.insert.exec: %w", e), -1
-	}
-	newID, e = theRes.LastInsertId()
-	if e != nil {
-		fmt.Fprintf(w, "engineunique.insert.lastinsertId: failed: %s", e)
-		return fmt.Errorf("engineunique.insert: lastinsertId: %w",e),-1
-	}
-	fmt.Fprintf(w, "INSERT: OK: LastInsertID: %d \n", newID)
-	return nil, int(newID)
-	
-     // =========
-	case "?": 
-     // =========
+     if useQueryRow { // "?" 
 	row := pSR.Handle().QueryRow(SQL_toUse)
 	// ---------------------------------------------------------
 	// What if there is no row in the result, and .Scan() can't
@@ -200,7 +172,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pFV *DRP.Fiel
 	// You should only see this error if you're using QueryRow().
 	// If you see this error elsewhere, yer doin' it wrong.
 	// ---------------------------------------------------------
-	e = row.Scan(CPF_wID...)
+	e = row.Scan(CPF_toUse...) // _noID // BUT WHAT ABOUT no-WHERE ???
 	switch e {
 	  case sql.ErrNoRows:
 	       return nil, 0 // false, nil
@@ -213,47 +185,36 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pFV *DRP.Fiel
 	}
 	panic("Oops, fallthru in SELECT")
 	
-     // =========
-	case "=": 
-     // =========
+     } else { 
 	// It is now ready for Exec()
 	var theRes sql.Result
-	// var newID  int64
-	// Call Exec(..) on the stmt, with all column ptrs
+	var newID  int64
 	theRes, e = pSR.Handle().Exec(SQL_toUse, CPF_toUse...)
 	if e != nil {
-		fmt.Fprintf(w, "UPDATE.exec: failed: %s", e)
-		return fmt.Errorf("engineunique.update.exec: %w", e), 0
+		fmt.Fprintf(w, "engineunique.???.exec: failed: %s", e)
+		return fmt.Errorf("engineunique.???.exec: %w", e), -1
 	}
+	
+	if dbOp == "+" { // INSERT 
+	// Used RETURNING to get new ID. 
+	// Call Exec(..) on the stmt, with all column ptrs (except ID) 
+	   newID, e = theRes.LastInsertId()
+	   if e != nil {
+		fmt.Fprintf(w, "engineunique.insert.lastinsertId: failed: %s", e)
+		return fmt.Errorf("engineunique.insert: lastinsertId: %w",e),-1
+		}
+	   fmt.Fprintf(w, "INSERT: OK: LastInsertID: %d \n", newID)
+	   return nil, int(newID)
+	}
+	// UPDATE, DELETE 
 	var nRA int64
 	nRA, e = theRes.RowsAffected()
 	if e != nil {
 		fmt.Fprintf(w, "engineunique.update.rowsaffected: failed: %s", e)
 		return fmt.Errorf("engineunique.update.rowsaffected: %w", e), 0
-	}
-	/*
-	newID, e = theRes.LastInsertId()
-	if e != nil {
-		fmt.Fprintf(w, "INSERT.lastinsertId: failed: %s", e)
-		return fmt.Errorf("engineunique: insert: lastinsertId: %w",e),0
-	}
-	fmt.Fprintf(w, "INSERT: OK: LastInsertID: %d \n", newID)
-	*/
-	return nil, int(nRA) // 1 
-
-// ====================================================
-
-     	// =======================================
-	case "D": // Delete, Discard, Drop
-	// https://www.sqlite.org/lang_delete.html
-	// DELETE FROM tblNm WHERE expr RET'G expr
-     	// =======================================
-	if pFV == nil {
-     	   return errors.New("EngineUnique: SELECT: missing WHERE"), 0 
-     	}
-     // default:
+		}
+	return nil, int(nRA) // nr of rows affected: 0 or 1 
      }
-     return errors.New("engineunique: bad dbOp: " + dbOp), -1
 }
 
 func writeFieldDebugInfo(w io.Writer, pTD *DRM.TableDetails) {
