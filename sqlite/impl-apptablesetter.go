@@ -50,7 +50,7 @@ func (p *SqliteRepo) RegisterAppTables(appName string, cfg []*DRM.TableDetails) 
 			S.ToLower(c.StorName))
 		// Do schema-related initialisations
 		_ = DRM.GenerateColumnStringsCSV(c)
-		_ = DRM.GeneratePreparedStatements(c)
+		_ = DRM.GenerateStatements(c)
 	}
 	return nil
 } 

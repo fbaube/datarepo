@@ -178,7 +178,12 @@ type ColumnStringsCSV struct {
 	// Where_* [with|no ID primary key] lists
 	// FIELD NAMES ?? PLACEHOLDERS ?? 
 	// for when there is also a WHERE clause:
-	Where_wID, Where_noID string 
+	Where_noVals, Where_wVals_wID, Where_wVals_noID string 
+/*
+	pTD.CSVs.Where_noVals     = fmt.Sprintf(" WHERE $%d = $%d", 1, 2)
+	pTD.CSVs.Where_wVals_wID  = fmt.Sprintf(" WHERE $%d = $%d", N, N+1)
+	pTD.CSVs.Where_wVals_noID = fmt.Sprintf(" WHERE $%d = $%d", N-1, N)
+*/
 }
 
 // Statements stores several SQL query strings customised for the
