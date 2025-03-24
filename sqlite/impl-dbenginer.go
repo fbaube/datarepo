@@ -133,6 +133,10 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pFV *DRP.Fiel
 	default:
 	return errors.New("engineunique: bad dbOp: " + dbOp), 0
      }
+
+     dbOpString := dbOp + "(" + dbOp1 + ")"
+     dbOpError := "engineunique: " + dbOpString + ": "
+
      // Check re. WHERE spec and/or input/output buffer.
      // if INSERT, no WHERE.
      if dbOp1 == "+" {
@@ -145,14 +149,13 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pFV *DRP.Fiel
 	// (2) an input buffer (where we can find an ID).
 	// TODO: If a WHERE spec, it must be on a UNIQUE column. 
 	   if (pFV == nil) && (pRMbuf == nil ) {
-	       return errors.New("EngineUnique: " + dbOp + "(" + dbOp1 +
-		  "): missing search spec (no WHERE spec or buffer with ID"), 0 
+	       return errors.New(dbOpError + 
+		  "missing search spec (no WHERE spec or buffer with ID"), 0 
 	   }
  	// If UPDATE, need an  input buffer 
  	// If SELECT, need an output buffer 
 	   if (dbOp1 != "-") && (pRMbuf == nil) {
-	    	return errors.New("EngineUnique: " + dbOp +
-		        "(" + dbOp1 + "): missing buffer"), 0 
+	    	return errors.New(dbOpError + "missing buffer"), 0 
 	   }
 	// Now set WHERE_toUse !!! TODO TODO TODO 
      }
@@ -180,7 +183,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pFV *DRP.Fiel
 	       return nil, 1 // true, nil 
 	  default:
 		println("SQL ERROR: (" + e.Error() + ") SQL: " + SQL_toUse)
-		return fmt.Errorf("engineunique.get: " +
+		return fmt.Errorf(dbOpError + 
 		       "(%s=%s) failed: %w", pFV.Field, pFV.Value, e), 0
 	}
 	panic("Oops, fallthru in SELECT")
@@ -191,8 +194,8 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pFV *DRP.Fiel
 	var newID  int64
 	theRes, e = pSR.Handle().Exec(SQL_toUse, CPF_toUse...)
 	if e != nil {
-		fmt.Fprintf(w, "engineunique.???.exec: failed: %s", e)
-		return fmt.Errorf("engineunique.???.exec: %w", e), -1
+		fmt.Fprintf(w, dbOpError + "exec failed: %s", e)
+		return fmt.Errorf(dbOpError + "exec: %w", e), -1
 	}
 	
 	if dbOp == "+" { // INSERT 
