@@ -97,7 +97,8 @@ func GenerateColumnStringsCSV(pTD *TableDetails) error {
      // - Including the ID, the placeholders are numbered $1..$N
      // - Not including it, the placeholders are numbered $2..$N
 
-     println(pTD.CSVs.String())
+     println(pTD.TableSummary.StorName +
+     	"[" + strconv.Itoa(len(pTD.ColumnSpecs)) + "}:\n" + pTD.CSVs.String())
 
      return nil
 }
