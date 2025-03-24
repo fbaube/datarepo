@@ -57,15 +57,16 @@ func GenerateColumnStringsCSV(pTD *TableDetails) error {
      var N = len(pTD.ColumnSpecs)
      // var cs D.ColumnSpec 
 
-     // Examples, if we assume N=5 fields (f[0]=ID plus four others, f[1..4])
+     // For example, if we assume << N=5 >> fields
+     // (f[0]=ID plus four others, f[1..4]):
      // type struct { id, f1, f2, f3, f4 } 
      // type ColumnStringsCSV struct {
      // 4 FieldNames_noID    "f1, f2, f3, f4" 
-     // 4 PlaceNumbers_noID  "$1, $2, $3, $4" 
+     // 4 PlaceNums_noID     "$1, $2, $3, $4" 
      // 5 FieldNames_wID     "id, f1, f2, f3, f4" 
-     // 5 PlaceNrs_wID       "$1, $2, $3, $4, $5"
-     // 6 PlaceNrs_wFV       "$1, $2, $3, $4, $5, $6"
-     // 7 PlaceNrs_wID_wFV   "$1, $2, $3, $4, $5, $6, $7" // 6,7=K,V // SELECT?
+     // 5 PlaceNums_wID      "$1, $2, $3, $4, $5"
+     // 6 PlaceNums_wFV      "$1, $2, $3, $4, $5, $6"
+     // 7 PlaceNums_wID_wFV  "$1, $2, $3, $4, $5, $6, $7" // 6,7=K,V // SELECT?
      // 4 UpdateNames        "f1=$1, f2=$2, f3=$3, f4=$4" // No ID!
 
      pTD.CSVs.PlaceNums_noID    = csvNumbers("$", 1, N-1) 
@@ -96,14 +97,7 @@ func GenerateColumnStringsCSV(pTD *TableDetails) error {
      // - Including the ID, the placeholders are numbered $1..$N
      // - Not including it, the placeholders are numbered $2..$N
 
-     println("FieldNames  noID", pTD.CSVs.FieldNames_noID)
-     println("FieldNames   wID", pTD.CSVs.FieldNames_wID)
-     println("PlaceNmbrs  noID", pTD.CSVs.PlaceNums_noID)
-     println("PlaceNmbrs   wID", pTD.CSVs.PlaceNums_wID)
-     println("UpdateNames     ", pTD.CSVs.UpdateNames)
-     println("Where noVals    ", pTD.CSVs.Where_noVals)
-     println("Where wVals noID", pTD.CSVs.Where_wVals_noID)
-     println("Where wVals  wID", pTD.CSVs.Where_wVals_wID)
+     println(pTD.CSVs.String())
 
      return nil
 }

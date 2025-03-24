@@ -1,6 +1,7 @@
 package rowmodels
 
 import(
+	S "strings"
 	D "github.com/fbaube/dsmnd"
 )
 
@@ -202,3 +203,18 @@ type ColumnStringsCSV struct {
 */
 }
 
+func (p ColumnStringsCSV) String() string {
+     var sb S.Builder
+     sb.WriteString("W/ ID \n")	
+     sb.WriteString("Fields " + p.FieldNames_wID + "\n")
+     sb.WriteString("Places " + p.PlaceNums_wID + "\n")
+     sb.WriteString("Wheres " + p.Where_wVals_wID + "\n")
+     sb.WriteString("NO ID \n")
+     sb.WriteString("Fields " + p.FieldNames_noID + "\n")
+     sb.WriteString("Places " + p.PlaceNums_noID + "\n")
+     sb.WriteString("OTHER \n")
+     sb.WriteString("Wh noID wVals " + p.Where_wVals_noID + "\n")
+     sb.WriteString("Where  noVals " + p.Where_noVals + "\n")
+     sb.WriteString("UpdateNames   " + p.UpdateNames + "\n")
+     return sb.String()
+     }
