@@ -92,7 +92,7 @@ func GenerateColumnStringsCSV(pTD *TableDetails) error {
      // For later composability: No placeholders for UPDATE's WHERE!
      var sbUpdtNams S.Builder
      var i int
-     for i=1; i<N; i++ {
+     for i=1; i<N-1; i++ {
      	 sbUpdtNams.WriteString(
 		CSs[i].StorName + " = $" +
 	 	strconv.Itoa(i) + ", ")
