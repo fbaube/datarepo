@@ -81,8 +81,8 @@ func GenerateColumnStringsCSV(pTD *TableDetails) error {
      pTD.CSVs.PlaceNums_noID    = csvNumbers("$", 1, N-1) 
      pTD.CSVs.PlaceNums_wID     = csvNumbers("$", 1, N) 
      pTD.CSVs.PlaceNums_wID_wFV = csvNumbers("$", 1, N+2)
-     pTD.CSVs.FieldNames_noID   = csvNames(CSs, 1, N-1)
-     pTD.CSVs.FieldNames_wID    = csvNames(CSs, 0, N-1)
+     pTD.CSVs.FieldNames_noID   = csvNames(CSs, 0, N-2)
+     pTD.CSVs.FieldNames_wID    = pTD.PKname + ", " + csvNames(CSs, 0, N-2)
 
      // For clarity in composability: No semicolons! 
      pTD.CSVs.Where_noVals     = fmt.Sprintf(" WHERE $%d = $%d", 1, 2)
