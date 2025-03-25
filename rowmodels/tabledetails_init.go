@@ -54,20 +54,29 @@ func GenerateColumnStringsCSV(pTD *TableDetails) error {
      pTD.CSVs = new(ColumnStringsCSV)
      var CSs []D.ColumnSpec
      CSs   = pTD.ColumnSpecs
-     var N = len(pTD.ColumnSpecs)
+     var N = 1+len(pTD.ColumnSpecs) // add in the ID 
      // var cs D.ColumnSpec 
 
-     // For example, if we assume << N=5 >> fields
-     // (f[0]=ID plus four others, f[1..4]):
-     // type struct { id, f1, f2, f3, f4 } 
+     // PRIMARY KEY (aka "ID") is NOT in ColumnSpecs !!
+
+     // So if (for example) we have a total (incl. ID) of N fields:
+     // - The first is the ID, and there are N-1 others
+     // - The N  fields are indexed in ColumnSpecs as 0..N-1, i.e. [:N]
+     // - Including the ID, the placeholders are numbered $1..$N
+     // - Not including it, the placeholders are numbered $1..$N-1
+
+     // For example, if we assume an ID plus four (4)
+     // other fields, for a total of << N=5 >> fields
+     // (ID plus four others, f[0..3]):
+     // type struct { id, f0, f1, f2, f3 } 
      // type ColumnStringsCSV struct {
-     // 4 FieldNames_noID    "f1, f2, f3, f4" 
-     // 4 PlaceNums_noID     "$1, $2, $3, $4" 
-     // 5 FieldNames_wID     "id, f1, f2, f3, f4" 
+     // 4 FieldNames_noID        "f0, f1, f2, f3" 
+     // 4 PlaceNums_noID         "$1, $2, $3, $4" 
+     // 5 FieldNames_wID     "id, f0, f1, f2, f3" 
      // 5 PlaceNums_wID      "$1, $2, $3, $4, $5"
      // 6 PlaceNums_wFV      "$1, $2, $3, $4, $5, $6"
-     // 7 PlaceNums_wID_wFV  "$1, $2, $3, $4, $5, $6, $7" // 6,7=K,V // SELECT?
-     // 4 UpdateNames        "f1=$1, f2=$2, f3=$3, f4=$4" // No ID!
+     // 7 PlaceNums_wID_wFV  "$1, $2, $3, $4, $5, $6, $7" // 6,7=K,V 
+     // 4 UpdateNames        "f0=$1, f1=$2, f2=$3, f3=$4" // No ID!
 
      pTD.CSVs.PlaceNums_noID    = csvNumbers("$", 1, N-1) 
      pTD.CSVs.PlaceNums_wID     = csvNumbers("$", 1, N) 
@@ -77,8 +86,8 @@ func GenerateColumnStringsCSV(pTD *TableDetails) error {
 
      // For clarity in composability: No semicolons! 
      pTD.CSVs.Where_noVals     = fmt.Sprintf(" WHERE $%d = $%d", 1, 2)
-     pTD.CSVs.Where_wVals_wID  = fmt.Sprintf(" WHERE $%d = $%d", N, N+1)
-     pTD.CSVs.Where_wVals_noID = fmt.Sprintf(" WHERE $%d = $%d", N-1, N)
+     pTD.CSVs.Where_wVals_wID  = fmt.Sprintf(" WHERE $%d = $%d", N+1, N+2)
+     pTD.CSVs.Where_wVals_noID = fmt.Sprintf(" WHERE $%d = $%d", N, N+1)
 
      // For later composability: No placeholders for UPDATE's WHERE!
      var sbUpdtNams S.Builder
@@ -90,15 +99,8 @@ func GenerateColumnStringsCSV(pTD *TableDetails) error {
 	}
      pTD.CSVs.UpdateNames = S.TrimSuffix(sbUpdtNams.String(), ", ")
 
-     // So if (for example) we have N fields:
-     // - The first is the ID, and there are N-1 others
-     // - The N  fields are indexed as 0..N-1, or in slice notation,  [:N]
-     // - Non-ID fields are indexed as 1..N-1, or in slice notation, [1:N]
-     // - Including the ID, the placeholders are numbered $1..$N
-     // - Not including it, the placeholders are numbered $2..$N
-
      println(pTD.TableSummary.StorName +
-     	"[" + strconv.Itoa(len(pTD.ColumnSpecs)) + "}:\n" + pTD.CSVs.String())
+     	"[" + strconv.Itoa(len(pTD.ColumnSpecs)) + "]:\n" + pTD.CSVs.String())
 
      return nil
 }
