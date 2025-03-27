@@ -8,5 +8,5 @@ import(
 type DBEnginer interface {
      // EngineUnique works on/with a single DB record. 
      	EngineUnique(dbOp string, tableName string, 
-		whereSpec *FieldValuePair, RM DRM.RowModel) (error, int)
+		anID int, RM DRM.RowModel) (int, error)
 }

@@ -9,17 +9,28 @@ import(
 	"database/sql"
 	S "strings"
 	D "github.com/fbaube/dsmnd"
-	DRP "github.com/fbaube/datarepo"
+	// DRP "github.com/fbaube/datarepo"
 	DRM "github.com/fbaube/datarepo/rowmodels"
 )
 
-// EngineUnique acts on a single DB record, based on the value of 
-// of a column that is specified as UNIQUE (for example, a row ID). 
+// EngineUnique acts on a single DB record, based on the
+// value of the primary key (except of course for INSERT).
+//
+// (It was thought that instead of using only the ID, there
+// could be a WHERE clause that uses any column specified to
+// be UNIQUE, but actually that approach makes no sense.)
+//
+// The basic signature is (int,error) = func(op,table,int,buffer):
 // One of four basic actions is performed (listed as SQL/CRUD/HTTP):
-//  - SELECT / Retrieve / GET  (returns 0/1 + buffer) 
-//  - INSERT / Create / POST   (returns new-ID + nil) 
-//  - UPDATE / Update / PUT    (returns 0/1 + nil) 
-//  - DELETE / Delete / DELETE (returns 0/1 + nil) 
+//  - INSERT / Create / POST (record in) (returns new-ID)
+//  - UPDATE / Update / PUT  (record in) (returns 0/1)
+//  - SELECT / Retriv / GET      (ID in) (returns 0/1 + record) 
+//  - DELETE / Delete / DELETE   (ID in) (returns 0/1)
+//  - let nAR = nr of records affected 
+//  - (newID,e)  = insert(0,inbuffer)  // optimize for use in batches 
+//  - (nAR,e) = update(anID,inbuffer)  // anID can be -1, else match buffer's
+//  - (nAR,e) = select(anID,outbuffer) // anID >= 0
+//  - (nAR,e) = delete(anID,nil)       // anID >= 0; buffer OK, then ID's match
 // 
 // It takes four input arguments:
 //  - The DB operation, one of the four listed above; the dbOp is
@@ -40,15 +51,13 @@ import(
 //    indicate how many records were (i.e. whether a record was) affected.
 //
 // NOTE: When using whereSpec, if a record is not found, this is indicated
-// by the second return value (the int), NOT by the first return value 
+// by the first return value (the int), NOT by the second return value 
 // (the error, which is reserved for when the DB rejects the SQL.
 //
-// NOTE: In an UPDATE, if the whereSpec does not refer to the ID, and the
-// ID of the input record does not match the ID of the record found by the
-// DB, the function panics. So, for UPDATE, it might be wise only to pass 
-// in the ID for the WHERE. 
+// NOTE: If anID >= 0 and buffer is non-nil, and anID does not match the ID
+// of the record in the buffer, the function panics. 
 //
-// NOTE: Also implement COUNT(*) ?
+// NOTE: Also implement COUNT(*) ? Perhaps as "K" = Kount. 
 //
 // TODO: TD.pCSVs could also use DB.Prepare to gather sql.Stmt's, but then we
 // have to pass in a Connection, which screws up modularity pretty severely.
@@ -64,7 +73,7 @@ import(
 // NOTE: When writing the multi-row version of this,
 // be sure to call Rows.Cloe()
 // . 
-func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pFV *DRP.FieldValuePair, pRMbuf DRM.RowModel) (error, int) {
+func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRMbuf DRM.RowModel) (int, error) {
 
      var pTD    *DRM.TableDetails
      var pCSVs  *DRM.ColumnStringsCSV
@@ -75,7 +84,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pFV *DRP.Fiel
      var useQueryRow bool // true only for SELECT 
      var SQL_toUse string // , WHERE_toUse string FIXME FIXME FIXME
      // Table's column-pointers funcs 
-     var CPF_noID, CPF_wID, CPF_toUse []any 
+     var CPF_noID, CPF_wID, CPF_toUse []any
 
      // Fetch the table's details 
      pTD = GetTableDetailsByCode(tableName)
@@ -83,20 +92,16 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pFV *DRP.Fiel
      	// FIXME err msgs 
      	s := "NO TblDtls FOR: " + tableName
      	println(s)
-	return errors.New(s), 0
+	return 0, errors.New(s) 
      }
-     // Fill in vars 
+     // Fill in convenience vars 
      pCSVs  = pTD.CSVs
      pStmts = pTD.Stmts
      if pCSVs  == nil { panic("nil TableDetails ColumnStrings") }
      if pStmts == nil { panic("nil TableDetails Statements") }
      
-     // For convenience, WHERE can use "ID"
-     // (without table name), and we fix it 
-     if pFV != nil && S.EqualFold("id", pFV.Field) {
-     	println("FIXED WHERE:", pFV.Field, "=>", pTD.PKname)
-     	pFV.Field = pTD.PKname
-     }
+     // These CPF vars cannot be pre-generated during initialization
+     // because the ptrs depend on the particular value of pRMbuf.
      CPF_noID = pTD.ColumnPtrsFunc(pRMbuf, false)   // no ID column 
      CPF_wID  = pTD.ColumnPtrsFunc(pRMbuf, true)   // with ID column
 
@@ -104,10 +109,11 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pFV *DRP.Fiel
      // writeFieldDebugInfo(w, pTD)
 
      // Convert dbOp from a long string to a single
-     // character (one of "+", "-", "=", "?"), and 
-     // choose the correct column ptrs func. 
+     // character (one of "+", "-", "=", "?", "#"), 
+     // and choose the correct column ptrs func. 
      // We check only the first letter of the DB op, 
-     // so be creative with the string passed in :-P
+     // so user can (and should?) be creative with
+     // the string passed in :-P
      // println("DB OP IS: " + S.ToUpper(dbOp[0:1]))
      switch S.ToUpper(dbOp[0:1]) {
      
@@ -130,34 +136,55 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pFV *DRP.Fiel
 	case "D":
 
 	     dbOp1 = "-"
+	// # Kount
+	case "K":
+	     dbOp1 = "#"
 	default:
-	return errors.New("engineunique: bad dbOp: " + dbOp), 0
+	return 0, errors.New("engineunique: bad dbOp: " + dbOp) 
      }
 
      dbOpString := dbOp + "(" + dbOp1 + ")"
      dbOpError := "engineunique: " + dbOpString + ": "
 
-     // Check re. WHERE spec and/or input/output buffer.
-     // if INSERT, no WHERE.
-     if dbOp1 == "+" {
-	if pFV != nil {
-	   return errors.New("EngineUnique: INSERT: unwanted WHERE"), 0 
+     // anID is the argument ID passed in.
+     // Now extract the ID if a buffer was passed in. 
+     var bufID = -1
+     var ID_toUse int 
+     if pRMbuf != nil {
+     	var cpf []any
+	cpf = pTD.ColumnPtrsFunc(pRMbuf, true)
+	cpfid := (cpf [0]).(*int)
+	bufID = *cpfid
+     }
+     // Check re. WHERE ID spec and/or input/output buffer.
+     // if INSERT or KOUNT, no WHERE ID.
+     if dbOp1 == "+" || dbOp1 == "#" {
+     	// Allow the zero value :-D 
+	if anID > 0 || bufID > 0 { // rather than: >= 0 
+	   return 0, errors.New("EngineUnique: INSERT: unwanted WHERE ID") 
 	   }
-     // else is SELECT/UPDATE/DELETE 
+     // else is ?/=/- SELECT/UPDATE/DELETE 
       } else {
-	// Need a search spec: either (1) a WHERE spec, or 
-	// (2) an input buffer (where we can find an ID).
-	// TODO: If a WHERE spec, it must be on a UNIQUE column. 
-	   if (pFV == nil) && (pRMbuf == nil ) {
-	       return errors.New(dbOpError + 
-		  "missing search spec (no WHERE spec or buffer with ID"), 0 
+	// Need a search spec: (1) the "anID" int argument, and/or 
+	// (2) the "pRMbuf" buffer argument (where check for an ID).
+	   if (anID == -1) && (pRMbuf == nil) {
+	       return 0, errors.New(dbOpError + 
+		  "missing search spec (no WHERE ID spec or buffer with ID") 
 	   }
+	   if (anID >= 0) && (pRMbuf != nil ) {
+	       if anID != bufID {
+	       	  return 0, fmt.Errorf(dbOpError + "conflicting ID spec: " +
+		  	 "arg <%d> != buffer's ID <%d>", anID, bufID) 
+	       }
+	   }
+	   ID_toUse = anID 
  	// If UPDATE, need an  input buffer 
  	// If SELECT, need an output buffer 
 	   if (dbOp1 != "-") && (pRMbuf == nil) {
-	    	return errors.New(dbOpError + "missing buffer"), 0 
+	    	return 0, errors.New(dbOpError + "missing buffer") 
 	   }
-	// Now set WHERE_toUse !!! TODO TODO TODO 
+	   // FIXME WHERE_toUse !!! TODO TODO TODO
+	   // "?"_wID, 
      }
 
      // ================
@@ -178,13 +205,13 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pFV *DRP.Fiel
 	e = row.Scan(CPF_toUse...) // _noID // BUT WHAT ABOUT no-WHERE ???
 	switch e {
 	  case sql.ErrNoRows:
-	       return nil, 0 // false, nil
+	       return 0, nil // no error, no nRows 
 	  case nil:
-	       return nil, 1 // true, nil 
+	       return 1, nil // no error, 1 row 
 	  default:
 		println("SQL ERROR: (" + e.Error() + ") SQL: " + SQL_toUse)
-		return fmt.Errorf(dbOpError + 
-		       "(%s=%s) failed: %w", pFV.Field, pFV.Value, e), 0
+		return 0, fmt.Errorf(dbOpError + 
+		       "ID <%d> failed: %w", ID_toUse, e)
 	}
 	panic("Oops, fallthru in SELECT")
 	
@@ -195,7 +222,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pFV *DRP.Fiel
 	theRes, e = pSR.Handle().Exec(SQL_toUse, CPF_toUse...)
 	if e != nil {
 		fmt.Fprintf(w, dbOpError + "exec failed: %s", e)
-		return fmt.Errorf(dbOpError + "exec: %w", e), -1
+		return 0, fmt.Errorf(dbOpError + "exec: %w", e) 
 	}
 	
 	if dbOp == "+" { // INSERT 
@@ -204,19 +231,19 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, pFV *DRP.Fiel
 	   newID, e = theRes.LastInsertId()
 	   if e != nil {
 		fmt.Fprintf(w, "engineunique.insert.lastinsertId: failed: %s", e)
-		return fmt.Errorf("engineunique.insert: lastinsertId: %w",e),-1
+		return 0, fmt.Errorf("engineunique.insert: lastinsertId: %w",e) 
 		}
 	   fmt.Fprintf(w, "INSERT: OK: LastInsertID: %d \n", newID)
-	   return nil, int(newID)
+	   return int(newID), nil 
 	}
 	// UPDATE, DELETE 
 	var nRA int64
 	nRA, e = theRes.RowsAffected()
 	if e != nil {
 		fmt.Fprintf(w, "engineunique.update.rowsaffected: failed: %s", e)
-		return fmt.Errorf("engineunique.update.rowsaffected: %w", e), 0
+		return 0, fmt.Errorf("engineunique.update.rowsaffected: %w", e) 
 		}
-	return nil, int(nRA) // nr of rows affected: 0 or 1 
+	return int(nRA), nil // nr of rows affected: 0 or 1 
      }
 }
 
