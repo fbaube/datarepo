@@ -87,7 +87,7 @@ func GenerateColumnStringsCSV(pTD *TableDetails) error {
      // For clarity in composability: No semicolons!
      s := pTD.PKname 
      pTD.CSVs.Where_noVals     = fmt.Sprintf(" WHERE %s = $%d", s, 1)
-     pTD.CSVs.Where_wVals_wID  = fmt.Sprintf(" WHERE %s = $%d", s, N+)
+     pTD.CSVs.Where_wVals_wID  = fmt.Sprintf(" WHERE %s = $%d", s, N+1)
      pTD.CSVs.Where_wVals_noID = fmt.Sprintf(" WHERE %s = $%d", s, N)
 
      // For later composability: No placeholders for UPDATE's WHERE!
@@ -143,7 +143,7 @@ func GenerateStatements(pTD *TableDetails) error {
      // FIELDS are FieldNames_noID.
      // VALUES are PlaceNums_noID.
      // ======================================================
-     pTD.Stmts.INSERTunique =
+     pTD.Stmts.INSERTuniqueID =
 	"INSERT INTO " + pTD.TableSummary.StorName +
         	   "(" + pTD.CSVs.FieldNames_noID  + ") " +
              "VALUES(" + pTD.CSVs.PlaceNums_noID   + ") " +
@@ -160,7 +160,7 @@ func GenerateStatements(pTD *TableDetails) error {
      // FIELDS are FieldNames_wID. 
      // The WHERE clause is tipicly on the ID but need not be. 
      // ======================================================
-     pTD.Stmts.SELECTunique =
+     pTD.Stmts.SELECTuniqueID =
 	"SELECT " + pTD.CSVs.FieldNames_wID +
 	" FROM "  + pTD.TableSummary.StorName + pTD.CSVs.Where_noVals + ";"
 
@@ -180,7 +180,7 @@ func GenerateStatements(pTD *TableDetails) error {
      // is used in the WHERE.
      // We do NOT include the WHERE clause.
      // -----------------------------------------------------
-     pTD.Stmts.UPDATEunique =
+     pTD.Stmts.UPDATEuniqueID =
      	"UPDATE " + pTD.TableSummary.StorName +
 	" SET "   + pTD.CSVs.UpdateNames 
      
