@@ -102,10 +102,10 @@ type TableDetails struct {
      	D.TableSummary
 	
 	// PKname is the name of the index (i.e. primary key)
-	// field, auto-generatable as "idx_{tableName}", which 
-	// has the same name BOTH as primary key in own-table
-	// AND as foreign key in other tables. Enabling natural
-	// joins, without using "AS"! 
+	// field, auto-generatable as "idx_{tableName}". It 
+	// has this same name BOTH as primary key in own-table
+	// AND as foreign key in other tables, enabling natural
+	// joins without using "AS"! 
 	PKname string
  
 	// ColumnSpecs is a list of [dsmnd.D.ColumnSpec] that
@@ -135,8 +135,6 @@ type TableDetails struct {
 	// the table name AND (sometimes) a unique field name. 
 	// ForenKeys   []string
 
-	// FuncNew func() RowModel
-
 	// ColumnStringsCSV is described in full elsewhere.
 	CSVs *ColumnStringsCSV
 	// Statements is described in full elsewhere.
@@ -144,18 +142,17 @@ type TableDetails struct {
 }
 
 // Statements stores several SQL query strings customised for the
-// table. Statements vary in whether they include the primary key, 
-// and whether they include a WHERE clause.
+// table. All statements but INSERT have a WHERE on the primary key.
 //
 // Statements named "*unique" are for working with single records,
 // and are used by method [datarepo.EngineUnique] of interface
 // [datarepo.DBEnginer].
 // .
 type Statements struct {
-     	INSERTunique string
-	SELECTunique string
-	UPDATEunique string
-	DELETEunique string 
+     	INSERTuniqueID string
+	SELECTuniqueID string
+	UPDATEuniqueID string
+	DELETEuniqueID string 
 }
 
 // ColumnStringsCSV stores strings useful for composing SQL
@@ -200,15 +197,11 @@ type ColumnStringsCSV struct {
 	// "F0 = $1, F1 = $2, F2 = $3, F3 = $4"
 	UpdateNames string
 
-	// Where_* [with|no ID primary key] lists
+	// Where_* [with|no ID primary key in the main query
+	// to which the WHERE clause is appended] lists
 	// FIELD NAMES ?? PLACEHOLDERS ?? 
 	// for when there is also a WHERE clause:
 	Where_noVals, Where_wVals_wID, Where_wVals_noID string 
-/*
-	pTD.CSVs.Where_noVals     = fmt.Sprintf(" WHERE $%d = $%d", 1, 2)
-	pTD.CSVs.Where_wVals_wID  = fmt.Sprintf(" WHERE $%d = $%d", N, N+1)
-	pTD.CSVs.Where_wVals_noID = fmt.Sprintf(" WHERE $%d = $%d", N-1, N)
-*/
 }
 
 func (p ColumnStringsCSV) String() string {

@@ -84,10 +84,11 @@ func GenerateColumnStringsCSV(pTD *TableDetails) error {
      pTD.CSVs.FieldNames_noID   = csvNames(CSs, 0, N-2)
      pTD.CSVs.FieldNames_wID    = pTD.PKname + ", " + csvNames(CSs, 0, N-2)
 
-     // For clarity in composability: No semicolons! 
-     pTD.CSVs.Where_noVals     = fmt.Sprintf(" WHERE $%d = $%d", 1, 2)
-     pTD.CSVs.Where_wVals_wID  = fmt.Sprintf(" WHERE $%d = $%d", N+1, N+2)
-     pTD.CSVs.Where_wVals_noID = fmt.Sprintf(" WHERE $%d = $%d", N, N+1)
+     // For clarity in composability: No semicolons!
+     s := pTD.PKname 
+     pTD.CSVs.Where_noVals     = fmt.Sprintf(" WHERE %s = $%d", s, 1)
+     pTD.CSVs.Where_wVals_wID  = fmt.Sprintf(" WHERE %s = $%d", s, N+)
+     pTD.CSVs.Where_wVals_noID = fmt.Sprintf(" WHERE %s = $%d", s, N)
 
      // For later composability: No placeholders for UPDATE's WHERE!
      var sbUpdtNams S.Builder

@@ -22,7 +22,7 @@ require (
 	github.com/mattn/go-colorable v0.1.14 // indirect
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mgutz/str v1.2.0 // indirect
-	github.com/nbio/xml v0.0.0-20250127210239-7f9281fed8c6 // indirect
+	github.com/nbio/xml v0.0.0-20250325194151-57e639e7ba73 // indirect
 	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394 // indirect
 	golang.org/x/sys v0.31.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
