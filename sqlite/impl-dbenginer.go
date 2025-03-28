@@ -119,12 +119,12 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
      
 	// + Add, Create, Insert, New
 	case "A", "C", "I", "N":
-	     SQL_toUse = pStmts.INSERTunique
+	     SQL_toUse = pStmts.INSERTuniqueID
 	     CPF_toUse = CPF_noID 
 	     dbOp1 = "+"
         // ? Fetch, Get, List, Retrieve, Select 
         case "F", "G", "L", "R", "S":
-	     SQL_toUse = pStmts.SELECTunique
+	     SQL_toUse = pStmts.SELECTuniqueID
 	     CPF_toUse = CPF_wID
 	     useQueryRow = true // <==
 	     dbOp1 = "?"
