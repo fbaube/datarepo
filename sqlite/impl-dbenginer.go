@@ -193,7 +193,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
       fmt.Fprintf(w, "SQL: " + SQL_toUse + "\n")	
 
      if useQueryRow { // "?" 
-	row := pSR.Handle().QueryRow(SQL_toUse)
+	row := pSR.Handle().QueryRow(SQL_toUse, ID_toUse)
 	// ---------------------------------------------------------
 	// What if there is no row in the result, and .Scan() can't
 	// scan a value. What then? The error constant sql.ErrNoRows
