@@ -255,13 +255,15 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 		ID_toUse, len(CPF_toUse), SQL_toUse)
 	// It is now ready for Exec()
 	var theRes sql.Result
-
 	theRes, e = pSR.Handle().Exec(SQL_toUse, CPF_toUse...)
 	if e != nil {
 	     	fmt.Println("EXEC FAILED !!")
 		fmt.Fprintf(w, dbOpError + "exec failed: %s", e)
 		return 0, fmt.Errorf(dbOpError + "exec: %w", e) 
 	}
+	println("**** EXEC SUCCEEDED", dbOp1)
+	fmt.Fprintf(w, "**** EXEC SUCCEEDED %s \n", dbOp1)
+	
 	if dbOp == "+" { // INSERT 
 	// Used RETURNING to get new ID. 
 	// Call Exec(..) on the stmt, with all column ptrs (except ID) 
