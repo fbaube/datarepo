@@ -250,7 +250,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 	
       } else {
 	var newID int64
-        if dbOp1 == "+" { CPF_toUse = append(CPF_toUse, &newID) } 
+     // if dbOp1 == "+" { CPF_toUse = append(CPF_toUse, &newID) } 
      	fmt.Fprintf(w, "Exec: %d / w %d parms / %s \n",
 		ID_toUse, len(CPF_toUse), SQL_toUse)
 	// It is now ready for Exec()

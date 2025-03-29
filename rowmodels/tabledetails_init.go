@@ -147,7 +147,8 @@ func GenerateStatements(pTD *TableDetails) error {
 	"INSERT INTO " + pTD.TableSummary.StorName +
         	   "(" + pTD.CSVs.FieldNames_noID  + ") " +
              "VALUES(" + pTD.CSVs.PlaceNums_noID   + ") " +
-         "RETURNING $" + strconv.Itoa(len(pTD.ColumnSpecs)+1) + ";"
+//       "RETURNING $" + strconv.Itoa(len(pTD.ColumnSpecs)+1) + ";"
+         ";"
 
      // === SELECT ===========================================
      // Fetch, Get, List, Retrieve, Select
