@@ -38,19 +38,24 @@ func init() {
 // Multiple calls to this do not conflict, whether with tables
 // previously specified or not before; if a table name is repeated 
 // but with a different schema, the result is undefined.
+//
+//  - StorName: the name of the table IN THE DB - a "long name"
+//  - DispName: a short name (3 ltrs!) for use in building up names 
 // .
 func (p *SqliteRepo) RegisterAppTables(appName string, cfg []*DRM.TableDetails) error {
 	L.L.Info("RegisterAppTables: got %d table definitions", len(cfg))
-	var c *DRM.TableDetails
-	for _, c = range cfg {
-	       	sindex := S.ToLower(c.DispName) // c.StorName)
+	var td *DRM.TableDetails
+	var lcDN, lcSN string 
+	for _, td = range cfg {
+	       	lcDN = S.ToLower(td.DispName) 
+		lcSN = S.ToLower(td.StorName)
 		// println("REG TBL DTLS: " + sindex)
-		theMap[sindex] = c
-		L.L.Info("Reg'd the config for app table: " +
-			S.ToLower(c.StorName))
+		theMap[lcDN] = td
+		theMap[lcSN] = td
+		L.L.Info("Reg'd the config for app table: " + lcDN + "/" + lcSN)
 		// Do schema-related initialisations
-		_ = DRM.GenerateColumnStringsCSV(c)
-		_ = DRM.GenerateStatements(c)
+		_ = DRM.GenerateColumnStringsCSV(td)
+		_ = DRM.GenerateStatements(td)
 	}
 	return nil
 } 
