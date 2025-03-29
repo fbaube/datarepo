@@ -268,11 +268,11 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 	// Used RETURNING to get new ID. 
 	// Call Exec(..) on the stmt, with all column ptrs (except ID) 
 	   fmt.Printf("INSERT SUCCEEDED !! newID: %d \n", newID)
-	/* newID, e = theRes.LastInsertId()
+	   newID, e = theRes.LastInsertId()
 	   if e != nil {
 		fmt.Fprintf(w, "engineunique.insert.lastinsertId: failed: %s", e)
 		return 0, fmt.Errorf("engineunique.insert: lastinsertId: %w", e) 
-		} */
+		} 
 	   fmt.Fprintf(w, "INSERT: OK: LastInsertID: %d \n", int(newID))
 	   return int(newID), nil 
 	}
