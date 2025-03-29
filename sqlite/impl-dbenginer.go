@@ -50,6 +50,9 @@ import(
 //  - An int that is (if INSERT) the newly-added row ID (else) 0 or 1 to
 //    indicate how many records were (i.e. whether a record was) affected.
 //
+// If the call to this func is inside a Transaction,
+// we probably need to make it available to this func.
+// 
 // NOTE: When using whereSpec, if a record is not found, this is indicated
 // by the first return value (the int), NOT by the second return value 
 // (the error, which is reserved for when the DB rejects the SQL.
@@ -216,14 +219,13 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 	   }
 	   
      }
-     // Handle WHERE clause
-   
-
+     
      // ================
      //  TIME to EXECUTE 	
      // ================
      if useQueryRow { // "?" 
      	fmt.Fprintf(w, "QueryRow: %s / %d / %s \n", dbOp1, ID_toUse, SQL_toUse)
+	// FIXME: Transaction, if active ?
 	row := pSR.Handle().QueryRow(SQL_toUse, ID_toUse)
 	// ---------------------------------------------------------
 	// What if there is no row in the result, and .Scan() can't
@@ -255,25 +257,22 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 		ID_toUse, len(CPF_toUse), SQL_toUse)
 	// It is now ready for Exec()
 	var theRes sql.Result
+	// FIXME: Transaction, if active ?
 	theRes, e = pSR.Handle().Exec(SQL_toUse, CPF_toUse...)
 	if e != nil {
-	     	fmt.Println("EXEC FAILED !!")
 		fmt.Fprintf(w, dbOpError + "exec failed: %s", e)
 		return 0, fmt.Errorf(dbOpError + "exec: %w", e) 
 	}
-	println("**** EXEC SUCCEEDED", dbOp1)
-	fmt.Fprintf(w, "**** EXEC SUCCEEDED %s \n", dbOp1)
 	
 	if dbOp1 == "+" { // INSERT 
-	// Used RETURNING to get new ID. 
-	// Call Exec(..) on the stmt, with all column ptrs (except ID) 
-	   fmt.Printf("INSERT SUCCEEDED !! newID: %d \n", newID)
+	   // Did NOT use RETURNING to get new ID. 
 	   newID, e = theRes.LastInsertId()
 	   if e != nil {
 		fmt.Fprintf(w, "engineunique.insert.lastinsertId: failed: %s", e)
 		return 0, fmt.Errorf("engineunique.insert: lastinsertId: %w", e) 
 		} 
-	   fmt.Fprintf(w, "INSERT: OK: LastInsertID: %d \n", int(newID))
+	   fmt.Fprintf(w, "INSERT (%s) OK: LastInsertID: %d \n",
+	   	tableName, int(newID))
 	   return int(newID), nil 
 	}
 	// UPDATE, DELETE 

@@ -133,7 +133,7 @@ func GenerateStatements(pTD *TableDetails) error {
 
      // === INSERT ===========================================
      // Add, Create, Insert, New
-     // Use INSERT...RETURNING to get the new ID. 
+     // Do NOT use RETURNING to get the new ID: it is a PITA.
      // https://www.sqlite.org/lang_insert.html
      // INSERT INTO tblNm (F1, F2, F3, F4) VALUES(val1, val2, val3, val4);-
      // INSERT INTO tblNm (F1, F2, F3, F4) VALUES($1,$2,$3,$4); + any...
@@ -146,9 +146,7 @@ func GenerateStatements(pTD *TableDetails) error {
      pTD.Stmts.INSERTuniqueID =
 	"INSERT INTO " + pTD.TableSummary.StorName +
         	   "(" + pTD.CSVs.FieldNames_noID  + ") " +
-             "VALUES(" + pTD.CSVs.PlaceNums_noID   + ") " +
-//       "RETURNING $" + strconv.Itoa(len(pTD.ColumnSpecs)+1) + ";"
-         ";"
+             "VALUES(" + pTD.CSVs.PlaceNums_noID   + ") " + ";"
 
      // === SELECT ===========================================
      // Fetch, Get, List, Retrieve, Select
