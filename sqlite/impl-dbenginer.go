@@ -114,7 +114,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
      // We check only the first letter of the DB op, 
      // so user can (and should?) be creative with
      // the string passed in :-P
-     fmt.Fprintln(w, "DB OP IS: " + S.ToUpper(dbOp[0:1]))
+     fmt.Fprintln(w, "DB OP IS: " + S.ToUpper(dbOp))
      switch S.ToUpper(dbOp[0:1]) {
 
 // Recapping: 
@@ -196,7 +196,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 	       	  if bufID == 0 {
 		     ermsg := fmt.Sprintf("WARN: Input ID %d != buffer ID 0", anID)
 		     println(ermsg)
-		     fmt.Fprintf(w, ermsg)
+		     fmt.Fprintln(w, ermsg)
 		  } else {
 	 	    return 0, fmt.Errorf(dbOpError + "conflicting ID spec: " +
 		  	 "arg <%d> != buffer's ID <%d>", anID, bufID)
@@ -250,12 +250,14 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 	var newID  int64
 	theRes, e = pSR.Handle().Exec(SQL_toUse, CPF_toUse...)
 	if e != nil {
+	     	fmt.Println("EXEC FAILED !!")
 		fmt.Fprintf(w, dbOpError + "exec failed: %s", e)
 		return 0, fmt.Errorf(dbOpError + "exec: %w", e) 
 	}
 	if dbOp == "+" { // INSERT 
 	// Used RETURNING to get new ID. 
 	// Call Exec(..) on the stmt, with all column ptrs (except ID) 
+	   fmt.Println("INSERT SUCCEEDED !!")
 	   newID, e = theRes.LastInsertId()
 	   if e != nil {
 		fmt.Fprintf(w, "engineunique.insert.lastinsertId: failed: %s", e)
