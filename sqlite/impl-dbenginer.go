@@ -264,7 +264,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 	println("**** EXEC SUCCEEDED", dbOp1)
 	fmt.Fprintf(w, "**** EXEC SUCCEEDED %s \n", dbOp1)
 	
-	if dbOp == "+" { // INSERT 
+	if dbOp1 == "+" { // INSERT 
 	// Used RETURNING to get new ID. 
 	// Call Exec(..) on the stmt, with all column ptrs (except ID) 
 	   fmt.Printf("INSERT SUCCEEDED !! newID: %d \n", newID)
