@@ -198,9 +198,8 @@ type ColumnStringsCSV struct {
 	UpdateNames string
 
 	// Where_* [with|no ID primary key in the main query
-	// to which the WHERE clause is appended] lists
-	// FIELD NAMES ?? PLACEHOLDERS ?? 
-	// for when there is also a WHERE clause:
+	// to which the WHERE clause is appended] lists name
+	// of primary key "=" placeholder.
 	Where_noVals, Where_wVals_wID, Where_wVals_noID string 
 }
 

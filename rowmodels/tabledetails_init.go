@@ -106,8 +106,8 @@ func GenerateColumnStringsCSV(pTD *TableDetails) error {
      return nil
 }
 
-// GeneratePreparedStatements generates struct [Statements]
-// for every struct that has been registered using method
+// GenerateStatements generates struct [Statements] for
+// every struct that has been registered using method
 // datarepo/RegisterAppTables of interface datarepo/SimpleRepo
 //
 // The examples in the inline docu here in this source code
@@ -182,17 +182,18 @@ func GenerateStatements(pTD *TableDetails) error {
      // -----------------------------------------------------
      pTD.Stmts.UPDATEuniqueID =
      	"UPDATE " + pTD.TableSummary.StorName +
-	" SET "   + pTD.CSVs.UpdateNames 
+	" SET "   + pTD.CSVs.UpdateNames + pTD.CSVs.Where_wVals_noID + ";"
      
+     // === DELETE ============================
+     // Delete, Discard, Drop
+     // https://www.sqlite.org/lang_delete.html
+     // =======================================
+     pTD.Stmts.DELETEuniqueID =
+     	"DELETE FROM " + pTD.TableSummary.StorName +
+	" WHERE " + pTD.PKname + " = $1" + ";"
+
      return nil
 }
-
-/*
-// WITH WHERE and withOUT WHERE
-func buildSELECT(pTD *DRM.TableDetails, pFV DRP.FieldValuePair) { }
-func buildUPDATE(pTD *DRM.TableDetails, pFV DRP.FieldValuePair) { }
-func buildDELETE(pTD *DRM.TableDetails, pFV DRP.FieldValuePair) { }
-* /
 
 /*     
      println("FieldNames    ", pTD.CSVs.FieldNames)
@@ -204,32 +205,5 @@ func buildDELETE(pTD *DRM.TableDetails, pFV DRP.FieldValuePair) { }
      return nil
 }
 
-===
-
-     	// ================================================
-	case "M", "U": // Modify, Update
-	// https://www.sqlite.org/lang_update.html
-	// Obnoxious syntax: 
-	// UPDATE tblNm SET fld1=val1,fld2=val2 WHERE expr: 
-	// (or..) SET fld1=$1, fld2=$2 WHERE expr; + any...
-	// https://www.sqlite.org/syntax/expr.html
-	// Use UpdateNames. 
-     	// ================================================
-	// -----------------------------------------------------
-	// For UPDATE (only), we have to generate here+now an 
-	// SQL string that involves all columns (except the ID). 
-	// Write assignment pairs as CSV: f1 = $1, f2 = $2, ...
-	// We do NOT include the primary key, D.SFT_PRKEY, which
-	// is used in the WHERE. 
-	// -----------------------------------------------------
-	sSQL =	"UPDATE " + pTD.TableSummary.StorName +
-		" SET " + pCSVs.UpdateNames +
-		" WHERE " + pFV.Field + " = " + pFV.Value + ";"
-
-     	// =======================================
-	case "D": // Delete, Discard, Drop
-	// https://www.sqlite.org/lang_delete.html
-	// DELETE FROM tblNm WHERE expr RET'G expr
-     	// =======================================
 
 */

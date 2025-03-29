@@ -114,27 +114,46 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
      // We check only the first letter of the DB op, 
      // so user can (and should?) be creative with
      // the string passed in :-P
-     // println("DB OP IS: " + S.ToUpper(dbOp[0:1]))
+     fmt.Fprintln(w, "DB OP IS: " + S.ToUpper(dbOp[0:1]))
      switch S.ToUpper(dbOp[0:1]) {
-     
+
+// Recapping: 
+// The basic signature is (int,error) = func(op,table,int,buffer):
+// One of four basic actions is performed (listed as SQL/CRUD/HTTP):
+//  - INSERT / Create / POST (record in) (returns new-ID)
+//  - UPDATE / Update / PUT  (record in) (returns 0/1)
+//  - SELECT / Retriv / GET      (ID in) (returns 0/1 + record) 
+//  - DELETE / Delete / DELETE   (ID in) (returns 0/1)
+//  - let nAR = nr of records affected 
+//  - (newID,e)  = insert(0,inbuffer)  // optimize for use in batches 
+//  - (nAR,e) = update(anID,inbuffer)  // anID can be -1, else match buffer's
+//  - (nAR,e) = select(anID,outbuffer) // anID >= 0
+//  - (nAR,e) = delete(anID,nil)       // anID >= 0; if buffer, ID's must match
+
 	// + Add, Create, Insert, New
 	case "A", "C", "I", "N":
 	     SQL_toUse = pStmts.INSERTuniqueID
+	     // We'll get the new ID OK, so don't try
+	     // to rely on hypothetical writeback 
 	     CPF_toUse = CPF_noID 
 	     dbOp1 = "+"
         // ? Fetch, Get, List, Retrieve, Select 
         case "F", "G", "L", "R", "S":
 	     SQL_toUse = pStmts.SELECTuniqueID
+	     // WHERE uses ID, so don't NEED to pass
+	     // via CPF, but let's use the writeback 
 	     CPF_toUse = CPF_wID
 	     useQueryRow = true // <==
 	     dbOp1 = "?"
 	// = Modify, Update
 	case "M", "U":
-
+	     SQL_toUse = pStmts.UPDATEuniqueID
+	     // WHERE uses ID, and no writeback, so don't pass via CPF 
+	     CPF_toUse = CPF_noID
 	     dbOp1 = "="
 	// - Delete, Discard, Drop
 	case "D":
-
+	     SQL_toUse = pStmts.DELETEuniqueID
 	     dbOp1 = "-"
 	// # Kount
 	case "K":
@@ -145,6 +164,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 
      dbOpString := dbOp + "(" + dbOp1 + ")"
      dbOpError := "engineunique: " + dbOpString + ": "
+     fmt.Fprintln(w, dbOpString, ",", SQL_toUse)
 
      // anID is the argument ID passed in.
      // Now extract the ID if a buffer was passed in. 
@@ -183,15 +203,14 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 	   if (dbOp1 != "-") && (pRMbuf == nil) {
 	    	return 0, errors.New(dbOpError + "missing buffer") 
 	   }
-	   // FIXME WHERE_toUse !!! TODO TODO TODO
-	   // "?"_wID, 
+	   
      }
+     // Handle WHERE clause
+   
 
      // ================
      //  TIME to EXECUTE 	
      // ================
-      fmt.Fprintf(w, "SQL: " + SQL_toUse + "\n")	
-
      if useQueryRow { // "?" 
 	row := pSR.Handle().QueryRow(SQL_toUse, ID_toUse)
 	// ---------------------------------------------------------
