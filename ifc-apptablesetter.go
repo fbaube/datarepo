@@ -31,7 +31,9 @@ type AppTableSetter interface {
 	CreateAppTables() error
 	
 	// GetTableDetailsByString is case-insensitive.
-	// Maybe not define it here because it is not DB-specific ? 
-	GetTableDetailsByString(string) *DRM.TableDetails
+	// Also, we do not define it here, because it is not
+	// DB-specific, it is expected for all impementations
+	// of SimpleRepo and interface AppTableSeteter.
+	// GetTableDetailsByString(string) *DRM.TableDetails
 }
 
