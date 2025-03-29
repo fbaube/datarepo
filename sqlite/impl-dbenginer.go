@@ -222,7 +222,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
      // ================
      //  TIME to EXECUTE 	
      // ================
-     if useQueryRow { // "?" AND ALSO "+" 
+     if useQueryRow { // "?" 
      	fmt.Fprintf(w, "QueryRow: %s / %d / %s \n", dbOp1, ID_toUse, SQL_toUse)
 	row := pSR.Handle().QueryRow(SQL_toUse, ID_toUse)
 	// ---------------------------------------------------------

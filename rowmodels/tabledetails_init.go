@@ -147,7 +147,7 @@ func GenerateStatements(pTD *TableDetails) error {
 	"INSERT INTO " + pTD.TableSummary.StorName +
         	   "(" + pTD.CSVs.FieldNames_noID  + ") " +
              "VALUES(" + pTD.CSVs.PlaceNums_noID   + ") " +
-          "RETURNING " + pTD.CSVs.Where_wVals_wID  + ";"
+          "RETURNING " + pTD.CSVs.Where_wVals_noID + ";"
 
      // === SELECT ===========================================
      // Fetch, Get, List, Retrieve, Select
@@ -195,15 +195,3 @@ func GenerateStatements(pTD *TableDetails) error {
      return nil
 }
 
-/*     
-     println("FieldNames    ", pTD.CSVs.FieldNames)
-     println("FieldNames wID", pTD.CSVs.FieldNames_wID)
-     println("PlaceNmbrs    ", pTD.CSVs.PlaceNumbers)
-     println("PlaceNmbrs wID", pTD.CSVs.PlaceNrs_wID)
-     println("UpdateNames   ", pTD.CSVs.UpdateNames)
-* /
-     return nil
-}
-
-
-*/
