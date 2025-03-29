@@ -121,9 +121,27 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 	if dbe != nil {
 	   L.L.Warning("Cannot open DB logfile ./db.log: %w", dbe)
 	}
+	// We are soon ready to maybe return success, but before we can
+	// do that, we have to be sure to register apptable details.
+	var pSR SimpleRepo
+	pSR, ok := repo.(SimpleRepo)
+	if !ok {
+		panic("init9n.L165")
+		return nil, errors.New("processDBargs: is not sqlite")
+	}
+	
+	if p.TableDetailz == nil || len(p.TableDetailz) == 0 {
+	   println("DB: missing app table details. Aborting.")
+	   return nil, errors.New("Missing app DB table details")
+	}
+	e = pSR.RegisterAppTables("", p.TableDetailz) // DRM.M5_TableDetails)
+	if e != nil {
+		return nil, fmt.Errorf("%s can't register tables: %w", errPfx, e)
+	}
+	
 	// If the DB exists and we want to open
 	// it as-is, i.e. without zeroing it out,
-	// then this is where we return success:
+	// then this is where we return success. 
 	if filexist && repo != nil && !p.DoZeroOut {
 	   	// Some weirdness ? A non-fatal error ? 
 	   	if openError != nil {
@@ -156,23 +174,6 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 	repoAbsPath := repo.Path()
 	println("DB: status OK.")
 	L.L.Info("DB OK: " + SU.ElideHomeDir(repoAbsPath))
-
-	var pSR SimpleRepo
-	// pSQR, ok := repo.(*DRS.SqliteRepo)
-	pSR, ok := repo.(SimpleRepo)
-	if !ok {
-		panic("init9n.L163")
-		return nil, errors.New("processDBargs: is not sqlite")
-	}
-	
-	// At this point we have finished all execution paths
-	// that do NOT require the app table details, and so
-	// now we do have to have apptable details.
-	if p.TableDetailz == nil || len(p.TableDetailz) == 0 {
-	   println("DB: missing app table details. Aborting.")
-	   return nil, errors.New("Missing app DB table details")
-	}
-	e = pSR.RegisterAppTables("", p.TableDetailz) // DRM.M5_TableDetails)
 
 	if !filexist {
 		// env.SimpleRepo.ForceExistDBandTables()
