@@ -136,9 +136,9 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 	     // We'll get the new ID OK, so don't try
 	     // to rely on hypothetical writeback 
 	     CPF_toUse = CPF_noID
-	     // USE QueryRow for INSERT! So that LastResultID works
+	     // USE QueryRow for INSERT! So that LastResultID works ? No.
 	     // https://github.com/mattn/go-sqlite3/issues/1140
-	     useQueryRow = true // <==
+	     // useQueryRow = true // <==
 	     dbOp1 = "+"
         // ? Fetch, Get, List, Retrieve, Select 
         case "F", "G", "L", "R", "S":
