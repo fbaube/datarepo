@@ -248,12 +248,14 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 	}
 	panic("Oops, fallthru in SELECT")
 	
-     } else { 
+      } else {
+	var newID int64
+        if dbOp1 == "+" { CPF_toUse = append(CPF_toUse, &newID) } 
      	fmt.Fprintf(w, "Exec: %d / w %d parms / %s \n",
 		ID_toUse, len(CPF_toUse), SQL_toUse)
 	// It is now ready for Exec()
 	var theRes sql.Result
-	var newID  int64
+
 	theRes, e = pSR.Handle().Exec(SQL_toUse, CPF_toUse...)
 	if e != nil {
 	     	fmt.Println("EXEC FAILED !!")
@@ -263,13 +265,13 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 	if dbOp == "+" { // INSERT 
 	// Used RETURNING to get new ID. 
 	// Call Exec(..) on the stmt, with all column ptrs (except ID) 
-	   fmt.Println("INSERT SUCCEEDED !!")
-	   newID, e = theRes.LastInsertId()
+	   fmt.Printf("INSERT SUCCEEDED !! newID: %d \n", newID)
+	/* newID, e = theRes.LastInsertId()
 	   if e != nil {
 		fmt.Fprintf(w, "engineunique.insert.lastinsertId: failed: %s", e)
 		return 0, fmt.Errorf("engineunique.insert: lastinsertId: %w", e) 
-		}
-	   fmt.Fprintf(w, "INSERT: OK: LastInsertID: %d \n", newID)
+		} */
+	   fmt.Fprintf(w, "INSERT: OK: LastInsertID: %d \n", int(newID))
 	   return int(newID), nil 
 	}
 	// UPDATE, DELETE 
