@@ -30,8 +30,8 @@ type AppTableSetter interface {
 	// schema(ta); if the tables exist, they are emptied of data. 
 	CreateAppTables() error
 	
-	// GetTableDetailsByCode is case-insensitive.
-	// Also, we do not define it here because it is not DB-specific.
-	// GetTableDetailsByCode(string) *DRM.TableDetails
+	// GetTableDetailsByString is case-insensitive.
+	// Maybe not define it here because it is not DB-specific ? 
+	GetTableDetailsByString(string) *DRM.TableDetails
 }
 

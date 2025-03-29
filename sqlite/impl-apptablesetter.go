@@ -173,14 +173,13 @@ func (p *SqliteRepo) createAppTable(td *DRM.TableDetails) error {
 	return nil
 }
 
-func GetTableDetailsByCode(s string) *DRM.TableDetails {
+func GetTableDetailsByString(s string) *DRM.TableDetails {
      s = S.ToLower(s) 
-  // println("GetTableDetailsByCode: " + s)
-  // return theMap[S.ToLower(s)]
-     ret := theMap[s]
+  // println("GetTableDetailsByString: " + s)
+     ret := theMap[S.ToLower(s)]
      if ret == nil {
      	for k, v := range theMap {
-	    fmt.Printf("MAP: %+v %+v \n", k, *v) }
+	    fmt.Printf("APP MAP CRAP'D: %+v %+v \n", k, *v) }
 	    }
      return ret 
 }
