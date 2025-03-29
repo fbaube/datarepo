@@ -212,7 +212,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
      //  TIME to EXECUTE 	
      // ================
      if useQueryRow { // "?"
-     	Fprintf(w, "QueryRow: %d / %s \n", ID_toUse, SQL_toUse)
+     	fmt.Fprintf(w, "QueryRow: %d / %s \n", ID_toUse, SQL_toUse)
 	row := pSR.Handle().QueryRow(SQL_toUse, ID_toUse)
 	// ---------------------------------------------------------
 	// What if there is no row in the result, and .Scan() can't
