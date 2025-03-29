@@ -193,8 +193,14 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 	   }
 	   if (anID >= 0) && (pRMbuf != nil ) {
 	       if anID != bufID {
-	       	  return 0, fmt.Errorf(dbOpError + "conflicting ID spec: " +
-		  	 "arg <%d> != buffer's ID <%d>", anID, bufID) 
+	       	  if bufID == 0 {
+		     ermsg := fmt.Sprintf("WARN: Input ID %d != buffer ID 0", anID)
+		     println(ermsg)
+		     fmt.Fprintf(w, ermsg)
+		  } else {
+	 	    return 0, fmt.Errorf(dbOpError + "conflicting ID spec: " +
+		  	 "arg <%d> != buffer's ID <%d>", anID, bufID)
+		  }
 	       }
 	   }
 	   ID_toUse = anID 
