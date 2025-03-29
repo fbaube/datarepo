@@ -237,8 +237,8 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 	panic("Oops, fallthru in SELECT")
 	
      } else { 
-     	fmt.Fprintf(w, "Exec: %d / %s / w %d parms \n",
-		ID_toUse, SQL_toUse, len(CPF_toUse))
+     	fmt.Fprintf(w, "Exec: %d / w %d parms / %s \n",
+		ID_toUse, len(CPF_toUse), SQL_toUse)
 	// It is now ready for Exec()
 	var theRes sql.Result
 	var newID  int64
