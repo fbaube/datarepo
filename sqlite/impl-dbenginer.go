@@ -223,11 +223,12 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 	// If you see this error elsewhere, yer doin' it wrong.
 	// ---------------------------------------------------------
 	e = row.Scan(CPF_toUse...) // _noID // BUT WHAT ABOUT no-WHERE ???
+	fmt.Fprintf(w, "QueryRow: ret: %v \n", e) 
 	switch e {
 	  case sql.ErrNoRows:
-	       return 0, nil // no error, no nRows 
+	       return 0, nil // 0 row, no error
 	  case nil:
-	       return 1, nil // no error, 1 row 
+	       return 1, nil // 1 row, no error 
 	  default:
 		println("SQL ERROR: (" + e.Error() + ") SQL: " + SQL_toUse)
 		return 0, fmt.Errorf(dbOpError + 
@@ -236,6 +237,8 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 	panic("Oops, fallthru in SELECT")
 	
      } else { 
+     	fmt.Fprintf(w, "Exec: %d / %s / w %d parms \n",
+		ID_toUse, SQL_toUse, len(CPF_toUse))
 	// It is now ready for Exec()
 	var theRes sql.Result
 	var newID  int64
@@ -244,14 +247,13 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 		fmt.Fprintf(w, dbOpError + "exec failed: %s", e)
 		return 0, fmt.Errorf(dbOpError + "exec: %w", e) 
 	}
-	
 	if dbOp == "+" { // INSERT 
 	// Used RETURNING to get new ID. 
 	// Call Exec(..) on the stmt, with all column ptrs (except ID) 
 	   newID, e = theRes.LastInsertId()
 	   if e != nil {
 		fmt.Fprintf(w, "engineunique.insert.lastinsertId: failed: %s", e)
-		return 0, fmt.Errorf("engineunique.insert: lastinsertId: %w",e) 
+		return 0, fmt.Errorf("engineunique.insert: lastinsertId: %w", e) 
 		}
 	   fmt.Fprintf(w, "INSERT: OK: LastInsertID: %d \n", newID)
 	   return int(newID), nil 
