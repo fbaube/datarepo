@@ -135,7 +135,10 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 	     SQL_toUse = pStmts.INSERTuniqueID
 	     // We'll get the new ID OK, so don't try
 	     // to rely on hypothetical writeback 
-	     CPF_toUse = CPF_noID 
+	     CPF_toUse = CPF_noID
+	     // USE QueryRow for INSERT! So that LastResultID works
+	     // https://github.com/mattn/go-sqlite3/issues/1140
+	     useQueryRow = true // <==
 	     dbOp1 = "+"
         // ? Fetch, Get, List, Retrieve, Select 
         case "F", "G", "L", "R", "S":
@@ -183,6 +186,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 	if anID > 0 || bufID > 0 { // rather than: >= 0 
 	   return 0, errors.New("EngineUnique: INSERT: unwanted WHERE ID") 
 	   }
+	ID_toUse = -1 
      // else is ?/=/- SELECT/UPDATE/DELETE 
       } else {
 	// Need a search spec: (1) the "anID" int argument, and/or 
@@ -194,7 +198,8 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 	   if (anID >= 0) && (pRMbuf != nil ) {
 	       if anID != bufID {
 	       	  if bufID == 0 {
-		     ermsg := fmt.Sprintf("WARN: Input ID %d != buffer ID 0", anID)
+		     ermsg := fmt.Sprintf("WARN: " +
+		     	     "Input ID %d != buffer ID 0", anID)
 		     println(ermsg)
 		     fmt.Fprintln(w, ermsg)
 		  } else {
@@ -217,8 +222,8 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
      // ================
      //  TIME to EXECUTE 	
      // ================
-     if useQueryRow { // "?"
-     	fmt.Fprintf(w, "QueryRow: %d / %s \n", ID_toUse, SQL_toUse)
+     if useQueryRow { // "?" AND ALSO "+" 
+     	fmt.Fprintf(w, "QueryRow: %s / %d / %s \n", dbOp1, ID_toUse, SQL_toUse)
 	row := pSR.Handle().QueryRow(SQL_toUse, ID_toUse)
 	// ---------------------------------------------------------
 	// What if there is no row in the result, and .Scan() can't
@@ -228,8 +233,9 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 	// You should only see this error if you're using QueryRow().
 	// If you see this error elsewhere, yer doin' it wrong.
 	// ---------------------------------------------------------
-	e = row.Scan(CPF_toUse...) // _noID // BUT WHAT ABOUT no-WHERE ???
-	fmt.Fprintf(w, "QueryRow: ret: %v \n", e) 
+	e = row.Scan(CPF_toUse...) 
+	fmt.Fprintf(w, "QueryRow: ret: %v \n", e)
+	
 	switch e {
 	  case sql.ErrNoRows:
 	       return 0, nil // 0 row, no error
