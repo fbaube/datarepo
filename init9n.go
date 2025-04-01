@@ -55,10 +55,6 @@ var DEFAULT_FILENAME = "m5.db"
 // .
 func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 
-        var repo SimpleRepo
-	// type-checking
-	// var _ repo.SimpleRepo = (*RS.SqliteRepo)(nil)
-
 	var mustAccessTheDB bool
 	var e error
 	// This will always be true, until it is decided
@@ -74,91 +70,69 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 	if p.DB_type == "" {
 	   println("DB: Type is missing: using SQLite.")
 	}
-	
-	// Start by checking on the status of the filename.
-	// NOTE: This assumes that the DB is SQLite, a single file.
-	// Note that a path is used to derive a FILE path.
+
+	// ===================================================
+	// Start by checking on the status of theDB  filename.
+	// NOTE: This assumes the DB is SQLite, a single file.
+	// ===================================================
+	// Derive a FILE path.
+	// ===================
 	var dbFilepath string
-	// println("misc.go: BEFOR:", p.Dir)
 	// NOTE that if p.Dir is "", ResolvePath won't fix it!
 	if p.Dir == "" {
 		p.Dir = "."
 	}
-	// println("misc.go: BEFOR:", p.Dir)
 	dbFilepath = FU.ResolvePath(
 		p.Dir + FU.PathSep + DEFAULT_FILENAME)
 	println("DB: full path:", dbFilepath)
-	errPfx := fmt.Errorf("DB.Init9n(%s):", dbFilepath)
-
+	// ================================
+	// Declare vars and check for file.
+	// ================================
+	errPfx := "db.init9n(" + dbFilepath + "): "
+        var repo SimpleRepo
+	// type-checking
+	// var _ repo.SimpleRepo = (*RS.SqliteRepo)(nil)
 	var fileinfo os.FileInfo
 	filexist, fileinfo, filerror := FU.IsFileAtPath(dbFilepath)
 	if filerror != nil {
-		return nil, fmt.Errorf("%s file error: %w", errPfx, filerror)
+		return nil, fmt.Errorf(errPfx + "file error: %w", filerror)
 	}
-	var shortPath string 
-	shortPath = SU.Tildotted(dbFilepath)
-	var openError error
-	// If the DB already exists already and 
-	// is non-zero then go ahead and open it
-	if filexist {
-		L.L.Info("DB exists: " + shortPath)
-		// If the file is zero-length, it is removed, altho this may
-		// remove some special permissions that were configured
-		if fileinfo.Size() == 0 {
-			L.L.Info("DB is empty: " + shortPath)
-			e = os.Remove(dbFilepath)
-			if e != nil {
-				panic(e)
-			}
-			filexist = false
-		} else {
-		        repo, openError = DB_Manager.OpenAtPath(dbFilepath)
+	var dbShortPath string 
+	dbShortPath = SU.Tildotted(dbFilepath)
+	// =========================================
+	// If it exists already but is zero-len then
+	// remove it, even tho this may remove any
+	// special permissions that were configured.
+	// =========================================
+	if filexist && fileinfo.Size() == 0 { 
+		L.L.Warning("DB exists but 0-len: " + dbShortPath)
+		e = os.Remove(dbFilepath)
+		if e != nil {
+			panic(e)
 		}
+		filexist = false
 	}
+	// ==========================================
 	// Now we have (or will have) a repo and we 
 	// will use it, so provide a DB logging file.
+	// ==========================================
 	dbw, dbe := FU.CreateEmpty("./db.log")
 	if dbe != nil {
 	   L.L.Warning("Cannot open DB logfile ./db.log: %w", dbe)
 	}
-	// We are soon ready to maybe return success, but before we can
-	// do that, we have to be sure to register apptable details.
-	var pSR SimpleRepo
-	pSR, ok := repo.(SimpleRepo)
-	if !ok {
-		panic("init9n.L165")
-		return nil, errors.New("processDBargs: is not sqlite")
-	}
-	
-	if p.TableDetailz == nil || len(p.TableDetailz) == 0 {
-	   println("DB: missing app table details. Aborting.")
-	   return nil, errors.New("Missing app DB table details")
-	}
-	e = pSR.RegisterAppTables("", p.TableDetailz) // DRM.M5_TableDetails)
-	if e != nil {
-		return nil, fmt.Errorf("%s can't register tables: %w", errPfx, e)
-	}
-	
-	// If the DB exists and we want to open
-	// it as-is, i.e. without zeroing it out,
-	// then this is where we return success. 
-	if filexist && repo != nil && !p.DoZeroOut {
-	   	// Some weirdness ? A non-fatal error ? 
-	   	if openError != nil {
-		   L.L.Warning("Expect DB problems: " +
-		   	"DB init got error: %w", openError)
-		}
-		L.L.Info("DB file opened OK: " + shortPath)
-	   	repo.SetLogWriter(dbw)
-		return repo, nil
-	}
-	if !filexist {
+	// ===============================
+	// Now let's get down to business.
+	// ===============================
+	var crearror error 
+	if filexist {
+		repo, crearror = DB_Manager.OpenAtPath(dbFilepath)
+	} else {
 	   	println("DB: Creating anew.")
-		L.L.Info("Creating DB: " + shortPath)
+		L.L.Info("Creating DB: " + dbShortPath)
 		if p.DoZeroOut {
 			L.L.Info("Zeroing out the DB is redundant")
 		}
-		repo, e = DB_Manager.NewAtPath(dbFilepath)
+		repo, crearror = DB_Manager.NewAtPath(dbFilepath)
 		// Now configure it using pragmas
 		ps, pe := repo.DoPragmas(DB_Manager.InitznPragmas())
 		if pe != nil {
@@ -167,27 +141,54 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 			}
 		L.L.Info("Ran init pragmas on DB: " + ps)
 	}
+	if crearror != nil {
+		return nil, fmt.Errorf(errPfx + "DB failure: %w", crearror)
+	}
+	// ======================================
+	// Soon we can maybe return success, but
+	// before that, register apptable details.
+	// ======================================
+	var pSR SimpleRepo
+	pSR, ok := repo.(SimpleRepo)
+	if !ok {
+		// panic("init9n.L155")
+		return nil, errors.New("db.init9n: is not sqlite simplerepo")
+	}
+	if p.TableDetailz == nil || len(p.TableDetailz) == 0 {
+	   println("DB: missing app table details. Aborting.")
+	   return nil, errors.New("Missing app DB table details")
+	}
+	e = pSR.RegisterAppTables("", p.TableDetailz) 
 	if e != nil {
-		return nil, fmt.Errorf("%s DB failure: %w", errPfx, e)
+		return nil, fmt.Errorf(errPfx + "can't register tables: %w", e)
 	}
 	repo.SetLogWriter(dbw)
-	repoAbsPath := repo.Path()
+	// ======================================	
+	// If the DB exists and we want to open
+	// it as-is, i.e. without zeroing it out,
+	// then this is where we return success.
+	// ======================================
+	if filexist && repo != nil && !p.DoZeroOut {
+		L.L.Info("DB file opened OK: " + dbShortPath)
+		return repo, nil
+	}
 	println("DB: status OK.")
-	L.L.Info("DB OK: " + SU.ElideHomeDir(repoAbsPath))
-
+	L.L.Info("DB OK: " + repo.Path())
+	// ===================================
+	// Otherwise, there is a bit more work
+	// to do before we return success.
+	// ===================================
 	if !filexist {
-		// env.SimpleRepo.ForceExistDBandTables()
 		e = pSR.CreateAppTables()
-
 	} else if p.DoZeroOut {
 		L.L.Info("Zeroing out DB (init9nb.go)")
 		_, e := repo.CopyToBackup()
 		if e != nil {
 			panic(e)
 		}
-		pSR.EmptyAppTables()
+		e = pSR.EmptyAppTables()
 	}
-	return repo, nil
+	return repo, e
 }
 
 /*

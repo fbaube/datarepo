@@ -9,7 +9,7 @@ require (
 	github.com/fbaube/fileutils v0.0.0-20250203130830-629d4e4bc31b
 	github.com/fbaube/mlog v0.0.0-20240425064535-3b89e3b28a76
 	github.com/fbaube/stringutils v0.0.0-20250203130909-339670f598f3
-	github.com/mattn/go-sqlite3 v1.14.24
+	github.com/mattn/go-sqlite3 v1.14.25
 )
 
 require (
