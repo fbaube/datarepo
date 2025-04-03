@@ -10,17 +10,19 @@ import (
 	S "strings"
 )
 
-// theMap holds all table schemata passed to RegisterAppTables(..).
+// mapByDispName & mapByStorName holds all table schemata passed
+// to RegisterAppTables(..). Keys are forced to lower case. 
 // Map key is "appname_tablename", where appname is forced to
 // lower case and tablename is taken from the TableDetails.
 // Map key is simply "tablename" if appname was "".
 //
 // Map value is the associated instance of TableDetails.
 // .
-var theMap map[string]*DRM.TableDetails
+var mapByDispName, mapByStorName map[string]*DRM.TableDetails
 
 func init() {
-	theMap = make(map[string]*DRM.TableDetails)
+	mapByDispName = make(map[string]*DRM.TableDetails)
+	mapByStorName = make(map[string]*DRM.TableDetails)
 }
 
 // Interface AppTableSetter is table-related methods for a specified
@@ -34,6 +36,10 @@ func init() {
 // RegisterAppTables processes the schemata of the specified 
 // app's tables, which this interface creates and/or manages. 
 // This includes filling many fields in struct [TableDetails].
+// 
+// It registers them in a singleton map in package datarepo/sqlite.
+// However this func is left as a method of a SimpleRepo so that 
+// future corrections are easier. 
 //
 // Multiple calls to this do not conflict, whether with tables
 // previously specified or not before; if a table name is repeated 
@@ -42,17 +48,17 @@ func init() {
 //  - StorName: the name of the table IN THE DB - a "long name"
 //  - DispName: a short name (3 ltrs!) for use in building up names 
 // .
-func (p *SqliteRepo) RegisterAppTables(appName string, cfg []*DRM.TableDetails) error {
-	L.L.Info("RegisterAppTables: got %d table definitions", len(cfg))
+func (p *SqliteRepo) RegisterAppTables(appName string, pTDs []*DRM.TableDetails) error {
+	L.L.Info("RegisterAppTables: got %d table definitions", len(pTDs))
 	var td *DRM.TableDetails
 	var lcDN, lcSN string 
-	for _, td = range cfg {
+	for _, td = range pTDs {
 	       	lcDN = S.ToLower(td.DispName) 
 		lcSN = S.ToLower(td.StorName)
 		// println("REG TBL DTLS: " + sindex)
-		theMap[lcDN] = td
-		theMap[lcSN] = td
-		L.L.Info("Reg'd the config for app table: " + lcDN + "/" + lcSN)
+		mapByDispName[lcDN] = td
+		mapByStorName[lcSN] = td
+		L.L.Info("Reg'd the config for app table: %s/%s", lcDN, lcSN)
 		// Do schema-related initialisations
 		_ = DRM.GenerateColumnStringsCSV(td)
 		_ = DRM.GenerateStatements(td)
@@ -67,6 +73,9 @@ func (p *SqliteRepo) RegisterAppTables(appName string, cfg []*DRM.TableDetails) 
 // error messages; the requirement could be removed.
 //
 // NOTE: If a table does not exist, it has to be created.
+//
+// NOTE: Errors appeared here because each table was in map twice,
+// under both StorNam and DispName, so that was rolled back. 
 // .
 func (p *SqliteRepo) EmptyAppTables() error {
 	if p.Path() == "" {
@@ -77,31 +86,32 @@ func (p *SqliteRepo) EmptyAppTables() error {
 			"not open", p.Path())
 	}
 	var e error
-	for _, c := range theMap {
-		CTS := "DELETE FROM " + S.ToLower(c.StorName) + ";"
+	for _, td := range mapByStorName {
+		CTS := "DELETE FROM " + S.ToLower(td.StorName) + ";"
 		// p.Handle().MustExec(CTS)
 		_, err := p.Exec(CTS)
-		if err != nil {
-			strerr := err.Error()
-			if S.HasPrefix(strerr, "no such table:") {
-				L.L.Info("No such table: " + c.StorName)
-			// OOPS! Create it!
-			e2 := p.createAppTable(c)
-			if e2 != nil {
-			   return fmt.Errorf("EmptyAppTbls.CreTbl failed: %w", e2)
-			// panic(e2.Error())
-			   }
-			} else {
-				L.L.Error("reposqlite.emptyAllTbls: " + strerr)
-				return fmt.Errorf(
-					"sqliterepo.emptyAppTbls(%s) "+
-						"failed: %w", p.Path(), e)
-			}
+		if err == nil {
+			L.L.Info("Deleted all from table: " +
+				S.ToLower(td.StorName))
+			continue
+		}
+		strerr := err.Error()
+		if S.HasPrefix(strerr, "no such table:") {
+			L.L.Info("No such table: " + td.StorName)
+		// OOPS! Create it!
+		e2 := p.createAppTable(td)
+		if e2 != nil {
+		   return fmt.Errorf("EmptyAppTbls.CreTbl failed: %w", e2)
+		// panic(e2.Error())
+		   }
 		} else {
-			L.L.Info("Deleted all from table: " + S.ToLower(c.StorName))
+			L.L.Error("reposqlite.emptyAllTbls: " + strerr)
+			return fmt.Errorf(
+				"sqliterepo.emptyAppTbls(%s) "+
+					"failed: %w", p.Path(), e)
 		}
 	}
-	L.L.Info("SQLAR not emptied, utils/repo/sqlite/impl_apptables.go L83")
+	L.L.Info("SQLAR not emptied, utils/repo/sqlite/impl_apptables.go L109")
 	if e != nil {
 		return fmt.Errorf(
 			"sqliterepo.emptyapptables(%s) failed: %w", p.Path(), e)
@@ -125,7 +135,7 @@ func (p *SqliteRepo) CreateAppTables() error {
 	// println("CreateAppTables")
 	// func (pDB SqliteRepo) CreateTable_sqlite(ts U.TableDetails) error {
 	// FIXME Check table name prefix (e.g. "mmmc_") ?
-	for _, td := range theMap {
+	for _, td := range mapByStorName {
 		e := p.createAppTable(td)
 		if e != nil {
 			// FIXME
@@ -158,8 +168,9 @@ func (p *SqliteRepo) createAppTable(td *DRM.TableDetails) error {
 	_, err := p.Exec(CTS)
 	if err != nil {
 		// panic(err)
-		return fmt.Errorf("CreAppTbl failed: %w", err)
+		return fmt.Errorf("CreAppTbl(%s) failed: %w", td.StorName, err)
 	}
+	fmt.Printf("CreAppTbl(%s) OK! \n", td.StorName)
 	/*
 	ss, e := p.DumpTableSchema_sqlite(td.StorName)
 	if e != nil {
@@ -173,13 +184,25 @@ func (p *SqliteRepo) createAppTable(td *DRM.TableDetails) error {
 	return nil
 }
 
-func GetTableDetailsByString(s string) *DRM.TableDetails {
+func GetTableDetailsByStorName(s string) *DRM.TableDetails {
      s = S.ToLower(s) 
   // println("GetTableDetailsByString: " + s)
-     ret := theMap[S.ToLower(s)]
+     ret := mapByStorName[S.ToLower(s)]
      if ret == nil {
-     	for k, v := range theMap {
+     	for k, v := range mapByStorName {
 	    fmt.Printf("APP MAP CRAP'D: %+v %+v \n", k, *v) }
 	    }
      return ret 
 }
+
+func GetTableDetailsByDispName(s string) *DRM.TableDetails {
+     s = S.ToLower(s) 
+  // println("GetTableDetailsByString: " + s)
+     ret := mapByDispName[S.ToLower(s)]
+     if ret == nil {
+     	for k, v := range mapByDispName {
+	    fmt.Printf("APP MAP CRAP'D: %+v %+v \n", k, *v) }
+	    }
+     return ret 
+}
+

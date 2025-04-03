@@ -90,7 +90,10 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
      var CPF_noID, CPF_wID, CPF_toUse []any
 
      // Fetch the table's details 
-     pTD = GetTableDetailsByString(tableName)
+     pTD = GetTableDetailsByStorName(tableName)
+     if pTD == nil {
+     	pTD = GetTableDetailsByDispName(tableName)
+     }
      if pTD == nil {
      	// FIXME err msgs 
      	s := "NO TblDtls FOR: " + tableName

@@ -100,8 +100,8 @@ func GenerateColumnStringsCSV(pTD *TableDetails) error {
 	}
      pTD.CSVs.UpdateNames = S.TrimSuffix(sbUpdtNams.String(), ", ")
 
-     println(pTD.TableSummary.StorName +
-     	"[" + strconv.Itoa(len(pTD.ColumnSpecs)) + "]:\n" + pTD.CSVs.String())
+//   println(pTD.TableSummary.StorName +
+//   	"[" + strconv.Itoa(len(pTD.ColumnSpecs)) + "]:\n" + pTD.CSVs.String())
 
      return nil
 }

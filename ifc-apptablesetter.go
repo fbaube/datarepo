@@ -30,10 +30,11 @@ type AppTableSetter interface {
 	// schema(ta); if the tables exist, they are emptied of data. 
 	CreateAppTables() error
 	
-	// GetTableDetailsByString is case-insensitive.
-	// Also, we do not define it here, because it is not
-	// DB-specific, it is expected for all impementations
-	// of SimpleRepo and interface AppTableSeteter.
-	// GetTableDetailsByString(string) *DRM.TableDetails
+	// GetTableDetailsBy(Stor|Disp)Name are case-insensitive.
+	// Also, we do not define them here, because they are not
+	// DB-specific, they are expected for all impementations
+	// of SimpleRepo and interface AppTableSetter.
+	// GetTableDetailsByStorName(string) *DRM.TableDetails
+	// GetTableDetailsByDispName(string) *DRM.TableDetails
 }
 
