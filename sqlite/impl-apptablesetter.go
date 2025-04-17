@@ -51,18 +51,22 @@ func init() {
 func (p *SqliteRepo) RegisterAppTables(appName string, pTDs []*DRM.TableDetails) error {
 	L.L.Info("RegisterAppTables: got %d table definitions", len(pTDs))
 	var td *DRM.TableDetails
-	var lcDN, lcSN string 
-	for _, td = range pTDs {
+	var lcDN, lcSN string
+	var i int
+	for i, td = range pTDs {
 	       	lcDN = S.ToLower(td.DispName) 
 		lcSN = S.ToLower(td.StorName)
-		// println("REG TBL DTLS: " + sindex)
+		println("REG TBL DTLS:", lcDN, lcSN)
 		mapByDispName[lcDN] = td
 		mapByStorName[lcSN] = td
-		L.L.Info("Reg'd the config for app table: %s/%s", lcDN, lcSN)
+		L.L.Info("Reg'd config for app table [%d]: %s/%s",
+			i, lcDN, lcSN)
 		// Do schema-related initialisations
 		_ = DRM.GenerateColumnStringsCSV(td)
 		_ = DRM.GenerateStatements(td)
 	}
+	fmt.Printf("MAPS lens stor<%d> disp<%d> \n",
+		len(mapByStorName), len(mapByDispName))
 	return nil
 } 
 
@@ -111,7 +115,7 @@ func (p *SqliteRepo) EmptyAppTables() error {
 					"failed: %w", p.Path(), e)
 		}
 	}
-	L.L.Info("SQLAR not emptied, utils/repo/sqlite/impl_apptables.go L109")
+	L.L.Info("emptyapptables: not SQLAR, sqlite/impl-apptablesetter L114")
 	if e != nil {
 		return fmt.Errorf(
 			"sqliterepo.emptyapptables(%s) failed: %w", p.Path(), e)
@@ -187,10 +191,11 @@ func (p *SqliteRepo) createAppTable(td *DRM.TableDetails) error {
 func GetTableDetailsByStorName(s string) *DRM.TableDetails {
      s = S.ToLower(s) 
   // println("GetTableDetailsByString: " + s)
-     ret := mapByStorName[S.ToLower(s)]
-     if ret == nil {
+     ret, ok := mapByStorName[s]
+     if !ok { // ret == nil {
+	fmt.Printf("MAP len stor<%d> \n", len(mapByStorName))
      	for k, v := range mapByStorName {
-	    fmt.Printf("APP MAP CRAP'D: %+v %+v \n", k, *v) }
+	    fmt.Printf("\nMAP StorName <%s>: %+v %+v \n", s, k, *v) }
 	    }
      return ret 
 }
@@ -198,10 +203,11 @@ func GetTableDetailsByStorName(s string) *DRM.TableDetails {
 func GetTableDetailsByDispName(s string) *DRM.TableDetails {
      s = S.ToLower(s) 
   // println("GetTableDetailsByString: " + s)
-     ret := mapByDispName[S.ToLower(s)]
-     if ret == nil {
+     ret, ok := mapByDispName[s]
+     if !ok { // ret == nil {
+	fmt.Printf("MAP len disp<%d> \n", len(mapByDispName))
      	for k, v := range mapByDispName {
-	    fmt.Printf("APP MAP CRAP'D: %+v %+v \n", k, *v) }
+	    fmt.Printf("\nMAP DispName <%s>: %+v %+v \n", s, k, *v) }
 	    }
      return ret 
 }

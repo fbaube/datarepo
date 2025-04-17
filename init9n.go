@@ -157,7 +157,7 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 		   return repo, nil
 		}
 		// p.DoZeroOut 
-		L.L.Info("(backing up and) zeroing out DB")
+		L.L.Info("backing up and zeroing out DB")
 		_, e := repo.CopyToBackup()
 		if e != nil {
 			panic(e)
@@ -203,17 +203,4 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 	e = repo.CreateAppTables()
 	return repo, e
 }
-
-/*
-// inputExts more than covers the file types associated with the LwDITA spec.
-// Of course, when we check for them we do so case-insensitively.
-// Ones we don't handle don't go here, e.g. ".adoc" Asciidoc.
-var inputExts = []string{
-	".dita", ".map", ".ditamap", ".xml",
-	".md", ".markdown", ".mdown", ".mkdn", 
-	".html", ".htm", ".xhtml", ".png", ".gif", ".jpg"}
-
-// AllGLinks gathers all GLinks in the current run's input set.
-var AllGLinks mcfile.GLinks
-*/
 
