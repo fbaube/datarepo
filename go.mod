@@ -6,10 +6,10 @@ toolchain go1.24.0
 
 require (
 	github.com/fbaube/dsmnd v0.0.0-20250305202727-066656bb5c6a
-	github.com/fbaube/fileutils v0.0.0-20250203130830-629d4e4bc31b
+	github.com/fbaube/fileutils v0.0.0-20250421105025-accbd6796679
 	github.com/fbaube/mlog v0.0.0-20240425064535-3b89e3b28a76
-	github.com/fbaube/stringutils v0.0.0-20250203130909-339670f598f3
-	github.com/mattn/go-sqlite3 v1.14.25
+	github.com/fbaube/stringutils v0.0.0-20250417165306-e5b66aefb1de
+	github.com/mattn/go-sqlite3 v1.14.28
 )
 
 require (
@@ -23,7 +23,7 @@ require (
 	github.com/mattn/go-isatty v0.0.20 // indirect
 	github.com/mgutz/str v1.2.0 // indirect
 	github.com/nbio/xml v0.0.0-20250325194151-57e639e7ba73 // indirect
-	golang.org/x/exp v0.0.0-20250305212735-054e65f0b394 // indirect
-	golang.org/x/sys v0.31.0 // indirect
+	golang.org/x/exp v0.0.0-20250408133849-7e4ce0ab07d0 // indirect
+	golang.org/x/sys v0.32.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
