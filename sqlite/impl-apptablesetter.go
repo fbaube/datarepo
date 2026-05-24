@@ -56,7 +56,7 @@ func (p *SqliteRepo) RegisterAppTables(appName string, pTDs []*DRM.TableDetails)
 	for i, td = range pTDs {
 	       	lcDN = S.ToLower(td.DispName) 
 		lcSN = S.ToLower(td.StorName)
-		println("REG TBL DTLS:", lcDN, lcSN)
+		// println("REG TBL DTLS:", lcDN, lcSN)
 		mapByDispName[lcDN] = td
 		mapByStorName[lcSN] = td
 		L.L.Info("Reg'd config for app table [%d]: %s/%s",
@@ -72,9 +72,9 @@ func (p *SqliteRepo) RegisterAppTables(appName string, pTDs []*DRM.TableDetails)
 
 // EmptyAllTables deletes (app-level) data from the app's tables
 // but does not delete any tables (i.e. no DROP TABLE are done).
-// The DB should be open when it is called (so that the connection
-// object exists). The DB should have a path, but mainly just for
-// error messages; the requirement could be removed.
+// The DB should be open when this func is called, so that the 
+// connection object exists. The DB should have a path, but 
+// mainly for error messages; the requirement could be removed.
 //
 // NOTE: If a table does not exist, it has to be created.
 //

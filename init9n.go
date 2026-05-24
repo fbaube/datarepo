@@ -84,7 +84,7 @@ func (p *Init9nArgs) ProcessInit9nArgs() (SimpleRepo, error) {
 	}
 	dbFilepath = FU.ResolvePath(
 		p.Dir + FU.PathSep + DEFAULT_FILENAME)
-	println("DB: full path:", dbFilepath)
+	println("DB path:", dbFilepath)
 	// ================================
 	// Declare vars and check for file.
 	// ================================
