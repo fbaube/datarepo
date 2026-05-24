@@ -65,8 +65,8 @@ func (p *SqliteRepo) RegisterAppTables(appName string, pTDs []*DRM.TableDetails)
 		_ = DRM.GenerateColumnStringsCSV(td)
 		_ = DRM.GenerateStatements(td)
 	}
-	fmt.Printf("MAPS lens stor<%d> disp<%d> \n",
-		len(mapByStorName), len(mapByDispName))
+	// fmt.Printf("MAPS lens stor<%d> disp<%d> \n",
+	//	len(mapByStorName), len(mapByDispName))
 	return nil
 } 
 
