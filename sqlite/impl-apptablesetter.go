@@ -193,9 +193,9 @@ func GetTableDetailsByStorName(s string) *DRM.TableDetails {
   // println("GetTableDetailsByString: " + s)
      ret, ok := mapByStorName[s]
      if !ok { // ret == nil {
-	fmt.Printf("MAP len stor<%d> \n", len(mapByStorName))
+	// fmt.Printf("MAP len stor<%d> \n", len(mapByStorName))
      	for k, v := range mapByStorName {
-	    fmt.Printf("\nMAP StorName <%s>: %s %s \n", s, k, v.DispName)
+	    L.L.Info("DB map StorName <%s>: %s %s \n", s, k, v.DispName)
 	    }
 	}
      return ret 
