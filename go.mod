@@ -1,13 +1,13 @@
 module github.com/fbaube/datarepo
 
-go 1.27.1
+go 1.27.3
 
 require (
-	github.com/fbaube/dsmnd v0.0.0-20260915164011-625e12f2575f
-	github.com/fbaube/fileutils v0.0.0-20260524182024-38a64571b887
+	github.com/fbaube/dsmnd v0.0.0-20261113173103-6353600e4d91
+	github.com/fbaube/fileutils v0.0.0-20261114131124-766441edbf44
 	github.com/fbaube/mlog v0.0.0-20260906153105-a92fb895decf
-	github.com/fbaube/stringutils v0.0.0-20260511123541-ab996b555f8d
-	github.com/mattn/go-sqlite3 v1.14.52
+	github.com/fbaube/stringutils v0.0.0-20261104124143-eebd30447f9d
+	github.com/mattn/go-sqlite3 v1.14.53
 )
 
 require (
@@ -21,6 +21,6 @@ require (
 	github.com/mattn/go-isatty v0.0.24 // indirect
 	github.com/mgutz/str v1.2.0 // indirect
 	github.com/nbio/xml v0.0.0-20260302224236-9f64bb3b5a9e // indirect
-	golang.org/x/sys v0.49.0 // indirect
+	golang.org/x/sys v0.50.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

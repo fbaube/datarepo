@@ -16,6 +16,14 @@ import (
 // tipicly they all point to the same single object.
 //
 // A SimpleRepo is expected to implement DBBackups.
+//
+// In a WIT-based host/client scheme, some ptrs
+// have to become opaque "resource"s, and there
+// must be decisions about which functionalities
+// exaxtly belong on the server and which at the
+// client. If we assume multiple clients then a
+// host should manage itself. A client with admin
+// privileges should be able to manage the server. 
 // .
 type SimpleRepo interface {
      // Entity is the Repo's basics: type, path, etc.
