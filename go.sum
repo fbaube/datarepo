@@ -18,6 +18,10 @@ github.com/fbaube/fileutils v0.0.0-20261113174227-f6eed5922451 h1:yHUbdcq10Vwc0e
 github.com/fbaube/fileutils v0.0.0-20261113174227-f6eed5922451/go.mod h1:4odv6RTURYQaJBX/K7o5dCa3w+aW9sKctKN+GDd9ePU=
 github.com/fbaube/fileutils v0.0.0-20261114131124-766441edbf44 h1:UNcwFkiYNDFvhm0qbN1Ca1q0HxDcBgnOpWpli3PLCzM=
 github.com/fbaube/fileutils v0.0.0-20261114131124-766441edbf44/go.mod h1:4odv6RTURYQaJBX/K7o5dCa3w+aW9sKctKN+GDd9ePU=
+github.com/fbaube/fileutils v0.0.0-20261115093126-97e8e9402ef0 h1:C5iqle9YFK51oTl3hUh7nbbcDnpxecIIiRcsoYQMLdQ=
+github.com/fbaube/fileutils v0.0.0-20261115093126-97e8e9402ef0/go.mod h1:4odv6RTURYQaJBX/K7o5dCa3w+aW9sKctKN+GDd9ePU=
+github.com/fbaube/fileutils v0.0.0-20261118084837-e363fbbe2fb5 h1:WBbA8lVWTOJUYxYQD6YmHTb8UpxJlJdz75qPNwfKEnE=
+github.com/fbaube/fileutils v0.0.0-20261118084837-e363fbbe2fb5/go.mod h1:4odv6RTURYQaJBX/K7o5dCa3w+aW9sKctKN+GDd9ePU=
 github.com/fbaube/humanbytes v0.0.0-20250119091546-d58fbfdd444c h1:k6VDhhlL+FI8nrBAwQDoXyPEKN+MuOtSMaDJfzwnA7E=
 github.com/fbaube/humanbytes v0.0.0-20250119091546-d58fbfdd444c/go.mod h1:WUS3tn4t+FViNsl4VOqYiV51cJNIIeMjLI9fOfm+Ug8=
 github.com/fbaube/logutils v0.0.0-20250316184850-0569e5bc6b6d h1:hH8uBNU6Vasxh9Pf3bzNdA+JFAtckHavpQf+kpmvHC8=
@@ -30,6 +34,8 @@ github.com/fbaube/stringutils v0.0.0-20260511123541-ab996b555f8d h1:aVchLvgOjt7Z
 github.com/fbaube/stringutils v0.0.0-20260511123541-ab996b555f8d/go.mod h1:prND58zPOTp1HSQ59bQl4w239JV0KNPYQZnNDRu5gjk=
 github.com/fbaube/stringutils v0.0.0-20261104124143-eebd30447f9d h1:G/uKZWTrHHSAQLEkbL86Zo7/07B9zx6yu/oBXPaltz0=
 github.com/fbaube/stringutils v0.0.0-20261104124143-eebd30447f9d/go.mod h1:z+kQKv0VhbApMwwOAWmJ2qC80Ud3PrzX9ESBZ8MNuaQ=
+github.com/fbaube/stringutils v0.0.0-20261122143006-48df54fb07e4 h1:jIFtggmyInD3JbKD/PtedkoP5h3wLxjhOsDqOjrAANg=
+github.com/fbaube/stringutils v0.0.0-20261122143006-48df54fb07e4/go.mod h1:vVg5G3xePaRhqumXFTRnbsGuWZZfqgWlUin+R7sQGpA=
 github.com/fbaube/wasmutils v0.0.0-20251129222829-80044fd986ff h1:HzGot5LeI+ls9FEXSoGEKF8YnJ+ajVFvgysHI+zPoP0=
 github.com/fbaube/wasmutils v0.0.0-20251129222829-80044fd986ff/go.mod h1:0toxIvnxI8IGqg8bRnvbHiVCWlplqXAlrbGNrmCgtMA=
 github.com/mattn/go-colorable v0.1.15 h1:+u9SLTRGnXv73cEsnsmoZBom+dMU88B2M0aDcWy0/jY=
