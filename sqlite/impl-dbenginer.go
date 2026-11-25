@@ -87,7 +87,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
      var useQueryRow bool // true only for SELECT 
      var SQL_toUse string // , WHERE_toUse string FIXME FIXME FIXME
      // Table's column-pointers funcs 
-     var CPF_noID, CPF_wID, CPF_toUse []any
+     var CPF []any
 
      // Fetch the table's details 
      pTD = GetTableDetailsByStorName(tableName)
@@ -106,10 +106,9 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
      if pCSVs  == nil { panic("nil TableDetails ColumnStrings") }
      if pStmts == nil { panic("nil TableDetails Statements") }
      
-     // These CPF vars cannot be pre-generated during initialization
+     // This CPF cannot be pre-generated during initialization
      // because the ptrs depend on the particular value of pRMbuf.
-     CPF_noID = pTD.ColumnPtrsFunc(pRMbuf, false)   // no ID column 
-     CPF_wID  = pTD.ColumnPtrsFunc(pRMbuf, true)   // with ID column
+     CPF = pTD.ColumnPtrsFunc(pRMbuf) 
 
      // Log info about the columns 
      // writeFieldDebugInfo(w, pTD)
@@ -139,9 +138,6 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 	// + Add, Create, Insert, New
 	case "A", "C", "I", "N":
 	     SQL_toUse = pStmts.INSERTuniqueID
-	     // We'll get the new ID OK, so don't try
-	     // to rely on hypothetical writeback 
-	     CPF_toUse = CPF_noID
 	     // USE QueryRow for INSERT! So that LastResultID works ? No.
 	     // https://github.com/mattn/go-sqlite3/issues/1140
 	     // useQueryRow = true // <==
@@ -149,16 +145,11 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
         // ? Fetch, Get, List, Retrieve, Select 
         case "F", "G", "L", "R", "S":
 	     SQL_toUse = pStmts.SELECTuniqueID
-	     // WHERE uses ID, so don't NEED to pass
-	     // via CPF, but let's use the writeback 
-	     CPF_toUse = CPF_wID
 	     useQueryRow = true // <==
 	     dbOp1 = "?"
 	// = Modify, Update
 	case "M", "U":
 	     SQL_toUse = pStmts.UPDATEuniqueID
-	     // WHERE uses ID, and no writeback, so don't pass via CPF 
-	     CPF_toUse = CPF_noID
 	     dbOp1 = "="
 	// - Delete, Discard, Drop
 	case "D":
@@ -181,7 +172,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
      var ID_toUse int 
      if pRMbuf != nil {
      	var cpf []any
-	cpf = pTD.ColumnPtrsFunc(pRMbuf, true)
+	cpf = pTD.ColumnPtrsFunc(pRMbuf)
 	cpfid := (cpf [0]).(*int)
 	bufID = *cpfid
      }
@@ -238,7 +229,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 	// You should only see this error if you're using QueryRow().
 	// If you see this error elsewhere, yer doin' it wrong.
 	// ---------------------------------------------------------
-	e = row.Scan(CPF_toUse...) 
+	e = row.Scan(CPF...) 
 	fmt.Fprintf(w, "QueryRow: ret: %v \n", e)
 	
 	switch e {
@@ -257,11 +248,11 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 	var newID int64
      // if dbOp1 == "+" { CPF_toUse = append(CPF_toUse, &newID) } 
      	fmt.Fprintf(w, "Exec: %d / w %d parms / %s \n",
-		ID_toUse, len(CPF_toUse), SQL_toUse)
+		ID_toUse, len(CPF), SQL_toUse)
 	// It is now ready for Exec()
 	var theRes sql.Result
 	// FIXME: Transaction, if active ?
-	theRes, e = pSR.Handle().Exec(SQL_toUse, CPF_toUse...)
+	theRes, e = pSR.Handle().Exec(SQL_toUse, CPF...)
 	if e != nil {
 		fmt.Fprintf(w, dbOpError + "exec failed: %s", e)
 		return 0, fmt.Errorf(dbOpError + "exec: %w", e) 
@@ -291,7 +282,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 
 func writeFieldDebugInfo(w io.Writer, pTD *DRM.TableDetails) {
      	// TODO: Check the correctness of this! It seemed to overrun with "true"
-	CPF := pTD.ColumnPtrsFunc(pTD.NewInstance(), false) // true) // with ID column
+	CPF := pTD.ColumnPtrsFunc(pTD.NewInstance()) 
 	for iCol, cp := range CPF {
 	    sn := pTD.ColumnSpecs[iCol].StorName
 	    dt := D.SemanticFieldType(pTD.ColumnSpecs[iCol].Datatype)

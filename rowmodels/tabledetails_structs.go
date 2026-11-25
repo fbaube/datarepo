@@ -10,7 +10,7 @@ import(
 // is also a method on interface [RowModel] with the signature: 
 // (p RowModel) ColumnPtrsMethod(bool) []any
 
-type columnPtrsFunc func(RowModel, bool) []any 
+type columnPtrsFunc func(RowModel) []any 
 // type columnPtrsMthd func(bool) []any 
 
 type NewInstanceFunc func() RowModel
