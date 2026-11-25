@@ -8,7 +8,7 @@ type RowModelUdx interface {
      // Note that ColumnPtrsMethod is a method,
      // and/but while there is also a func with 
      // signature ColumnPtrsFunc(RowModel, bool) 
-     ColumnPtrsMethod(l) []any
+     ColumnPtrsMethod() []any
      // We should constrain it to be a ptr: 
      // *T
      // The generic REST interface takes a ptr to a
