@@ -6,33 +6,36 @@ import(
 	"fmt"
 	"errors"
 	"io"
+    "uuid"
 	"database/sql"
 	S "strings"
+	"github.com/fbaube/nork"
 	D "github.com/fbaube/dsmnd"
 	// DRP "github.com/fbaube/datarepo"
 	DRM "github.com/fbaube/datarepo/rowmodels"
 )
 
 // EngineUnique acts on a single DB record, based on the
-// value of the primary key (except of course for INSERT).
+// value of the UUID v7 primary key; this includes INSERT,
+// because we assign the UUID before inserting.
 //
-// (It was thought that instead of using only the ID, there
-// could be a WHERE clause that uses any column specified to
-// be UNIQUE, but actually that approach makes no sense.)
+//  - Inputs are calling arguments DB-Op and UUIDv7 and
+//    maybe the buffer at calling argument *RowModel;
+//    UUIDv7 must include the DB table name 
+//  - Ouputs are return value error (nil is success) and 
+//    maybe  the buffer at calling argument *RowModel 
 //
-// The basic signature is (int,error) = func(op,table,int,buffer):
+// The basic signature is (error) = func(op,UUIDv7,*RowModel):
 // One of four basic actions is performed (listed as SQL/CRUD/HTTP):
-//  - INSERT / Create / POST (record in) (returns new-ID)
-//  - UPDATE / Update / PUT  (record in) (returns 0/1)
-//  - SELECT / Retriv / GET      (ID in) (returns 0/1 + record) 
-//  - DELETE / Delete / DELETE   (ID in) (returns 0/1)
-//  - let nAR = nr of records affected 
-//  - (newID,e)  = insert(0,inbuffer)  // optimize for use in batches 
-//  - (nAR,e) = update(anID,inbuffer)  // anID can be -1, else match buffer's
-//  - (nAR,e) = select(anID,outbuffer) // anID >= 0
-//  - (nAR,e) = delete(anID,nil)       // anID >= 0; buffer OK, then ID's match
-// 
-// It takes four input arguments:
+//  - INSERT / Create / POST   (record in) 
+//  - UPDATE / Update / PUT    (record in) 
+//  - SELECT / Retriv / GET    (record out; *Rowmodel has nork.NilUUID if not found)
+//  - DELETE / Delete / DELETE (record in - mandatory for now) 
+//  - For UPDATE and DELETE,  calling argument UUID must
+//    match the UUID in the *Rowmodel, and the UUID must
+//    include the DB table name; otherwise the func panics. 
+//
+// OBSOLETE: It takes four input arguments:
 //  - The DB operation, one of the four listed above; the dbOp is
 //    specified by the first letter (only!) of the argument dbOp
 //  - The name of the DB table (case-insensitive)
@@ -45,11 +48,6 @@ import(
 //  - Note that the buffer pointer is an interface, implemented by a pointer 
 //    to a struct; this may be usable by GO generics
 //
-// It returns two values:
-//  - An error: if it is non-nil, the other (i.e. int) return value is invalid
-//  - An int that is (if INSERT) the newly-added row ID (else) 0 or 1 to
-//    indicate how many records were (i.e. whether a record was) affected.
-//
 // If the call to this func is inside a Transaction,
 // we probably need to make it available to this func.
 // 
@@ -57,10 +55,7 @@ import(
 // by the first return value (the int), NOT by the second return value 
 // (the error, which is reserved for when the DB rejects the SQL.
 //
-// NOTE: If anID >= 0 and buffer is non-nil, and anID does not match the ID
-// of the record in the buffer, the function panics. 
-//
-// NOTE: Also implement COUNT(*) ? Perhaps as "K" = Kount. 
+// NOTE: Also implement COUNT(*) ? Perhaps as DB Op "K" = Kount. 
 //
 // TODO: TD.pCSVs could also use DB.Prepare to gather sql.Stmt's, but then we
 // have to pass in a Connection, which screws up modularity pretty severely.
@@ -71,13 +66,17 @@ import(
 // https://pkg.go.dev/database/sql#Result
 // RowsAffected returns the number of rows affected by an update, insert,
 // or delete. Not every DB or driver supports it. [altho mattn/SQLite does.]
-// RowsAffected() (int64, error)
 //
 // NOTE: When writing the multi-row version of this,
 // be sure to call Rows.Cloe()
 // . 
-func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRMbuf DRM.RowModel) (int, error) {
+// func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName
+//       string, anID int, pRMbuf DRM.RowModel) (int, error)  
+func (pSR *SqliteRepo) EngineUnique(dbOp string, u *uuid.UUID, pRMbuf DRM.RowModel) error {
 
+     if u == nil || *u == nork.NilUUID || *u != *pRMbuf.UUID() {
+        panic("EngineUnique got bad inputs")
+     }
      var pTD    *DRM.TableDetails
      var pCSVs  *DRM.ColumnStringsCSV
      var pStmts *DRM.Statements
@@ -89,6 +88,9 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
      // Table's column-pointers funcs 
      var CPF []any
 
+     var tableName string
+     tableName = nork.TableNameInUUID(*u) // FIXME: Is it OK Ascii ? 
+
      // Fetch the table's details 
      pTD = GetTableDetailsByStorName(tableName)
      if pTD == nil {
@@ -98,8 +100,8 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
      	// FIXME err msgs 
      	s := "NO TblDtls FOR: " + tableName
      	println(s)
-	return 0, errors.New(s) 
-     }
+	    errors.New(s) 
+    }
      // Fill in convenience vars 
      pCSVs  = pTD.CSVs
      pStmts = pTD.Stmts
@@ -159,7 +161,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 	case "K":
 	     dbOp1 = "#"
 	default:
-	return 0, errors.New("engineunique: bad dbOp: " + dbOp) 
+	return errors.New("engineunique: bad dbOp: " + dbOp) 
      }
 
      dbOpString := dbOp + "(" + dbOp1 + ")"
@@ -173,7 +175,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
      if pRMbuf != nil {
      	var cpf []any
 	cpf = pTD.ColumnPtrsFunc(pRMbuf)
-	cpfid := (cpf [0]).(*int)
+	cpfid := (cpf [0]).(*uuid.UUID)
 	bufID = *cpfid
      }
      // Check re. WHERE ID spec and/or input/output buffer.
@@ -181,7 +183,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
      if dbOp1 == "+" || dbOp1 == "#" {
      	// Allow the zero value :-D 
 	if anID > 0 || bufID > 0 { // rather than: >= 0 
-	   return 0, errors.New("EngineUnique: INSERT: unwanted WHERE ID") 
+	   return errors.New("EngineUnique: INSERT: unwanted WHERE ID") 
 	   }
 	ID_toUse = -1 
      // else is ?/=/- SELECT/UPDATE/DELETE 
@@ -189,7 +191,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 	// Need a search spec: (1) the "anID" int argument, and/or 
 	// (2) the "pRMbuf" buffer argument (where check for an ID).
 	   if (anID == -1) && (pRMbuf == nil) {
-	       return 0, errors.New(dbOpError + 
+	       return errors.New(dbOpError + 
 		  "missing search spec (no WHERE ID spec or buffer with ID") 
 	   }
 	   if (anID >= 0) && (pRMbuf != nil ) {
@@ -200,7 +202,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 		     println(ermsg)
 		     fmt.Fprintln(w, ermsg)
 		  } else {
-	 	    return 0, fmt.Errorf(dbOpError + "conflicting ID spec: " +
+	 	    return fmt.Errorf(dbOpError + "conflicting ID spec: " +
 		  	 "arg <%d> != buffer's ID <%d>", anID, bufID)
 		  }
 	       }
@@ -209,7 +211,7 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
  	// If UPDATE, need an  input buffer 
  	// If SELECT, need an output buffer 
 	   if (dbOp1 != "-") && (pRMbuf == nil) {
-	    	return 0, errors.New(dbOpError + "missing buffer") 
+	    	return errors.New(dbOpError + "missing buffer") 
 	   }
 	   
      }
@@ -234,9 +236,10 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName string, anID int, pRM
 	
 	switch e {
 	  case sql.ErrNoRows:
-	       return 0, nil // 0 row, no error
+           pRMbuf.UUID = nork.NilUUID
+	       return nil // no row, no error
 	  case nil:
-	       return 1, nil // 1 row, no error 
+	       return nil // 1 row, no error 
 	  default:
 		println("SQL ERROR: (" + e.Error() + ") SQL: " + SQL_toUse)
 		return 0, fmt.Errorf(dbOpError + 

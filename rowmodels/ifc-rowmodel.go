@@ -1,8 +1,13 @@
 package rowmodels
 
+import(
+//  "uuid"
+)
+
 // RowModel is implemented by ptrs-to-structs in package
 // [github.com/fbaube/m5db] that use a UUID v7 as primary key.
 type RowModel interface {
+  // UUID() *uuid.UUID // Oops - no UUID at this level 
      TableDetails() TableDetails 
 //    ColumnNamesCsv(bool) string
      // Note that ColumnPtrsMethod is a method,
