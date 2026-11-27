@@ -149,10 +149,11 @@ type TableDetails struct {
 // [datarepo.DBEnginer].
 // .
 type Statements struct {
-     	INSERTuniqueID string
+    INSERTuniqueID string
 	SELECTuniqueID string
 	UPDATEuniqueID string
 	DELETEuniqueID string 
+	 COUNTuniqueID string 
 }
 
 // ColumnStringsCSV stores strings useful for composing SQL

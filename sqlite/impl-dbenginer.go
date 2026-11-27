@@ -6,36 +6,53 @@ import(
 	"fmt"
 	"errors"
 	"io"
-    "uuid"
 	"database/sql"
 	S "strings"
-	"github.com/fbaube/nork"
+	"github.com/fbaube/oid"
 	D "github.com/fbaube/dsmnd"
-	// DRP "github.com/fbaube/datarepo"
 	DRM "github.com/fbaube/datarepo/rowmodels"
 )
 
-// EngineUnique acts on a single DB record, based on the
-// value of the UUID v7 primary key; this includes INSERT,
-// because we assign the UUID before inserting.
+// EngineUnique acts on one DB record. All three arguments
+// are required, and altho the pointers must be non-nil,
+// requirements on their contents depend on which dbOp.
 //
-//  - Inputs are calling arguments DB-Op and UUIDv7 and
-//    maybe the buffer at calling argument *RowModel;
-//    UUIDv7 must include the DB table name 
-//  - Ouputs are return value error (nil is success) and 
-//    maybe  the buffer at calling argument *RowModel 
+// Input arguments:
+//  - dbOp is a single letter, and some dbOps have more
+//    than one available, as a convenience
+//  - anOID is assumed to be every table's primary key
+//    and is basically a UUID v7
+//  - anOID must always include the target DB table name 
+//  - anOID is even required for INSERT, because we
+//    assign an OID to a record *before* inserting it 
+//  - anOID is even required for KOUNT, because it 
+//    includes the target DB table name
+//  - pRowBuf is even required for DELETE because its
+//    OID must match the OID argument (as an error check)
+//  - pRowBuf is even required for KOUNT because the 
+//    integer count is written into its last two bytes 
+//  - Except for KOUNT, pRowBuf.OID must match anOID 
 //
-// The basic signature is (error) = func(op,UUIDv7,*RowModel):
-// One of four basic actions is performed (listed as SQL/CRUD/HTTP):
-//  - INSERT / Create / POST   (record in) 
-//  - UPDATE / Update / PUT    (record in) 
-//  - SELECT / Retriv / GET    (record out; *Rowmodel has nork.NilUUID if not found)
-//  - DELETE / Delete / DELETE (record in - mandatory for now) 
-//  - For UPDATE and DELETE,  calling argument UUID must
-//    match the UUID in the *Rowmodel, and the UUID must
-//    include the DB table name; otherwise the func panics. 
+// Outputs: 
+//  - error is nil if SQL execution returns no error
+//  - If a SELECT fails to find the item, pRowBuf.OID 
+//    is set to oid.Nil 
+//  - For KOUNT, the integer value is returned in the last
+//    two bytes at pRowBuf (this is admittedly hacky) 
 //
-// OBSOLETE: It takes four input arguments:
+// DB operations and Use of pRowBuf:
+//  - One of four basic actions is performed (listed here as
+//    SQL/CRUD/HTTP), and they vary in how pRowBuf is used
+//  - INSERT / Create / POST : (record-in) 
+//  - UPDATE / Update / PUT  : (record-in) 
+//  - SELECT / Retriv / GET  : (record-out) 
+//    (if the OID is not found, RowModel.OID <= oid.Nil) 
+//  - DELETE / Delete / DELETE (record-in is for OID error checking) 
+//  - KOUNT (record-out receives the integer count)
+//
+// === FURTHER DOCU HERE IS OLD/DODGY ===
+// 
+// It takes four input arguments:
 //  - The DB operation, one of the four listed above; the dbOp is
 //    specified by the first letter (only!) of the argument dbOp
 //  - The name of the DB table (case-insensitive)
@@ -55,8 +72,6 @@ import(
 // by the first return value (the int), NOT by the second return value 
 // (the error, which is reserved for when the DB rejects the SQL.
 //
-// NOTE: Also implement COUNT(*) ? Perhaps as DB Op "K" = Kount. 
-//
 // TODO: TD.pCSVs could also use DB.Prepare to gather sql.Stmt's, but then we
 // have to pass in a Connection, which screws up modularity pretty severely.
 //
@@ -70,26 +85,42 @@ import(
 // NOTE: When writing the multi-row version of this,
 // be sure to call Rows.Cloe()
 // . 
-// func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName
-//       string, anID int, pRMbuf DRM.RowModel) (int, error)  
-func (pSR *SqliteRepo) EngineUnique(dbOp string, u *uuid.UUID, pRMbuf DRM.RowModel) error {
+// OLD: func (pSR *SqliteRepo) EngineUnique(dbOp string, tableName
+//            string, anID int, pRowBuf DRM.RowModel) (int, error)
+// . 
+func (pSR *SqliteRepo) EngineUnique(dbOp string, anOID *oid.OID, pRowBuf DRM.RowModel) error {
 
-     if u == nil || *u == nork.NilUUID || *u != *pRMbuf.UUID() {
-        panic("EngineUnique got bad inputs")
-     }
+     var dbOpIsCount = ("K" == S.ToUpper(dbOp[0:1]))
+     
+     // For all ops, including SELECT and KOUNT,
+     // we need pointers anOID and pRowBuf to be non-nil. 
+     if anOID == nil { 
+	    return errors.New("EngineUnique: nil OID") 
+	    }
+     if anOID.IsNil() { 
+	    return errors.New("EngineUnique: Nil OID") 
+	    }
+     if pRowBuf == nil { 
+	    return errors.New("EngineUnique: nil row buffer") 
+	    }
+     if *anOID != *pRowBuf.OID() && !dbOpIsCount {
+        return errors.New("EngineUnique: OID != row buffer OID")
+        }
+     var tableName string
+     tableName = anOID.TableName()
+     if !anOID.HasValidTableName() {
+         return errors.New("EngineUnique: bad DB table name <" + tableName + ">")
+         }
+         
      var pTD    *DRM.TableDetails
      var pCSVs  *DRM.ColumnStringsCSV
      var pStmts *DRM.Statements
      var w = pSR.LogWriter()
      var e error
-     var dbOp1 string // single character 
-     var useQueryRow bool // true only for SELECT 
+     var dbOp1 string     // single character 
      var SQL_toUse string // , WHERE_toUse string FIXME FIXME FIXME
      // Table's column-pointers funcs 
      var CPF []any
-
-     var tableName string
-     tableName = nork.TableNameInUUID(*u) // FIXME: Is it OK Ascii ? 
 
      // Fetch the table's details 
      pTD = GetTableDetailsByStorName(tableName)
@@ -109,8 +140,8 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, u *uuid.UUID, pRMbuf DRM.RowMod
      if pStmts == nil { panic("nil TableDetails Statements") }
      
      // This CPF cannot be pre-generated during initialization
-     // because the ptrs depend on the particular value of pRMbuf.
-     CPF = pTD.ColumnPtrsFunc(pRMbuf) 
+     // because the ptrs depend on the particular value of pRowBuf.
+     CPF = pTD.ColumnPtrsFunc(pRowBuf) 
 
      // Log info about the columns 
      // writeFieldDebugInfo(w, pTD)
@@ -124,126 +155,78 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, u *uuid.UUID, pRMbuf DRM.RowMod
      fmt.Fprintln(w, "DB OP IS: " + S.ToUpper(dbOp))
      switch S.ToUpper(dbOp[0:1]) {
 
-// Recapping: 
-// The basic signature is (int,error) = func(op,table,int,buffer):
-// One of four basic actions is performed (listed as SQL/CRUD/HTTP):
-//  - INSERT / Create / POST (record in) (returns new-ID)
-//  - UPDATE / Update / PUT  (record in) (returns 0/1)
-//  - SELECT / Retriv / GET      (ID in) (returns 0/1 + record) 
-//  - DELETE / Delete / DELETE   (ID in) (returns 0/1)
-//  - let nAR = nr of records affected 
-//  - (newID,e)  = insert(0,inbuffer)  // optimize for use in batches 
-//  - (nAR,e) = update(anID,inbuffer)  // anID can be -1, else match buffer's
-//  - (nAR,e) = select(anID,outbuffer) // anID >= 0
-//  - (nAR,e) = delete(anID,nil)       // anID >= 0; if buffer, ID's must match
+// Recapping:
+//  - INSERT / Create / POST : (record-in) 
+//  - UPDATE / Update / PUT  : (record-in) 
+//  - SELECT / Retriv / GET  : (record-out) 
+//    (if the OID is not found, RowModel.OID <= oid.Nil) 
+//  - DELETE / Delete / DELETE (record-in is for OID error checking) 
+//  - KOUNT (record-out receives the integer count)
 
-	// + Add, Create, Insert, New
+	// "+" Add, Create, Insert, New
 	case "A", "C", "I", "N":
 	     SQL_toUse = pStmts.INSERTuniqueID
 	     // USE QueryRow for INSERT! So that LastResultID works ? No.
 	     // https://github.com/mattn/go-sqlite3/issues/1140
 	     // useQueryRow = true // <==
 	     dbOp1 = "+"
-        // ? Fetch, Get, List, Retrieve, Select 
-        case "F", "G", "L", "R", "S":
+    // "?" Fetch, Get, List, Retrieve, Select 
+    case "F", "G", "L", "R", "S":
 	     SQL_toUse = pStmts.SELECTuniqueID
-	     useQueryRow = true // <==
 	     dbOp1 = "?"
-	// = Modify, Update
+	// "=" Modify, Update
 	case "M", "U":
 	     SQL_toUse = pStmts.UPDATEuniqueID
 	     dbOp1 = "="
-	// - Delete, Discard, Drop
+	// "-" Delete, Discard, Drop
 	case "D":
 	     SQL_toUse = pStmts.DELETEuniqueID
 	     dbOp1 = "-"
-	// # Kount
+	// "#" Kount
 	case "K":
 	     dbOp1 = "#"
+         SQL_toUse = pStmts.COUNTuniqueID
+         // FIXME TBS 
 	default:
-	return errors.New("engineunique: bad dbOp: " + dbOp) 
-     }
+         return errors.New("EngineUnique: bad dbOp <" + dbOp + ">") 
+    }
 
      dbOpString := dbOp + "(" + dbOp1 + ")"
-     dbOpError := "engineunique: " + dbOpString + ": "
+     dbOpError  := "EngineUnique: " + dbOpString + ": "
      fmt.Fprintln(w, dbOpString, ",", SQL_toUse)
 
-     // anID is the argument ID passed in.
-     // Now extract the ID if a buffer was passed in. 
-     var bufID = -1
-     var ID_toUse int 
-     if pRMbuf != nil {
-     	var cpf []any
-	cpf = pTD.ColumnPtrsFunc(pRMbuf)
-	cpfid := (cpf [0]).(*uuid.UUID)
-	bufID = *cpfid
-     }
-     // Check re. WHERE ID spec and/or input/output buffer.
-     // if INSERT or KOUNT, no WHERE ID.
-     if dbOp1 == "+" || dbOp1 == "#" {
-     	// Allow the zero value :-D 
-	if anID > 0 || bufID > 0 { // rather than: >= 0 
-	   return errors.New("EngineUnique: INSERT: unwanted WHERE ID") 
-	   }
-	ID_toUse = -1 
-     // else is ?/=/- SELECT/UPDATE/DELETE 
-      } else {
-	// Need a search spec: (1) the "anID" int argument, and/or 
-	// (2) the "pRMbuf" buffer argument (where check for an ID).
-	   if (anID == -1) && (pRMbuf == nil) {
-	       return errors.New(dbOpError + 
-		  "missing search spec (no WHERE ID spec or buffer with ID") 
-	   }
-	   if (anID >= 0) && (pRMbuf != nil ) {
-	       if anID != bufID {
-	       	  if bufID == 0 {
-		     ermsg := fmt.Sprintf("WARN: " +
-		     	     "Input ID %d != buffer ID 0", anID)
-		     println(ermsg)
-		     fmt.Fprintln(w, ermsg)
-		  } else {
-	 	    return fmt.Errorf(dbOpError + "conflicting ID spec: " +
-		  	 "arg <%d> != buffer's ID <%d>", anID, bufID)
-		  }
-	       }
-	   }
-	   ID_toUse = anID 
- 	// If UPDATE, need an  input buffer 
- 	// If SELECT, need an output buffer 
-	   if (dbOp1 != "-") && (pRMbuf == nil) {
-	    	return errors.New(dbOpError + "missing buffer") 
-	   }
-	   
-     }
+//   var cpf []any
+//	 cpf = pTD.ColumnPtrsFunc(pRowBuf)
      
      // ================
      //  TIME to EXECUTE 	
      // ================
-     if useQueryRow { // "?" 
-     	fmt.Fprintf(w, "QueryRow: %s / %d / %s \n", dbOp1, ID_toUse, SQL_toUse)
-	// FIXME: Transaction, if active ?
-	row := pSR.Handle().QueryRow(SQL_toUse, ID_toUse)
-	// ---------------------------------------------------------
-	// What if there is no row in the result, and .Scan() can't
-	// scan a value. What then? The error constant sql.ErrNoRows
-	// is returned by QueryRow() when the result is empty.
-	// This needs to be handled as a special case in most cases.
-	// You should only see this error if you're using QueryRow().
-	// If you see this error elsewhere, yer doin' it wrong.
-	// ---------------------------------------------------------
-	e = row.Scan(CPF...) 
-	fmt.Fprintf(w, "QueryRow: ret: %v \n", e)
+     if dbOp1 == "?" { // SELECT // might aalso be: if !dbOpIsCount { 
+         fmt.Fprintf(w, "QueryRow: %s / %d / %s \n",
+             dbOp1, anOID, SQL_toUse)
+	     // FIXME: Transaction, if active ?
+	     row := pSR.Handle().QueryRow(SQL_toUse, anOID)
+	     // ---------------------------------------------------------
+	     // What if there is no row in the result, and .Scan() can't
+	     // scan a value. What then? The error constant sql.ErrNoRows
+	     // is returned by QueryRow() when the result is empty.
+	     // This needs to be handled as a special case in most cases.
+	     // You should only see this error if you're using QueryRow().
+	     // If you see this error elsewhere, yer doin' it wrong.
+	     // ---------------------------------------------------------
+	     e = row.Scan(CPF...) 
+	     fmt.Fprintf(w, "QueryRow: ret: %v \n", e)
 	
 	switch e {
 	  case sql.ErrNoRows:
-           pRMbuf.UUID = nork.NilUUID
+           pRowBuf.SetOID(oid.Nil)
 	       return nil // no row, no error
 	  case nil:
 	       return nil // 1 row, no error 
 	  default:
 		println("SQL ERROR: (" + e.Error() + ") SQL: " + SQL_toUse)
-		return 0, fmt.Errorf(dbOpError + 
-		       "ID <%d> failed: %w", ID_toUse, e)
+		return fmt.Errorf(dbOpError + 
+		       "ID <%d> failed: %w", anOID, e)
 	}
 	panic("Oops, fallthru in SELECT")
 	
@@ -251,14 +234,14 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, u *uuid.UUID, pRMbuf DRM.RowMod
 	var newID int64
      // if dbOp1 == "+" { CPF_toUse = append(CPF_toUse, &newID) } 
      	fmt.Fprintf(w, "Exec: %d / w %d parms / %s \n",
-		ID_toUse, len(CPF), SQL_toUse)
+		anOID, len(CPF), SQL_toUse)
 	// It is now ready for Exec()
 	var theRes sql.Result
 	// FIXME: Transaction, if active ?
 	theRes, e = pSR.Handle().Exec(SQL_toUse, CPF...)
 	if e != nil {
 		fmt.Fprintf(w, dbOpError + "exec failed: %s", e)
-		return 0, fmt.Errorf(dbOpError + "exec: %w", e) 
+		return fmt.Errorf(dbOpError + "exec: %w", e) 
 	}
 	
 	if dbOp1 == "+" { // INSERT 
@@ -266,20 +249,22 @@ func (pSR *SqliteRepo) EngineUnique(dbOp string, u *uuid.UUID, pRMbuf DRM.RowMod
 	   newID, e = theRes.LastInsertId()
 	   if e != nil {
 		fmt.Fprintf(w, "engineunique.insert.lastinsertId: failed: %s", e)
-		return 0, fmt.Errorf("engineunique.insert: lastinsertId: %w", e) 
+		return fmt.Errorf("engineunique.insert: lastinsertId: %w", e) 
 		} 
 	   fmt.Fprintf(w, "INSERT (%s) OK: LastInsertID: %d \n",
 	   	tableName, int(newID))
-	   return int(newID), nil 
+	   return nil 
 	}
-	// UPDATE, DELETE 
+	// UPDATE, DELETE
+    /*
 	var nRA int64
 	nRA, e = theRes.RowsAffected()
 	if e != nil {
 		fmt.Fprintf(w, "engineunique.update.rowsaffected: failed: %s", e)
-		return 0, fmt.Errorf("engineunique.update.rowsaffected: %w", e) 
+		return fmt.Errorf("engineunique.update.rowsaffected: %w", e) 
 		}
-	return int(nRA), nil // nr of rows affected: 0 or 1 
+        */
+	return nil // nr of rows affected: 0 or 1 
      }
 }
 

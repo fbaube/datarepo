@@ -3,8 +3,8 @@ module github.com/fbaube/datarepo
 go 1.27.3
 
 require (
-	github.com/fbaube/dsmnd v0.0.0-20261113173103-6353600e4d91
-	github.com/fbaube/fileutils v0.0.0-20261118084837-e363fbbe2fb5
+	github.com/fbaube/dsmnd v0.0.0-20261127170939-5dd10c8295e9
+	github.com/fbaube/fileutils v0.0.0-20261127171130-64e4f44a09ae
 	github.com/fbaube/mlog v0.0.0-20260906153105-a92fb895decf
 	github.com/fbaube/stringutils v0.0.0-20261122143006-48df54fb07e4
 	github.com/mattn/go-sqlite3 v1.14.53

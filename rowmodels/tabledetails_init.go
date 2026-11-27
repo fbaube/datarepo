@@ -191,6 +191,16 @@ func GenerateStatements(pTD *TableDetails) error {
      	"DELETE FROM " + pTD.TableSummary.StorName +
 	" WHERE " + pTD.PKname + " = $1" + ";"
 
+     // === COUNT ============================
+     // https://sqlite.org/lang_aggfunc.html
+     // count(X) returns the number of times
+     // that X is not NULL in a group.
+     // count(*) (with no arguments) returns 
+     // the total number of rows in the group.
+     // =======================================
+     pTD.Stmts.DELETEuniqueID =
+     	"SELECT COUNT(*) FROM " + pTD.TableSummary.StorName + ";"
+
      return nil
 }
 
